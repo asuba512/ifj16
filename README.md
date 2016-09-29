@@ -1,6 +1,12 @@
 # Interpret jazyka IFJ16
 
 ### Příklady psaní kódu:
+
+-modul.h:
+```c
+int foo();
+int foo2(int c, char *string);
+```
 -modul.c:
 ```c
 #include <stdlib.h>
