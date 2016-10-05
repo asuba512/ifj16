@@ -7,7 +7,7 @@ class Main{
 		double x = 1.42e-25;
 		x = 0.12e5;
 		if (a < 0) { // nacitani zaporneho cisla nemusite podporovat
-			ifj16.print("Faktorial nelze spocitat!\n");
+			ifj16.print("Faktorial\t \" \\ nelze \125 spocitat!\n");
 		}
 		else {
 			vysl = 1;
