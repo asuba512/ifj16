@@ -1,17 +1,34 @@
+/**
+ * \file infinite_string.c
+ * \brief Library providing infinite strings in C.
+ *
+ */
 #include "infinite_string.h"
 #include <stdlib.h>
 #include <string.h>
 
-int str_init(string_t *s) {
-	s->length = 0;
-	s->max_length = STRING_CHUNK;
-	if((s->data = malloc(sizeof(char) * (STRING_CHUNK + 1))) == NULL)
-		return STRING_ERR;
-	s->data[0] = 0;
-	return STRING_OK;
+string_t str_init(const char *str) {
+	string_t s;
+	if((s = malloc(sizeof(struct string))) == NULL)
+		return NULL;
+	int str_l = strlen(str);
+	int k = (str_l / STRING_CHUNK) + 1;
+	s->length = str_l;
+	s->max_length = STRING_CHUNK * k;
+	if((s->data = malloc(sizeof(char) * (STRING_CHUNK * k + 1))) == NULL){
+		free(s);
+		return NULL;
+	}
+	strcpy(s->data, str);
+	return s;
 }
 
-int str_addchar(string_t *s, char c) {
+void str_destroy(string_t s) {
+	free(s->data);
+	free(s);
+}
+
+int str_addchar(string_t s, char c) {
 	if(s->length == s->max_length) {
 		if((s->data = _str_add_chunk(s, 1)) == NULL)
 			return STRING_ERR;
@@ -21,22 +38,20 @@ int str_addchar(string_t *s, char c) {
 	return STRING_OK;
 }
 
-void str_destroy(string_t *s) {
-	free(s->data);
-	s->data = NULL;
-	s->length = -1;
-	s->max_length = -1;
-}
-
-int str_compare(string_t *s1, string_t *s2) {
-	if(s1->length != s2->length) {
-		return s1->length > s2->length ? 1 : 2;
+int str_cat(string_t dest, string_t src) {
+	int char_difference = dest->max_length - dest->length - src->length;
+	if(char_difference >= 0) {
+		strncpy(dest->data + dest->length, src->data, src->length + 1);
 	} else {
-		return strcmp(s1->data, s2->data);
+		if((dest->data = _str_add_chunk(dest, (-char_difference) / STRING_CHUNK + 1)) == NULL)
+			return STRING_ERR;
+		strncpy(dest->data + dest->length, src->data, src->length + 1);
 	}
+	dest->length += src->length;
+	return STRING_OK;
 }
 
-int str_addstring(string_t *s, const char *str) {
+int str_addstring(string_t s, const char *str) {
 	int char_difference = (s->max_length - s->length) - strlen(str);
 	if(char_difference >= 0) {
 		strcpy(s->data + s->length, str);
@@ -49,7 +64,16 @@ int str_addstring(string_t *s, const char *str) {
 	return STRING_OK;
 }
 
-char *_str_add_chunk(string_t *s, int chunk_count) {
+int str_compare(string_t s1, string_t s2) {
+	if(s1->length != s2->length) {
+//		return s1->length > s2->length ? 1 : 2;
+		return 1;
+	} else {
+		return strcmp(s1->data, s2->data);
+	}
+}
+
+char *_str_add_chunk(string_t s, int chunk_count) {
 	s->max_length += chunk_count*STRING_CHUNK;
 	return realloc(s->data, s->max_length);
 }

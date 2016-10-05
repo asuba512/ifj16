@@ -16,32 +16,34 @@ int main(){
 		return 1;
 	}
 */
-	string_t string;
-	string_t *s = &string;
-	str_init(s);
 
-	str_addstring(s, "pejsek a kocicka");
 
-	printf("%d: %s\n", s->max_length, s->data);
+	string_t a[11];
+	a[0] = str_init("for");
+	a[1] = str_init("while");
+	a[2] = str_init("else");
+	a[3] = str_init("int");
+	a[4] = str_init("double");
+	a[5] = str_init("string");
+	a[6] = str_init("return");
+	a[7] = str_init("switch");
+	a[8] = str_init("case");
+	a[9] = str_init("break");
+	a[10] = str_init("continue");
 
-	str_addstring(s, "pejsek a kocicka");
+	string_t b = str_init("fe");
 
-	printf("%d: %s\n", s->max_length, s->data);
-	
-	str_addchar(s, '!');
-	printf("%d: %s\n", s->max_length, s->data);
-	str_addchar(s, '!');
-	printf("%d: %s\n", s->max_length, s->data);
-	str_addchar(s, '!');
-	
-	printf("%d: %s\n", s->max_length, s->data);
+	for(int i = 0; i < 30000000; i++){
+		for(int j = 0; j < 11; j++)
+			if(str_compare(a[j], b) == 0)
+			break;
+	}
 
-	str_addstring(s, "Lorem ipsum dolor sit amet, consectetur adipiscing sed.");
+	for(int i = 0; i < 11; i++)
+		str_destroy(a[i]);
 
-	printf("%d: %s\n", s->max_length, s->data);
+	str_destroy(b);
 
-	str_addstring(s, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac luctus arcu. Nam faucibus neque feugiat malesuada porta. Curabitur placerat nullam.");
-	printf("%d: %s\n", s->max_length, s->data);
 //	get_token(fd);
 
 //	fclose(fd);
