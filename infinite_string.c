@@ -12,10 +12,9 @@ int str_init(string_t *s) {
 }
 
 int str_addchar(string_t *s, char c) {
-	if(s->length-1 == s->max_length) {
+	if(s->length == s->max_length) {
 		if((s->data = _str_add_chunk(s, 1)) == NULL)
 			return STRING_ERR;
-		s->max_length += STRING_CHUNK;
 	}
 	s->data[s->length++] = c;
 	s->data[s->length] = 0;
@@ -46,9 +45,11 @@ int str_addstring(string_t *s, const char *str) {
 			return STRING_ERR;
 		strcpy(s->data + s->length, str);
 	}
+	s->length += strlen(str);
 	return STRING_OK;
 }
 
 char *_str_add_chunk(string_t *s, int chunk_count) {
-	return realloc(s->data, s->max_length + chunk_count*STRING_CHUNK);
+	s->max_length += chunk_count*STRING_CHUNK;
+	return realloc(s->data, s->max_length);
 }

@@ -152,7 +152,7 @@ int get_token(FILE *fd) {
 					state = state_init;
 				}
 				break;
-case state_double_e:
+			case state_double_e:
 				if(isdigit(c))
 					buff[i++] = c;
 				else{

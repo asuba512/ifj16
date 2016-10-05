@@ -20,21 +20,28 @@ int main(){
 	string_t *s = &string;
 	str_init(s);
 
-	str_addstring(s, "pejsek");
+	str_addstring(s, "pejsek a kocicka");
 
-	printf("%s\n", s->data);
+	printf("%d: %s\n", s->max_length, s->data);
 
-	str_addstring(s, "a kocicka");
+	str_addstring(s, "pejsek a kocicka");
 
-	printf("%s\n", s->data);
+	printf("%d: %s\n", s->max_length, s->data);
 	
 	str_addchar(s, '!');
+	printf("%d: %s\n", s->max_length, s->data);
+	str_addchar(s, '!');
+	printf("%d: %s\n", s->max_length, s->data);
+	str_addchar(s, '!');
 	
-	printf("%s\n", s->data);
+	printf("%d: %s\n", s->max_length, s->data);
 
 	str_addstring(s, "Lorem ipsum dolor sit amet, consectetur adipiscing sed.");
 
-	printf("%s\n", s->data);
+	printf("%d: %s\n", s->max_length, s->data);
+
+	str_addstring(s, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac luctus arcu. Nam faucibus neque feugiat malesuada porta. Curabitur placerat nullam.");
+	printf("%d: %s\n", s->max_length, s->data);
 //	get_token(fd);
 
 //	fclose(fd);
