@@ -4,7 +4,7 @@
 
 typedef struct string {
 	char *data;
-	int mem_size;
+	int max_length;
 	int length;
 } string_t;
 
