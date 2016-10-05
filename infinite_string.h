@@ -13,4 +13,4 @@ int str_addchar(string_t *s, char c);
 void str_destroy(string_t *s);
 int str_compare(string_t *s1, string_t *s2);
 int str_addstring(string_t *s, const char *str);
-string_t *_str_add_chunk(string_t *s, int chunk_count);
+char *_str_add_chunk(string_t *s, int chunk_count);

@@ -49,6 +49,6 @@ int str_addstring(string_t *s, const char *str) {
 	return STRING_OK;
 }
 
-string_t *_str_add_chunk(string_t *s, int chunk_count) {
+char *_str_add_chunk(string_t *s, int chunk_count) {
 	return realloc(s->data, s->max_length + chunk_count*STRING_CHUNK);
 }
