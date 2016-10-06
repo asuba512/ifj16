@@ -11,6 +11,7 @@
 #include <ctype.h>
 
 extern int token_error;
+extern string_t keywords[17];
 
 token_t get_token(FILE *fd) {
 
@@ -84,6 +85,13 @@ token_t get_token(FILE *fd) {
 					str_addchar(buff, c);	
                 else{
 					ungetc(c, fd);
+					for(int i = 0; i < 17; i++){
+						if(str_compare(buff, keywords[i]) == 0){
+							t->type = token_keyword;
+							t->attr.s = buff;
+							return t;
+						}
+					}
 					t->type = token_id;
 					t->attr.s = buff;
 					return t;

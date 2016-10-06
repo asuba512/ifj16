@@ -12,7 +12,8 @@ typedef enum token_type{
 	token_double,
 	token_int,
 	token_string,
-	token_id
+	token_id,
+	token_keyword
 } token_type;
 
 typedef union attr{
