@@ -65,12 +65,12 @@ int str_addstring(string_t s, const char *str) {
 }
 
 int str_compare(string_t s1, string_t s2) {
-	if(s1->length != s2->length) {
+//	if(s1->length != s2->length) {
 //		return s1->length > s2->length ? 1 : 2;
-		return 1;
-	} else {
+//		return 1;
+//	} else {
 		return strcmp(s1->data, s2->data);
-	}
+//	}
 }
 
 char *_str_add_chunk(string_t s, int chunk_count) {

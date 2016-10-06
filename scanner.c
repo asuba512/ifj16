@@ -5,40 +5,52 @@
  */
 
 #include "scanner.h"
+#include "infinite_string.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-int get_token(FILE *fd) {
+extern int token_error;
 
-	int c, i = 0, o = 0;
-	char buff[100]; // temporary
+token_t get_token(FILE *fd) {
+
+	int c, o = 0;
+	string_t buff = str_init(""); 
 	char octal[4];
 	char *endptr;
 	
 	t_state state = state_init;
 
+	token_t t;
+
+	if((t = malloc(sizeof(struct token))) == NULL){
+		token_error = 1;
+		return NULL;
+	}
+	
 	while(1){
 
 		c = getc(fd);
-		if(c == EOF)
-			return EOF;
+		if(c == EOF){
+			token_error = EOF;
+			return NULL;
+		}
 
         switch(state){
             case state_init:
                 if(c == '/')
 					state = _state_division;
                 else if(isalpha(c) || c == '$' || c == '_'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
                     state = state_identifier;
                 }
 				else if(c == '0');
 				else if(isdigit(c)){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = state_integer;
 				}
 				else if(c == '"'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = state_string;
 				}
 					
@@ -69,98 +81,97 @@ int get_token(FILE *fd) {
 				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_')
-					buff[i++] = c;
+					str_addchar(buff, c);	
                 else{
 					ungetc(c, fd);
-					buff[i] = 0;
-                    printf("ID: %s\n",buff);
-					i = 0;
-                    state = state_init;
+					t->type = token_id;
+					t->attr.s = buff;
+					return t;
                 }
                 break;
 			
 			case state_integer:
 				if(isdigit(c))
-					buff[i++] = c;
+					str_addchar(buff, c);	
 				else if(c == '.'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = _state_double_point;
 				}
 				else if(c == 'e' || c == 'E'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = _state_double_e;
 				}
 				else{
 					ungetc(c, fd);
-					buff[i] = 0;
-					printf("INTEGER: %s\n", buff);
-					i = 0;
-					state = state_init;
+					t->type = token_int;
+					t->attr.i = strtol(buff->data, &endptr, 10);
+					return t;
 				}
 				break;
 			
 			case _state_double_point:
 				if(isdigit(c)){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = state_double;
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
 				break;
 			
 			case state_double:
 				if(isdigit(c))
-					buff[i++] = c;
+					str_addchar(buff, c);	
 				else if(c == 'e' || c == 'E'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = _state_double_e;
 				}
 				else{
 					ungetc(c, fd);
-					buff[i] = 0;
-					printf("REAL: %s\n", buff);
-					i = 0;
-					state = state_init;
+					t->type = token_double;
+					t->attr.d = strtod(buff->data, &endptr);
+					return t;
 				}
 				break;
 			case _state_double_e:
 				if(isdigit(c)){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = state_double_e;
 				}
 				else if(c == '+' || c == '-'){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = _state_double_e_sign;
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
 				break;
 			case _state_double_e_sign:
 				if(isdigit(c)){
-					buff[i++] = c;
+					str_addchar(buff, c);	
 					state = state_double_e;
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
 				break;
 			case state_double_e:
 				if(isdigit(c))
-					buff[i++] = c;
+					str_addchar(buff, c);	
 				else{
 					ungetc(c, fd);
-					buff[i] = 0;
-					printf("REAL: %s\n", buff);
-					i = 0;
-					state = state_init;
+					t->type = token_double;
+					t->attr.d = strtod(buff->data, &endptr);
+					return t;
 				}				
 				break;
 			case state_string:
@@ -168,26 +179,25 @@ int get_token(FILE *fd) {
 					state = _state_string_escape;
 				}
 				else if(c == '"'){
-					buff[i++] = c;
-					buff[i] = 0;
-					printf("STRING: %s\n", buff);
-					i = 0;
-					state = state_init;
+					str_addchar(buff, c);	
+					t->type = token_string;
+					t->attr.s = buff;
+					return t;
 				}
 				else
-					buff[i++] = c;
+					str_addchar(buff, c);	
 				break;
 			case _state_string_escape:
 				if(c == 't' || c == 'n' || c == '"' || c == '\\'){
 					switch(c){
 						case 't':
-							buff[i++] = '\t'; break;
+							str_addchar(buff, '\t'); break;	
 						case 'n':
-							buff[i++] = '\n'; break;
+							str_addchar(buff, '\n'); break;	
 						case '"':
-							buff[i++] = '\"'; break;
+							str_addchar(buff, '\"'); break;	
 						case '\\':
-							buff[i++] = '\\'; break;
+							str_addchar(buff, '\\'); break;	
 					}
 					state = state_string;
 				}
@@ -197,8 +207,9 @@ int get_token(FILE *fd) {
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
 				break;
 			case _state_string_octalx:
@@ -208,22 +219,24 @@ int get_token(FILE *fd) {
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
 				break;
 			case _state_string_octalxx:
 				if(c >= '0' && c <= '7'){
 					octal[o++] = c;
 					octal[o] = 0;
-					buff[i++] = strtol(octal, &endptr, 8);
+					str_addchar(buff, strtol(octal, &endptr, 8));
 					o = 0;
 					state = state_string;
 				}
 				else{ // <- future error state
 					ungetc(c, fd);
-					i = 0;
-					state = state_init;
+					token_error = 1; //TODO
+					free(t);
+					return NULL;
 				}
         }
 
