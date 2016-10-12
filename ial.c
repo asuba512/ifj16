@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "ial.h"
 
-bst_node_t helper_ptr; // v IAL sa da vnorovat funkcie a pristupovat k premennym materskej funkcie, preto tento skurveny balast
+bst_node_t _bst_helper_ptr; 
 
 bool bst_search(bst_node_t root, string_t key) {
 	if(root != NULL) {
@@ -67,17 +67,17 @@ void bst_delete(bst_node_t *root, string_t key) {
 		} else if(str_compare((*root)->key, key) < 0) {
 			bst_delete(&((*root)->right_p), key);
 		} else {
-			helper_ptr = *root;
-			if(helper_ptr->right_p == NULL) {
-				*root = helper_ptr->left_p;
-			} else if(helper_ptr->left_p == NULL) {
-				*root = helper_ptr->right_p;
+			_bst_helper_ptr = *root;
+			if(_bst_helper_ptr->right_p == NULL) {
+				*root = _bst_helper_ptr->left_p;
+			} else if(_bst_helper_ptr->left_p == NULL) {
+				*root = _bst_helper_ptr->right_p;
 			} else {
-				_bst_del(&(helper_ptr->left_p));
+				_bst_del(&(_bst_helper_ptr->left_p));
 			}
-			str_destroy(helper_ptr->key);
-			free(helper_ptr);
-			helper_ptr = NULL;
+			str_destroy(_bst_helper_ptr->key);
+			free(_bst_helper_ptr);
+			_bst_helper_ptr = NULL;
 		}
 	}
 }
@@ -86,47 +86,9 @@ void _bst_del(bst_node_t *node) {
 	if((*node)->right_p != NULL) {
 		_bst_del(&((*node)->right_p));
 	} else {
-		helper_ptr->data = (*node)->data;
-		helper_ptr->key = (*node)->key;
-		helper_ptr = *node;
+		_bst_helper_ptr->data = (*node)->data;
+		_bst_helper_ptr->key = (*node)->key;
+		_bst_helper_ptr = *node;
 		*node = (*node)->left_p;
 	}
 }
-
-/*procedure Del(var Uk:TUk);
-(* Pomocná procedura Del se pohybuje po pravé diagonále levého podstromu rušeného uzlu a hledá nejpravější uzel. Když ho najde, je globální proměnná - ukazatel na uzel PomUk - přepsán ukazatelen na uzel Uk a Uk je připraven pro následnou operaci dispose.*) begin
-	if Uk^.PUk <>nil
-		Del(Uk^.PUk) (* pokračuj v pravém podstromu *)
-	else begin (* nejpravější uzel je nalezen, přepsání a uvolnění uzlu *)
-		PomUk^.Data:=Uk^.Data;
-		PomUk^.Klic:=Uk^.Klic;
-		PomUk:=Uk;
-		Uk:=Uk^.LUk (* Uvolnění uzlu Uk! Pozor! V proceduře Del je Uk ukazatelová složka uzlu nadřazeného k uzlu Uk *)
-	end
-end; (* Konec pomocné procedure Del *)*/
-
-
-/*procedure Delete(var UkKor:TUk; K:TKlic);
-var
-	PomUk:TUk;
-begin (* tělo hlavní procedury *)
-	if UkKor <> nil (* vyhledávání neskončilo; hledaný uzel může stále být v BVS *)
-		if K < UkKor^.Klic
-			Delete (UkKor^.LUk,K) (* pokračuj v levém podstromu *)
-		else if K > UkKor^.Klic
-			Delete(UkKor^.PUk,K) (* pokračuj v pravém podstromu *)
-		else begin (* uzel UkKor se má rušit *)
-			PomUk:=UkKor;
-			if PomUk^.PUk=nil (* uzel nemá pravý podstrom; levý podstrom se připojí na nadřazený uzel *)
-				UkKor:=PomUk^.LUk
-			else (* rušený uzel má pravý podstrom; bude přepsán nejpravějším uzlem
-				levého podstromu uvnitř procedury Del. Je-li levý podstrom prázdný, přípojí se pravý
-				podstrom na nadřazený uzel *)
-				if PomUk^.LUk=nil 
-					UkKor:=PomUk^.PUk (* připojení pravého podstromu *)
-				else
-					Del(PomUk^.LUk); (* Pomocná rekurz. procedura Del *)
-			dispose (PomUk); (* uvolnění uzlu *)
-		end (* if K> UkKor^.LUk,K) *)
-	else (* zde může být akce, když uzel nebyl nalezen; normálně se neděje nic *)
-end (* delete *).*/
