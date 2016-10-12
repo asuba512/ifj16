@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "ial.h"
 
-bst_node_t _bst_helper_ptr; 
+static bst_node_t _bst_helper_ptr;
 
 bool bst_search(bst_node_t root, string_t key) {
 	if(root != NULL) {
