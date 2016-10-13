@@ -39,25 +39,28 @@ bst_node_t bst_search_get(bst_node_t root, string_t key) {
 	}
 }
 
-void bst_insert(bst_node_t *root_ptr, string_t key, int data) {
+int bst_insert(bst_node_t *root_ptr, string_t key, void *data) {
 	if(*root_ptr == NULL) {
-		_bst_create_node(root_ptr, key, data);
+		return _bst_create_node(root_ptr, key, data);
 	} else {
 		if(str_compare((*root_ptr)->key, key) > 0) {
-			bst_insert(&((*root_ptr)->left_p), key, data);
+			return bst_insert(&((*root_ptr)->left_p), key, data);
 		} else if(str_compare((*root_ptr)->key, key) < 0) {
-			bst_insert(&((*root_ptr)->right_p), key, data);
+			return bst_insert(&((*root_ptr)->right_p), key, data);
 		} else {
 			(*root_ptr)->data = data;
+			return 0;
 		}
 	}
 }
 
-void _bst_create_node(bst_node_t *node_ptr, string_t key, int data) {
+int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
 	*node_ptr = malloc(sizeof(struct bst_node));
+	if(*node_ptr == NULL) return BST_ERR;
 	(*node_ptr)->left_p = (*node_ptr)->right_p = NULL;
 	(*node_ptr)->key = key;
 	(*node_ptr)->data = data;
+	return 0;
 }
 
 void bst_delete(bst_node_t *root, string_t key) {
