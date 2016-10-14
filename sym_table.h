@@ -46,6 +46,7 @@ typedef struct class_memb {
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	bool initialized; ///< indicates whether variable was initialized or not
+	bst_node_t local_sym_table_root; ///< root node of local table of symbols
 } *class_memb_t;
 
 
