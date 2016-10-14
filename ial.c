@@ -7,6 +7,26 @@
 
 static bst_node_t _bst_helper_ptr;
 
+// Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 156)
+void shell_sort(string_t s) {
+	char tmp;
+	int i,j;
+	int step = s->length / 2;
+	while (step > 0) {
+		for(i=step; i<=((s->length)-1); i++) {
+			j=i-step;
+			while ((j>=0) && (s->data[j]>s->data[j+step])) {
+				tmp = s->data[j];				// ====
+				s->data[j] = s->data[j+step];	// SWAP
+				s->data[j+step] = tmp;			// ====
+				j -= step;
+			}
+		}
+		step = step/2;
+	}
+	return;
+}
+
 bool bst_search(bst_node_t root, string_t key) {
 	if(root != NULL) {
 		if(str_compare(root->key, key) == 0) {

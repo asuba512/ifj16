@@ -12,6 +12,7 @@ typedef struct bst_node {
 	struct bst_node *right_p, *left_p;
 } *bst_node_t;
 
+void shell_sort(string_t s);
 bool bst_search(bst_node_t root, string_t key);
 bst_node_t bst_search_get(bst_node_t root, string_t key);
 int bst_insert(bst_node_t *root_ptr, string_t key, void *data);
