@@ -10,10 +10,10 @@ static bst_node_t _bst_helper_ptr;
 /*
 void BMA_compute_jumps(string_t s, int char_jump[][]) {
     for(int i=0; i<255; i++) {
-        char_jumps[i]=s->length;
+        char_jump[i]=s->length;
     }
     for(int j=0; j<s->length; j++0) {
-        char_jumps[(int)s->data][j] = s->length-j
+        char_jump[(int)s->data][j] = s->length-j;
     }
     return;
 }
