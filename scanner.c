@@ -12,6 +12,7 @@
 
 extern int token_error;
 extern string_t keywords[17];
+char mem = 0; /////////// TODO TODO
 
 token_t get_token(FILE *fd) {
 
@@ -63,7 +64,8 @@ token_t get_token(FILE *fd) {
 					state = _state_blockcomment;
 				else{ // <- future division sign return
 					ungetc(c, fd);
-					state = state_init;
+					t->type = token_division;
+					return t;
 				}
 				break;
 			case state_linecomment:
