@@ -14,11 +14,11 @@ typedef enum {
 
 
 /** 
- * @brief Pointer to class entry in global class table
+ * @brief Global class table
  */
 typedef struct class_table {
 	bst_node_t root; ///< Root node
-} class_table_t;
+} *class_table_t;
 
 
 /** 
@@ -40,13 +40,17 @@ typedef struct class_memb {
 		int i_val;
 		string_t s_val;
 		bool b_val;
-	}; ///< value of global variable
+	}; ///< value of global variable, not used by functions
 	datatype type; ///< return value for functions, datatype for variable
-	int arg_count; ///< argument count
+	int arg_count; ///< argument count, not used by static variable
+	int var_count ///< local variable count, including arguments, not used by static variable
+	fn_context_t stack_top; ///< top of the stack of function contexts, not used by static variable
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
-	bool initialized; ///< indicates whether variable was initialized or not
-	bst_node_t local_sym_table_root; ///< root node of local table of symbols
+	                       ///< not used by static variable
+	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
+	bool defined; ///< indicates whether variable or function was defined
+	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
 } *class_memb_t;
 
 
@@ -56,29 +60,42 @@ typedef struct class_memb {
  * A new instance is created and pushed to the stack whenever a function is called and is popped when functions returns from control.
  */
 typedef struct local_var_inst {
-	bool initialized; ///< indicates whether variable was initialized or not
+	bool initialized; ///< indicates whether local variable was initialized or not
 	union {
 		double d_val;
 		int i_val;
 		string_t s_val;
 		bool b_val;
 	}; ///< value of local variable instance
-	struct local_var_inst *next; ///< pointer to the next instance of variable on the stack
-} *local_var_inst_t;
+} local_var_inst_t;
 
 
 /**
- * @brief      Represents a local variable or argument in the table of local variables table of function.
+ * @brief      Represents a local variable or argument in the table of local variables of function.
  * 
- * A new instance is created and pushed to the stack whenever a function is called and is popped when functions returns from control.
+ * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
-typedef struct local_var_t {
+typedef struct local_var {
 	datatype type; ///< return value for functions, datatype for variable
-	local_var_inst_t stack_top; ///< points to the top of variable instances stack
+	int index; ///< index in array of variable instances in function context
 } *local_var_t;
 
 
-/** Global variable - highest level table */
+/**
+ * @brief      Represents one "context" of funcion. Contains an array of local variable values.
+ * 
+ * A new context is created and pushed to the stack whenever a function is called. Once completed, context is popped from the stack.
+ * Every function has its own stack of contexts.
+ */
+typedef struct fn_context {
+	struct fn_context *next; ///< pointer to next function context on the stack
+	local_var_inst_t *vars; ///< array of variable instances in current context
+} *fn_context_t;
+
+
+/**
+ * Global variable - table of classes.
+ */
 class_table_t class_table;
 
 #endif
