@@ -9,6 +9,16 @@
 int token_error;
 
 typedef enum token_type{
+	token_multiplication,
+	token_division,
+	token_addition,
+	token_substraction,
+	token_less,
+	token_more,
+	token_lesseq,
+	token_moreeq,
+	token_equal,
+	token_nequal,
 	token_double,
 	token_int,
 	token_string,
