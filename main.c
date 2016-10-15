@@ -7,7 +7,9 @@
 #include "scanner.h"
 #include "infinite_string.h"
 #include "ial.h"
+#include "token.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 extern int token_error;
 
@@ -21,32 +23,11 @@ int main(){
 		return 1;
 	}
 
-	/*--------- temporary ------ */
+	token_t x = malloc(sizeof(struct token));
+	int retval;	
 
-	keywords[0] = str_init("boolean");
-	keywords[1] = str_init("break");
-	keywords[2] = str_init("class");
-	keywords[3] = str_init("continue");
-	keywords[4] = str_init("do");
-	keywords[5] = str_init("double");
-	keywords[6] = str_init("else");
-	keywords[7] = str_init("false");
-	keywords[8] = str_init("for");
-	keywords[9] = str_init("if");
-	keywords[10] = str_init("int");
-	keywords[11] = str_init("return");
-	keywords[12] = str_init("String");
-	keywords[13] = str_init("static");
-	keywords[14] = str_init("true");
-	keywords[15] = str_init("void");
-	keywords[16] = str_init("while");
-
-	/* -------------- */
-
-	token_t x = get_token(fd);
-
-	while(token_error != EOF){
-		if(x != NULL){ // <<< THIS IS ERROR no. 1;;;; what error is int x = 55c????
+	while((retval = get_token(fd, x)) != EOF){
+		if(retval != 1){ // <<< THIS IS ERROR no. 1
 			switch(x->type){
 				case token_double:
 					printf("DOUBLE: %g\n", x->attr.d);
@@ -56,21 +37,64 @@ int main(){
 					break;
 				case token_string:
 					printf("STRING: %s\n", x->attr.s->data);
+					str_destroy(x->attr.s);
 					break;
 				case token_id:
 					printf("ID: %s\n", x->attr.s->data);
+					str_destroy(x->attr.s);
 					break;
-				case token_keyword:
-					printf("KEYWORD: %s\n", x->attr.s->data);
+				case token_division:
+					printf("/\n");
+					break;
+				case token_multiplication:
+					printf("*\n");
+					break;
+				case token_addition:
+					printf("+\n");
+					break;
+				case token_substraction:
+					printf("-\n");
+					break;
+				case token_less:
+					printf("<\n");
+					break;
+				case token_more:
+					printf(">\n");
+					break;
+				case token_lesseq:
+					printf("<=\n");
+					break;
+				case token_moreeq:
+					printf(">=\n");
+					break;
+				case token_equal:
+					printf("==\n");
+					break;
+				case token_nequal:
+					printf("!=\n");
+					break;
+				case token_semicolon:
+					printf(";\n");
+					break;
+				case token_assign:
+					printf("=\n");
+					break;
+				case token_lbracket:
+					printf("(\n");
+					break;
+				case token_rbracket:
+					printf(")\n");
+					break;
+				case token_lbrace:
+					printf("{\n");
+					break;
+				case token_rbrace:
+					printf("}\n");
 					break;
 			}
 		}
-		x = get_token(fd);
 	}
 
 	fclose(fd);
-	for(int i = 0; i < 17; i++)
-		str_destroy(keywords[i]);
-
     return 0;
 }
