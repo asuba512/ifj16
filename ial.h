@@ -13,7 +13,7 @@ typedef struct bst_node {
 } *bst_node_t;
 
 void BMA_compute_jumps(string_t s, unsigned *char_jump);
-int BMA(string_t s, string_t substr, unsigned *char_jump)
+int BMA(string_t s, string_t substr, unsigned *char_jump);
 
 void shell_sort(string_t s);
 
