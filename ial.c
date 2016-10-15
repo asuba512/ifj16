@@ -7,36 +7,40 @@
 
 static bst_node_t _bst_helper_ptr;
 
-/*
-void BMA_compute_jumps(string_t s, int char_jump[][]) {
-    for(int i=0; i<255; i++) {
-        char_jump[i]=s->length;
+// Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
+void BMA_compute_jumps(string_t s, unsigned *char_jump) {
+    for(int i=0; i<128; i++){
+        char_jump[i] =s->length;
     }
-    for(int j=0; j<s->length; j++0) {
-        char_jump[(int)s->data][j] = s->length-j;
+    for(int k=0; k<s->length; k++){
+        char_jump[(int)s->length[k]] = s->length-k-1;
     }
     return;
 }
 
-int BMA(string_t s, string_t substring, int char_jump[][], int match_jump[][]) {
-    int a,b,max;
-    j = s->length;
-    k = s->length;
-    while (j<=substring->length && k>0) {
-        if (substring->data[j] == s->data[k]) {
+// Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
+int BMA(string_t s, string_t substr, unsigned *char_jump) {
+    int index;
+    int j = s->length-1;
+    int k = s->length-1;
+    while( j<substr->length && k>=0 ){
+        if (T[j] == P[k]) {
             j = j-1;
             k = k-1;
         }
         else {
-            if () max = ;
-            else max = ;
-            j = j+max;
-            k = substring->length;
+            j = j+char_jump[(int)substr->data[j]];
+            k = s->length-1;
         }
     }
-    return (k == 0) ? 0 : -1; // (0 = substring found), (-1 = substring not found)
+    if (k == -1) {
+        index = j+1;
+    }
+    else {
+        index = -1;
+    }       
+    return index;
 }
-*/
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 156)
 void shell_sort(string_t s) {
