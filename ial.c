@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include "ial.h"
 
 static bst_node_t _bst_helper_ptr;
