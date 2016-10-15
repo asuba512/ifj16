@@ -75,5 +75,5 @@ int str_compare(string_t s1, string_t s2) {
 
 char *_str_add_chunk(string_t s, int chunk_count) {
 	s->max_length += chunk_count*STRING_CHUNK;
-	return realloc(s->data, s->max_length);
+	return realloc(s->data, s->max_length + 1);
 }
