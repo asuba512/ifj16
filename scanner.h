@@ -1,3 +1,5 @@
+#ifndef SCANNER_INC
+#define SCANNER_INC 1
 /**
  * \file scanner.h
  * \brief Header file of lexical analyzer module.
@@ -15,6 +17,10 @@
 
 typedef enum {
 	state_init,
+	state_less,
+	state_more,
+	state_eq,
+	state_neq,
 	_state_division,
 	_state_blockcomment,
 	state_blockcomment,
@@ -32,5 +38,6 @@ typedef enum {
 	_state_string_octalxx
 } t_state;
 
-token_t get_token(FILE *);
+int get_token(FILE *, token_t t);
 
+#endif
