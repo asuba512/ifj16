@@ -9,36 +9,36 @@
 static bst_node_t _bst_helper_ptr;
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-void BMA_compute_jumps(char* P, unsigned *char_jump){
+void BMA_compute_jumps(string_t s, unsigned *char_jump) {
     for(int i=0; i<128; i++){
-        char_jump[i] =strlen(P);
+        char_jump[i] =s->length;
     }
-    for(int k=0; k<(int)strlen(P); k++){
-        char_jump[(int)P[k]] = (int)strlen(P)-k-1;
+    for(int k=0; k<s->length; k++){
+        char_jump[(int)s->length[k]] = s->length-k-1;
     }
     return;
 }
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-int BMA(char *P,char*T,unsigned *char_jump){
+int BMA(string_t s, string_t substr, unsigned *char_jump) {
     int index;
-    int j = (int)strlen(P)-1;
-    int k = (int)strlen(P)-1;
-    while( j<(int)strlen(T) && k>=0 ){
-        if (T[j]==P[k]){
+    int j = s->length-1;
+    int k = s->length-1;
+    while( j<substr->length && k>=0 ){
+        if (T[j] == P[k]) {
             j = j-1;
             k = k-1;
         }
         else {
-            j = j+char_jump[(int)T[j]];
-            k = (int)strlen(P)-1;
+            j = j+char_jump[(int)substr->data[j]];
+            k = s->length-1;
         }
     }
-    if (k==-1) {
-        index=j+1;
+    if (k == -1) {
+        index = j+1;
     }
     else {
-        index=-1;
+        index = -1;
     }       
     return index;
 }
