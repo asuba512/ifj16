@@ -44,7 +44,6 @@ typedef struct class_memb {
 	datatype type; ///< return value for functions, datatype for variable
 	int arg_count; ///< argument count, not used by static variable
 	int var_count ///< local variable count, including arguments, not used by static variable
-	fn_context_t stack_top; ///< top of the stack of function contexts, not used by static variable
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
@@ -77,15 +76,14 @@ typedef struct local_var_inst {
  */
 typedef struct local_var {
 	datatype type; ///< return value for functions, datatype for variable
-	int index; ///< index in array of variable instances in function context
+	int index; ///< index in array of variable instances in function context, unique within one function
 } *local_var_t;
 
 
 /**
  * @brief      Represents one "context" of funcion. Contains an array of local variable values.
  * 
- * A new context is created and pushed to the stack whenever a function is called. Once completed, context is popped from the stack.
- * Every function has its own stack of contexts.
+ * A new context is created and pushed to the context stack whenever a function is called. Once completed, context is popped from the stack.
  */
 typedef struct fn_context {
 	struct fn_context *next; ///< pointer to next function context on the stack
@@ -97,5 +95,10 @@ typedef struct fn_context {
  * Global variable - table of classes.
  */
 class_table_t class_table;
+
+/**
+ * Global variable - top of function context stack.
+ */
+fn_context_t context_stack_top;
 
 #endif
