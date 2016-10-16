@@ -10,7 +10,7 @@
 #include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
-/* ===============================================================
+
 extern int token_error;
 
 string_t keywords[17];
@@ -98,44 +98,3 @@ int main(){
 	fclose(fd);
     return 0;
 }
-=============================================================== */
-
-
-
-// BMA TESTING ======================================================
-int main() {
-	int index;
-	unsigned array[128];
-	string_t str,substr;
-
-	// NO
-	str    = str_init("sadfesdfaaaef");
-	substr = str_init("rf");
-
-	BMA_compute_jumps(substr,array);
-	index = BMA(str,substr,array);
-
-	if (index == -1) {
-		printf("Substring not found in string! Index: %d\n", index);
-	}
-	else{
-		printf("Substring found in string! Index: %d\n", index);	
-	}
-
-	// YES
-	str    = str_init("sadfesdfaaaef");
-	substr = str_init("fes");
-
-	BMA_compute_jumps(substr,array);
-	index = BMA(str,substr,array);
-
-	if (index == -1) {
-		printf("Substring not found in string! Index: %d\n", index);
-	}
-	else{
-		printf("Substring found in string! Index: %d\n", index);	
-	}
-
-	return 0;
-}
-// ==================================================================
