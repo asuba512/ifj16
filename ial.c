@@ -8,12 +8,12 @@
 static bst_node_t _bst_helper_ptr;
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-void BMA_compute_jumps(string_t s, unsigned *char_jump) {
+void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
     for(int i=0; i<128; i++){
-        char_jump[i] =s->length;
+        char_jump[i] =substr->length;
     }
-    for(int k=0; k<s->length; k++){
-        char_jump[(int)s->data[k]] = s->length-k-1;
+    for(int k=0; k<substr->length; k++){
+        char_jump[(int)substr->data[k]] = substr->length-k-1;
     }
     return;
 }
