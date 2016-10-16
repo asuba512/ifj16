@@ -19,17 +19,17 @@ void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
 }
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-int BMA(string_t s, string_t substr, unsigned *char_jump) {
+int BMA(string_t str, string_t substr, unsigned *char_jump) {
     int index;
     int j = substr->length-1;
     int k = substr->length-1;
-    while( j<s->length && k>=0 ){
-        if (s->data[j] == substr->data[k]) {
+    while( j<str->length && k>=0 ){
+        if (str->data[j] == substr->data[k]) {
             j = j-1;
             k = k-1;
         }
         else {
-            j = j+char_jump[(int)s->data[j]];
+            j = j+char_jump[(int)str->data[j]];
             k = substr->length-1;
         }
     }

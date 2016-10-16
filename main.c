@@ -104,14 +104,15 @@ int main(){
 
 // BMA TESTING ======================================================
 int main() {
+	int index;
+	unsigned array[128];
 	string_t str,substr;
+
+	// NO
 	str    = str_init("sadfesdfaaaef");
 	substr = str_init("rf");
 
-	int index;
-	unsigned array[128];
-
-	BMA_compute_jumps(str,array);
+	BMA_compute_jumps(substr,array);
 	index = BMA(str,substr,array);
 
 	if (index == -1) {
@@ -120,6 +121,21 @@ int main() {
 	else{
 		printf("Substring found in string! Index: %d\n", index);	
 	}
+
+	// YES
+	str    = str_init("sadfesdfaaaef");
+	substr = str_init("fes");
+
+	BMA_compute_jumps(substr,array);
+	index = BMA(str,substr,array);
+
+	if (index == -1) {
+		printf("Substring not found in string! Index: %d\n", index);
+	}
+	else{
+		printf("Substring found in string! Index: %d\n", index);	
+	}
+
 	return 0;
 }
 // ==================================================================
