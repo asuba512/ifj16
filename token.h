@@ -26,6 +26,7 @@ typedef enum token_type{
 	token_rbracket,
 	token_lbrace,
 	token_rbrace,
+	token_comma,
 	token_id,
 	token_assign,
 	token_semicolon,

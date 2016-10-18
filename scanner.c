@@ -12,17 +12,19 @@
 #include <ctype.h>
 
 int get_token(FILE *fd, token_t t) {
-
-	int c, o = 0;
-	string_t buff = str_init(""); 
-	char octal[4];
-	char *endptr;
-	
+	int c; // var for storing input characters
+	int o = 0; // for indexing c-string | storing octal number
+	char octal[4]; //			    <---'
+	char *endptr; // for string-to-number conversions
 	t_state state = state_init;
 	
+	if(buff == NULL) // buff is global variable, if it wasnt used yet, it is NULL
+		buff = str_init("");
+	else
+		str_empty(buff); // if it is a consecutive call of get_token, empty buffer
+	
 	while(1){
-
-		c = getc(fd);
+		c = getc(fd);		
 		if(c == EOF)
 			return EOF;
 
@@ -70,11 +72,14 @@ int get_token(FILE *fd, token_t t) {
 					t->type = token_rbrace;
 					return 0;
 				}
+				else if(c == ','){
+					t->type = token_comma;
+					return 0;
+				}
                 else if(isalpha(c) || c == '$' || c == '_'){
 					str_addchar(buff, c);	
                     state = state_identifier;
                 }
-				else if(c == '0');
 				else if(isdigit(c)){
 					str_addchar(buff, c);	
 					state = state_integer;
@@ -89,7 +94,7 @@ int get_token(FILE *fd, token_t t) {
 					state  = state_linecomment;
 				else if(c == '*')
 					state = _state_blockcomment;
-				else{ // <- future division sign return
+				else{
 					ungetc(c, fd);
 					t->type = token_division;
 					return 0;
@@ -167,10 +172,9 @@ int get_token(FILE *fd, token_t t) {
 					}
 					else{
 						t->type = token_id;
-						t->attr.s = buff;
+						t->attr.s = str_init(buff->data);
 						return 0;
 					}
-					free(buff);
 					return 0;
                 }
                 break;
@@ -227,7 +231,7 @@ int get_token(FILE *fd, token_t t) {
 					return 1;
 				}
 				else{
-					ungetc(c, fd);
+					 ungetc(c, fd);
 					t->type = token_int;
 					t->attr.i = strtol(buff->data, &endptr, 10);
 					return 0;
@@ -240,7 +244,7 @@ int get_token(FILE *fd, token_t t) {
 					state = state_double;
 				}
 				else{
-					ungetc(c, fd);
+					ungetc(c, fd); 
 					t = NULL;;
 					return 1;
 				}
@@ -303,7 +307,7 @@ int get_token(FILE *fd, token_t t) {
 				else if(c == '"'){
 					str_addchar(buff, c);	
 					t->type = token_string;
-					t->attr.s = buff;
+					t->attr.s = str_init(buff->data);
 					return 0;
 				}
 				else

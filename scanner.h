@@ -8,12 +8,9 @@
 
 #include <stdio.h>
 #include "token.h"
+#include "infinite_string.h"
 
-/* List of tokens follows: */
-#define ID 1
-#define INTEGER 2
-#define REAL 3
-// ...
+string_t buff;
 
 typedef enum {
 	state_init,

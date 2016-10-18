@@ -23,6 +23,7 @@ int str_cat(string_t dest, string_t src);
 int str_addstring(string_t s, const char *str); // obsolete?
 
 int str_compare(string_t s1, string_t s2);
+void str_empty(string_t s); // empties passed string
 
 char *_str_add_chunk(string_t s, int chunk_count);
 #endif
