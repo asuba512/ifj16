@@ -12,8 +12,8 @@ typedef struct bst_node {
 	struct bst_node *right_p, *left_p;
 } *bst_node_t;
 
-void BMA_compute_jumps(string_t s, unsigned *char_jump);
-int BMA(string_t s, string_t substr, unsigned *char_jump);
+void BMA_compute_jumps(string_t substr, unsigned *char_jump);
+int BMA(string_t str, string_t substr, unsigned *char_jump);
 
 void shell_sort(string_t s);
 
