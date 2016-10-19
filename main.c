@@ -151,6 +151,18 @@ int main(){
 				case token_comma:
 					printf(",\n");
 					break;
+				case token_not:
+					printf("!\n");
+					break;
+				case token_or:
+					printf("||\n");
+					break;
+				case token_and:
+					printf("&&\n");
+					break;
+				case token_dot:
+					printf(".\n");
+					break;
 			}
 		}
 		else{

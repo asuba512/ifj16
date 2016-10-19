@@ -9,44 +9,48 @@
 #include "infinite_string.h"
 
 typedef enum token_type{
-	token_multiplication,
-	token_division,
-	token_addition,
-	token_substraction,
-	token_less,
-	token_more,
-	token_lesseq,
-	token_moreeq,
-	token_equal,
-	token_nequal,
-	token_double,
-	token_int,
-	token_string,
-	token_lbracket,
-	token_rbracket,
-	token_lbrace,
-	token_rbrace,
-	token_comma,
-	token_id,
-	token_assign,
-	token_semicolon,
-	token_k_boolean,
-	token_k_break,
-	token_k_class,
-	token_k_continue,
-	token_k_do,
-	token_k_double,
-	token_k_else,
-	token_k_false,
-	token_k_for,
-	token_k_if,
-	token_k_int,
-	token_k_return,
-	token_k_string,
-	token_k_static,
-	token_k_true,
-	token_k_void,
-	token_k_while
+	token_multiplication, // *
+	token_division, // /
+	token_addition, // + 
+	token_substraction, // -
+	token_less, // <
+	token_more, // >
+	token_lesseq, // <=
+	token_moreeq, // >=
+	token_equal, // ==
+	token_nequal, // !=
+	token_and, // &&
+	token_or, // ||
+	token_not, // !
+	token_double, // floating point number
+	token_int, // integer number
+	token_string, // string
+	token_lbracket, // (
+	token_rbracket, // )
+	token_lbrace, // {
+	token_rbrace, // }
+	token_comma, // ,
+	token_id, // identifier
+	token_assign, // =
+	token_semicolon, // ;
+	token_dot, // .
+	token_k_boolean, // keyword boolean
+	token_k_break, // keyword break
+	token_k_class, // keyword  class
+	token_k_continue, // keyword continue
+	token_k_do, // keyword do
+	token_k_double, // keyword double
+	token_k_else, // keyword else
+	token_k_false, // keyword false
+	token_k_for, // keyword for
+	token_k_if, // keyword if
+	token_k_int, // keyword int
+	token_k_return, // keyword return
+	token_k_string, // keyword String
+	token_k_static, // keyword static
+	token_k_true, // keyword true
+	token_k_void, // keyword void
+	token_k_while // keyword while
 } token_type;
 
 typedef union attr{

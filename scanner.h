@@ -18,6 +18,8 @@ typedef enum {
 	state_more,
 	state_eq,
 	state_neq,
+	state_and,
+	state_or,
 	_state_division,
 	_state_blockcomment,
 	state_blockcomment,

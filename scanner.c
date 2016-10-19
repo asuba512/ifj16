@@ -76,6 +76,14 @@ int get_token(FILE *fd, token_t t) {
 					t->type = token_comma;
 					return 0;
 				}
+				else if(c == '.'){
+					t->type = token_dot;
+					return 0;
+				}
+				else if(c == '&')
+					state = state_and;
+				else if(c == '|')
+					state = state_or;
                 else if(isalpha(c) || c == '$' || c == '_'){
 					str_addchar(buff, c);	
                     state = state_identifier;
@@ -87,6 +95,10 @@ int get_token(FILE *fd, token_t t) {
 				else if(c == '"'){
 					str_addchar(buff, c);	
 					state = state_string;
+				}
+				else if(isspace(c));
+				else{
+					return 1;
 				}
                 break;
 			case _state_division:
@@ -212,9 +224,27 @@ int get_token(FILE *fd, token_t t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
+					t->type = token_not;
+					return 0;
+				}
+			case state_and:
+				if(c == '&'){
+					t->type = token_and;
+					return 0;
+				}
+				else{
 					return 1;
 				}
+				break;
+			case state_or:
+				if(c == '|'){
+					t->type = token_or;
+					return 0;
+				}
+				else{
+					return 1;
+				}
+				break;
 			case state_integer:
 				if(isdigit(c))
 					str_addchar(buff, c);	
