@@ -25,8 +25,10 @@ int get_token(FILE *fd, token_t t) {
 	
 	while(1){
 		c = getc(fd);		
-		if(c == EOF)
+		if(c == EOF){
+			t->type = token_eof;
 			return EOF;
+		}
 
         switch(state){
             case state_init:

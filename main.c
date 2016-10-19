@@ -5,6 +5,7 @@
  */
 
 #include "scanner.h"
+#include "parser.h"
 #include "token.h"
 #include "infinite_string.h"
 #include "ial.h"
@@ -12,8 +13,10 @@
 #include <stdlib.h>
 
 extern string_t buff; // <- variable which has to be destroyed before exit, internal scanner variable
+extern token_t t;
+extern FILE *fd;
 
-int main(){
+int main(int argc, char **argv){
 
 	/* this is an example of how scanner interface works */
 	/* get_token() returns a value 1 if there was lexical error, 0 if succeded */
@@ -23,31 +26,32 @@ int main(){
 	/* .. this string can be (duplicated AND destroyed) OR (pointer can be copied and later destroyed) .. */
 	/* .. depends on semantic analysis implementation */
 
-	FILE *fd = fopen("zdroj.ifj","r");
+	fd = fopen(argv[1],"r");
 	if(fd == NULL){
 		printf("error\n");
 		return 99;
 	}
 
-	token_t x = malloc(sizeof(struct token));
+	t = malloc(sizeof(struct token));
+	
 	int retval;
 
-	while((retval = get_token(fd, x)) != EOF){
+	while((retval = get_token(fd, t)) != EOF){
 		if(retval != 1){ // <<< THIS IS ERROR no. 1
-			switch(x->type){
+			switch(t->type){
 				case token_double:
-					printf("DOUBLE: %f\n", x->attr.d);
+					printf("DOUBLE: %f\n", t->attr.d);
 					break;
 				case token_int:
-					printf("INT: %d\n", x->attr.i);
+					printf("INT: %d\n", t->attr.i);
 					break;
 				case token_string:
-					printf("STRING: %s\n", x->attr.s->data);
-					str_destroy(x->attr.s);
+					printf("STRING: %s\n", t->attr.s->data);
+					str_destroy(t->attr.s);
 					break;
 				case token_id:
-					printf("ID: %s\n", x->attr.s->data);
-					str_destroy(x->attr.s);
+					printf("ID: %s\n", t->attr.s->data);
+					str_destroy(t->attr.s);
 					break;
 				case token_division:
 					printf("/\n");
@@ -177,7 +181,7 @@ int main(){
 	*/
 	str_destroy(buff);
 
-	free(x);
+	free(t);
 	fclose(fd);
     return 0;
 }

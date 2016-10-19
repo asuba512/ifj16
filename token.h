@@ -50,7 +50,8 @@ typedef enum token_type{
 	token_k_static, // keyword static
 	token_k_true, // keyword true
 	token_k_void, // keyword void
-	token_k_while // keyword while
+	token_k_while, // keyword while
+	token_eof
 } token_type;
 
 typedef union attr{
