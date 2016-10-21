@@ -3,6 +3,8 @@
 //////////////////////////
 //                                     comment
 // "comment"
+// 111111111
+// identificator
 
 /**/
 /* */
@@ -29,6 +31,14 @@
 
 /* "string in comment " */
 
+/*
+	identificator
+*/
+
+/*
+	11111111111
+*/
+
 "one two three long string test"
 " A B C D E F G H I J K L M N O P Q R S T U V W X Y Z "
 " a b c d e f g h i j k l m n o p q r s t u v w x y z "
@@ -53,19 +63,61 @@
 "{   }"
 
 identificator
+"identificator"
+
+identificator.
+.identificator
 identificator.identificator
+
 identificator;
 ;identificator
+identificator;identificator
+
 (identificator)
 {identificator}
-identificator.
+
 {identificator.}
+{.identificator.}
+
 identificator>
 >identificator
-.identificator
-identificator+identificator
-identificator;identificator
+
+identificator && identificator
+identificator&&identificator
+identificator &&identificator
+identificator&& identificator
+
+identificator>identificator
+identificator/identificator
+
+identificator * identificator
+identificator*identificator
+identificator *identificator
+identificator* identificator
+
+identificator+identificator+identificator
+
 !identificator
 identificator!
+
 classidentificator
 class.identificator
+for identificator
+foridentificator
+
+if(identificator)
+if(if(if(if(if(if(if(if(1))))))))
+
+1
+0
+99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+000001
+100000
+
+"1111111111111111111111111111"
+" 111111111111111"
+
+;1111111111111111111;
+
+111111111111111111;1111111111111111111111;11111111111111111111
+1111111111111111.1.11111111111111111111111111111111111111111111111111.1.1.1.11111111111111111111111111
