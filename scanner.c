@@ -167,9 +167,6 @@ int get_token(FILE *fd, token_t t) {
 					else if(!strcmp(buff->data, "else")){
 						t->type = token_k_else;
 					}
-					else if(!strcmp(buff->data, "false")){
-						t->type = token_k_false;
-					}
 					else if(!strcmp(buff->data, "for")){
 						t->type = token_k_for;
 					}
@@ -188,8 +185,9 @@ int get_token(FILE *fd, token_t t) {
 					else if(!strcmp(buff->data, "static")){
 						t->type = token_k_static;
 					}
-					else if(!strcmp(buff->data, "true")){
-						t->type = token_k_true;
+					else if(!strcmp(buff->data, "true") || !strcmp(buff->data, "false")){
+						t->type = token_boolean;
+						t->attr.b = !strcmp(buff->data, "true") ? 1 : 0;
 					}
 					else if(!strcmp(buff->data, "void")){
 						t->type = token_k_void;

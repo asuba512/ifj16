@@ -24,6 +24,7 @@ typedef enum token_type{
 	token_not, // !
 	token_double, // floating point number
 	token_int, // integer number
+	token_boolean, // boolean literal
 	token_string, // string
 	token_lbracket, // (
 	token_rbracket, // )
@@ -41,14 +42,12 @@ typedef enum token_type{
 	token_k_do, // keyword do
 	token_k_double, // keyword double
 	token_k_else, // keyword else
-	token_k_false, // keyword false
 	token_k_for, // keyword for
 	token_k_if, // keyword if
 	token_k_int, // keyword int
 	token_k_return, // keyword return
 	token_k_string, // keyword String
 	token_k_static, // keyword static
-	token_k_true, // keyword true
 	token_k_void, // keyword void
 	token_k_while, // keyword while
 	token_eof
@@ -58,6 +57,7 @@ typedef union attr{
 	double d;
 	int i;
 	string_t s;
+	int b;
 } attr_t;
 
 typedef struct token{
