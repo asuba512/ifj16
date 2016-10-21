@@ -1,0 +1,67 @@
++
+-
+*
+/
+<
+>
+<=
+>=
+==
+!=
+&&
+||
+!
+(
+)
+{
+}
+;
+class
+static
+true
+false
+void
+boolean
+double
+int
+String
+for
+while
+do
+break
+continue
+if
+else
+return
+ID: identificator
+STRING: "Adam Adrian Jakub Peter"
+STRING: "adam adrian jakub peter"
+STRING: "<3"
+STRING: "42"
+STRING: "$$"
+INT: 0
+INT: 1
+INT: 123
+INT: 2147483647
+DOUBLE: 100000000000.000000
+DOUBLE: 22000000000.000000
+DOUBLE: 1000.000000
+DOUBLE: 220.000000
+DOUBLE: 100000000000.000000
+DOUBLE: 22000000000.000000
+DOUBLE: 1000.000000
+DOUBLE: 220.000000
+STRING: """
+STRING: "
+"
+STRING: "	"
+STRING: "\"
+STRING: ""
+STRING: ""
+STRING: "@"
+STRING: "
+STRING: "�"
+STRING: "�"
+STRING: "Ahoj
+Sve'te\""
+STRING: "\""
