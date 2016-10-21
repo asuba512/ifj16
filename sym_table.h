@@ -1,3 +1,9 @@
+/**
+ * @file 	   sym_table.h
+ * @brief      Header file of table of symbols module.
+ * @authors    Paliesek Jakub
+ */
+
 #ifndef SYM_TABLE_INC
 #define SYM_TABLE_INC 1
 
