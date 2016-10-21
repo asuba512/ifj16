@@ -1,0 +1,188 @@
+STRING: "one two three long string test"
+STRING: " A B C D E F G H I J K L M N O P Q R S T U V W X Y Z "
+STRING: " a b c d e f g h i j k l m n o p q r s t u v w x y z "
+STRING: " . ; { } ( ) / + - * "
+STRING: " // "
+STRING: "//"
+STRING: "/**/"
+STRING: " (string: "
+STRING: ")
+"
+STRING: "String"
+STRING: "                                                      String"
+STRING: "String                                                      "
+STRING: "string"
+STRING: "                                                      string"
+STRING: "string                                                      "
+STRING: "ľščťžýáíéôúäň"
+STRING: "false"
+STRING: ";"
+STRING: "{   }"
+ID: __
+ID: _$
+ID: $_
+ID: $$
+ID: identificator
+STRING: "identificator"
+ID: _identificator
+ID: identificator_
+ID: _identificator_
+ID: identi_ficator
+ID: __identificator
+ID: identificator__
+ID: __identificator__
+ID: identif__icator
+ID: _______________________________________________identificator
+ID: identificator_______________________________________________
+ID: _______________________________________________identificator_______________________________________________
+ID: identi_______________________________________________ficator
+ID: $identificator
+ID: identificator$
+ID: $identificator$
+ID: identif$icator
+ID: $$identificator
+ID: identificator$$
+ID: $$identificator$$
+ID: identif$$icator
+ID: $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$identificator
+ID: identificator$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ID: $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$identificator$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ID: identif$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$icator
+ID: identificator_$
+ID: $_identificator
+ID: $_identificator_$
+ID: _$identificator
+ID: identificator$_
+ID: _$identificator$_
+ID: identificator
+.
+.
+ID: identificator
+ID: identificator
+.
+ID: identificator
+ID: identificator
+;
+;
+ID: identificator
+ID: identificator
+;
+ID: identificator
+(
+ID: identificator
+)
+{
+ID: identificator
+}
+{
+ID: identificator
+.
+}
+{
+.
+ID: identificator
+}
+ID: identificator
+>
+>
+ID: identificator
+ID: identificator
+&&
+ID: identificator
+ID: identificator
+&&
+ID: identificator
+ID: identificator
+&&
+ID: identificator
+ID: identificator
+&&
+ID: identificator
+ID: identificator
+>
+ID: identificator
+ID: identificator
+/
+ID: identificator
+ID: identificator
+*
+ID: identificator
+ID: identificator
+*
+ID: identificator
+ID: identificator
+*
+ID: identificator
+ID: identificator
+*
+ID: identificator
+ID: identificator
++
+ID: identificator
++
+ID: identificator
+!
+ID: identificator
+ID: identificator
+!
+ID: classidentificator
+class
+.
+ID: identificator
+for
+ID: identificator
+ID: foridentificator
+lexical error
+lexical error
+lexical error
+ID: $identificator
+lexical error
+lexical error
+lexical error
+ID: identificator$
+lexical error
+lexical error
+lexical error
+ID: identificator$identificator
+INT: 0
+INT: 0
+INT: 0
+INT: 0
+INT: 1
+INT: 2147483646
+INT: 2147483647
+INT: 12345
+;
+INT: 12345
+INT: 12345
+;
+;
+INT: 12345
+;
+lexical error
+lexical error
+lexical error
+STRING: "12345"
+STRING: " 12345"
+STRING: "12345 "
+INT: 12345
+;
+INT: 12345
+INT: 12345
+;
+;
+INT: 12345
+;
+INT: 12345
+;
+INT: 12345
+INT: 0
+;
+INT: 12345
+INT: 12345
+;
+INT: 0
+============================================ bookmark TODO
+0.0
+.0
+0.

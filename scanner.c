@@ -12,19 +12,23 @@
 #include <ctype.h>
 
 int get_token(FILE *fd, token_t t) {
-
-	int c, o = 0;
-	string_t buff = str_init(""); 
-	char octal[4];
-	char *endptr;
-	
+	int c; // var for storing input characters
+	int o = 0; // for indexing c-string | storing octal number
+	char octal[4]; //			    <---'
+	char *endptr; // for string-to-number conversions
 	t_state state = state_init;
 	
+	if(buff == NULL) // buff is global variable, if it wasnt used yet, it is NULL
+		buff = str_init("");
+	else
+		str_empty(buff); // if it is a consecutive call of get_token, empty buffer
+	
 	while(1){
-
-		c = getc(fd);
-		if(c == EOF)
+		c = getc(fd);		
+		if(c == EOF){
+			t->type = token_eof;
 			return EOF;
+		}
 
         switch(state){
             case state_init:
@@ -70,11 +74,26 @@ int get_token(FILE *fd, token_t t) {
 					t->type = token_rbrace;
 					return 0;
 				}
-                else if(isalpha(c) || c == '$' || c == '_'){
+				else if(c == ','){
+					t->type = token_comma;
+					return 0;
+				}
+				else if(c == '.'){
+					t->type = token_dot;
+					return 0;
+				}
+				else if(c == '&')
+					state = state_and;
+				else if(c == '|')
+					state = state_or;
+                else if(c == '_'){
+					str_addchar(buff, c);
+					state = _state_identifier;
+				}
+				else if(isalpha(c) || c == '$'){
 					str_addchar(buff, c);	
                     state = state_identifier;
                 }
-				else if(c == '0');
 				else if(isdigit(c)){
 					str_addchar(buff, c);	
 					state = state_integer;
@@ -83,13 +102,17 @@ int get_token(FILE *fd, token_t t) {
 					str_addchar(buff, c);	
 					state = state_string;
 				}
+				else if(isspace(c));
+				else{
+					return 1;
+				}
                 break;
 			case _state_division:
 				if(c == '/')
 					state  = state_linecomment;
 				else if(c == '*')
 					state = _state_blockcomment;
-				else{ // <- future division sign return
+				else{
 					ungetc(c, fd);
 					t->type = token_division;
 					return 0;
@@ -106,8 +129,17 @@ int get_token(FILE *fd, token_t t) {
 			case state_blockcomment:
 				if(c == '/')
 					state = state_init;
+				else if(c == '*');
 				else
 					state = _state_blockcomment;
+				break;
+			case _state_identifier:
+					if(c == '_' || c == '$' || isalnum(c)){
+						str_addchar(buff, c);
+						state = state_identifier;
+					}
+					else
+						return 1;
 				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_')
@@ -135,9 +167,6 @@ int get_token(FILE *fd, token_t t) {
 					else if(!strcmp(buff->data, "else")){
 						t->type = token_k_else;
 					}
-					else if(!strcmp(buff->data, "false")){
-						t->type = token_k_false;
-					}
 					else if(!strcmp(buff->data, "for")){
 						t->type = token_k_for;
 					}
@@ -156,8 +185,9 @@ int get_token(FILE *fd, token_t t) {
 					else if(!strcmp(buff->data, "static")){
 						t->type = token_k_static;
 					}
-					else if(!strcmp(buff->data, "true")){
-						t->type = token_k_true;
+					else if(!strcmp(buff->data, "true") || !strcmp(buff->data, "false")){
+						t->type = token_boolean;
+						t->attr.b = !strcmp(buff->data, "true") ? 1 : 0;
 					}
 					else if(!strcmp(buff->data, "void")){
 						t->type = token_k_void;
@@ -167,10 +197,9 @@ int get_token(FILE *fd, token_t t) {
 					}
 					else{
 						t->type = token_id;
-						t->attr.s = buff;
+						t->attr.s = str_init(buff->data);
 						return 0;
 					}
-					free(buff);
 					return 0;
                 }
                 break;
@@ -208,9 +237,27 @@ int get_token(FILE *fd, token_t t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
+					t->type = token_not;
+					return 0;
+				}
+			case state_and:
+				if(c == '&'){
+					t->type = token_and;
+					return 0;
+				}
+				else{
 					return 1;
 				}
+				break;
+			case state_or:
+				if(c == '|'){
+					t->type = token_or;
+					return 0;
+				}
+				else{
+					return 1;
+				}
+				break;
 			case state_integer:
 				if(isdigit(c))
 					str_addchar(buff, c);	
@@ -227,7 +274,7 @@ int get_token(FILE *fd, token_t t) {
 					return 1;
 				}
 				else{
-					ungetc(c, fd);
+					 ungetc(c, fd);
 					t->type = token_int;
 					t->attr.i = strtol(buff->data, &endptr, 10);
 					return 0;
@@ -240,7 +287,7 @@ int get_token(FILE *fd, token_t t) {
 					state = state_double;
 				}
 				else{
-					ungetc(c, fd);
+					ungetc(c, fd); 
 					t = NULL;;
 					return 1;
 				}
@@ -303,8 +350,11 @@ int get_token(FILE *fd, token_t t) {
 				else if(c == '"'){
 					str_addchar(buff, c);	
 					t->type = token_string;
-					t->attr.s = buff;
+					t->attr.s = str_init(buff->data);
 					return 0;
+				}
+				else if(c == '\n'){
+					return 1;
 				}
 				else
 					str_addchar(buff, c);	
@@ -348,7 +398,9 @@ int get_token(FILE *fd, token_t t) {
 				if(c >= '0' && c <= '7'){
 					octal[o++] = c;
 					octal[o] = 0;
-					str_addchar(buff, strtol(octal, &endptr, 8));
+					if((c = strtol(octal, &endptr, 8)) == 0)
+						return 1;
+					str_addchar(buff, c);
 					o = 0;
 					state = state_string;
 				}
