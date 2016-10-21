@@ -125,6 +125,7 @@ int get_token(FILE *fd, token_t t) {
 			case state_blockcomment:
 				if(c == '/')
 					state = state_init;
+				else if(c == '*');
 				else
 					state = _state_blockcomment;
 				break;
@@ -342,6 +343,9 @@ int get_token(FILE *fd, token_t t) {
 					t->attr.s = str_init(buff->data);
 					return 0;
 				}
+				else if(c == '\n'){
+					return 1;
+				}
 				else
 					str_addchar(buff, c);	
 				break;
@@ -384,7 +388,9 @@ int get_token(FILE *fd, token_t t) {
 				if(c >= '0' && c <= '7'){
 					octal[o++] = c;
 					octal[o] = 0;
-					str_addchar(buff, strtol(octal, &endptr, 8));
+					if((c = strtol(octal, &endptr, 8)) == 0)
+						return 1;
+					str_addchar(buff, c);
 					o = 0;
 					state = state_string;
 				}
