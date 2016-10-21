@@ -24,6 +24,7 @@ typedef enum {
 	_state_blockcomment,
 	state_blockcomment,
 	state_linecomment,
+	_state_identifier,
 	state_identifier,
 	state_integer,
 	_state_double_point,

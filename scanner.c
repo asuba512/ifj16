@@ -86,7 +86,11 @@ int get_token(FILE *fd, token_t t) {
 					state = state_and;
 				else if(c == '|')
 					state = state_or;
-                else if(isalpha(c) || c == '$' || c == '_'){
+                else if(c == '_'){
+					str_addchar(buff, c);
+					state = _state_identifier;
+				}
+				else if(isalpha(c) || c == '$'){
 					str_addchar(buff, c);	
                     state = state_identifier;
                 }
@@ -128,6 +132,14 @@ int get_token(FILE *fd, token_t t) {
 				else if(c == '*');
 				else
 					state = _state_blockcomment;
+				break;
+			case _state_identifier:
+					if(c == '_' || c == '$' || isalnum(c)){
+						str_addchar(buff, c);
+						state = state_identifier;
+					}
+					else
+						return 1;
 				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_')
