@@ -1,10 +1,39 @@
 /* Program 3: Prace s retezci a vestavenymi funkcemi */
-&
 class Main
 {
+static int x;
+static void run()
+{
+String str1;
+String str2;
+Main.x = ifj16.find(str2, "text");
+ifj16.print();
+Game.play(str1);
+}
+// end of static void run()
+}
+// end of class Main
+class Game
+{
+static void play(String str)
+{
+ifj16.print("Zadejte nejakou posloupnost vsech malych pismen a-h, ");
+ifj16.print("pricemz se pismena nesmeji v posloupnosti opakovat:");
+str = ifj16.readString();
+str = ifj16.sort(str);
+int cmp = ifj16.compare(str, "abcdefgh");
+if () {
+while () {
+ifj16.print("Spatne zadana posloupnost, zkuste znovu:");
+str = ifj16.readString();
+str = ifj16.sort(str);
+cmp = ifj16.compare(str, "abcdefgh");
+}
+}
+else {
+}
+return;
+}
+// end of static void play(String)
 }
 // end of class Game
-class Main2
-{
-}
-class
