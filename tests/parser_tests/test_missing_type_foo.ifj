@@ -1,0 +1,11 @@
+class Main
+{
+    static void run()
+        {
+        }
+    static test()
+        {
+        return 0
+        }
+}
+

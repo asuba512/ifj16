@@ -1,0 +1,7 @@
+class Main
+{
+	double test;
+	static void run()
+		{
+		}
+}

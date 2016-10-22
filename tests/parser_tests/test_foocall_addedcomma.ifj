@@ -1,0 +1,12 @@
+class Main
+{
+	static  void run()
+		{
+		int summa;
+		summa=test(5,,4);
+		}
+	static int test(int a,int b)
+		{
+			return a+b;
+		}
+}
