@@ -1,0 +1,11 @@
+class Main
+{
+    static void run()
+        {
+        }
+    static integeeer test()
+        {
+        return 0
+        }
+}
+

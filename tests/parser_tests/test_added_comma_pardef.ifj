@@ -1,0 +1,11 @@
+claass Main
+{
+    static void run()
+        {
+        }
+    static int(int a,,double b,String asd)
+        {
+        return 0
+        }
+}
+
