@@ -9,47 +9,47 @@
 #include "infinite_string.h"
 
 typedef enum token_type{
-	token_multiplication, // *
-	token_division, // /
-	token_addition, // + 
-	token_substraction, // -
-	token_less, // <
-	token_more, // >
-	token_lesseq, // <=
-	token_moreeq, // >=
-	token_equal, // ==
-	token_nequal, // !=
-	token_and, // &&
-	token_or, // ||
-	token_not, // !
-	token_double, // floating point number
-	token_int, // integer number
-	token_boolean, // boolean literal
-	token_string, // string
-	token_lbracket, // (
-	token_rbracket, // )
-	token_lbrace, // {
-	token_rbrace, // }
-	token_comma, // ,
-	token_id, // identifier
-	token_assign, // =
-	token_semicolon, // ;
-	token_dot, // .
-	token_k_boolean, // keyword boolean
-	token_k_break, // keyword break
-	token_k_class, // keyword  class
-	token_k_continue, // keyword continue
-	token_k_do, // keyword do
-	token_k_double, // keyword double
-	token_k_else, // keyword else
-	token_k_for, // keyword for
-	token_k_if, // keyword if
-	token_k_int, // keyword int
-	token_k_return, // keyword return
-	token_k_string, // keyword String
-	token_k_static, // keyword static
-	token_k_void, // keyword void
-	token_k_while, // keyword while
+	token_multiplication, // * 0
+	token_division, // / 1
+	token_addition, // + 2
+	token_substraction, // - 3
+	token_less, // < 4
+	token_more, // > 5
+	token_lesseq, // <= 6
+	token_moreeq, // >= 7
+	token_equal, // == 8
+	token_nequal, // != 9
+	token_and, // && 10
+	token_or, // || 11
+	token_not, // ! 12
+	token_double, // floating point number 13
+	token_int, // integer number 14
+	token_boolean, // boolean literal 15
+	token_string, // string 16
+	token_lbracket, // ( 17
+	token_rbracket, // ) 18
+	token_lbrace, // { 19
+	token_rbrace, // } 20
+	token_comma, // , 21
+	token_id, // identifier 22
+	token_assign, // = 23
+	token_semicolon, // ; 24
+	token_dot, // . 25
+	token_k_boolean, // keyword boolean 26
+	token_k_break, // keyword break 27
+	token_k_class, // keyword  class 28
+	token_k_continue, // keyword continue 29
+	token_k_do, // keyword do 30
+	token_k_double, // keyword double 31
+	token_k_else, // keyword else 32
+	token_k_for, // keyword for 33
+	token_k_if, // keyword if 34
+	token_k_int, // keyword int 35
+	token_k_return, // keyword return 36
+	token_k_string, // keyword String 37
+	token_k_static, // keyword static 38
+	token_k_void, // keyword void 39
+	token_k_while, // keyword while 40
 	token_eof
 } token_type;
 
