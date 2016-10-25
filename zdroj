@@ -1,0 +1,41 @@
+class Main{
+	static void run(){
+		int p;
+		double q = 32 + 55;
+		boolean z = foo();
+		String u = foo2(x, z);
+		if((few + (efw))){
+			if(p){
+				p = 55;
+				x = foo(de, fe, feff);
+			}
+			else
+			{
+				if(55) {} else {}
+			}
+		}
+		else
+		{
+			i = cc;
+		}
+		while(541 + 12 != fee)){
+			
+		}
+		p = q;
+		return 1 + q;
+	}
+	
+	static int c = 5 + 3 - 25 * k;
+
+}
+
+class Main2{
+
+	static double q;
+	static boolean x = true;
+
+	static int fce(int x, double z){
+		String z;
+	}
+
+}
