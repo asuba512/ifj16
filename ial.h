@@ -26,4 +26,6 @@ void bst_delete(bst_node_t *root, string_t key);
 void _bst_del(bst_node_t *node);
 int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data);
 
+void bst_inorder(bst_node_t root, void (*do_work)(void *));
+
 #endif

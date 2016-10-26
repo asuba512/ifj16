@@ -36,6 +36,7 @@ typedef struct class_table {
  * @brief Pointer to class entry in global class table
  */
 typedef struct class {
+	string_t id;
 	bst_node_t root; ///< Root node
 } *class_t;
 
@@ -45,6 +46,7 @@ typedef struct class {
  * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
 typedef struct local_var {
+	string_t id;
 	datatype dtype; ///< return value for functions, datatype for variable
 	int index; ///< index in array of variable instances in function context, unique within one function
 } *local_var_t;
@@ -55,6 +57,7 @@ typedef struct local_var {
  * Either static function or static variable.
  */
 typedef struct class_memb {
+	string_t id; // temp
 	union {
 		double d_val;
 		int i_val;

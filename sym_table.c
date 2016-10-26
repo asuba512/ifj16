@@ -15,6 +15,7 @@ int insert_class(string_t id, class_t *target) {
 		return 99;
 	// initialization
 	new_class->root = NULL;
+	new_class->id = id;
 	int err;
 	if((err = bst_insert_or_err(&(classes->root), id, (void *)new_class)) == 0) {
 		*target = new_class;
@@ -35,6 +36,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
+	m->id = id;
 	int err;
 	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
@@ -57,7 +59,7 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t lv;
 	if ((lv = malloc(sizeof(struct local_var))) == NULL)
 		return 99;
-	
+	// this shat allows us to search for function arguments by their indexes
 	if(fn->arg_count == fn->_max_arg_count) {
 		if(_add_fn_arg_space(fn) == 99) {
 			free(lv);
@@ -69,10 +71,12 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	// initialization
 	lv->dtype = dt;
 	lv->index = (fn->arg_count)++;
+	lv->id = id;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
+	if(err == 3) (fn->arg_count)--; // doesn't matter anyways, if there's an error
 	free(lv);
 	return err;
 }

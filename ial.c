@@ -167,3 +167,11 @@ void _bst_del(bst_node_t *node) {
         *node = (*node)->left_p;
     }
 }
+
+void bst_inorder(bst_node_t root, void (*do_work)(void *)) {
+    if(root != NULL) {
+        bst_inorder(root->left_p, do_work);
+        bst_inorder(root->right_p, do_work);
+        do_work(root->data);
+    }
+}
