@@ -63,7 +63,11 @@ void print_member(void *memb) {
     if(m->type == func) {
         printf("\t%s: %s %s(", memb_type, types[m->dtype], m->id->data);
         for(int i = 0; i < (m->arg_count); i++) {
-            printf("%s %s, ", types[(m->arg_list)[i]->dtype], (m->arg_list)[i]->id->data);
+            if(i == m->arg_count - 1) {
+                printf("%s %s", types[(m->arg_list)[i]->dtype], (m->arg_list)[i]->id->data);
+            } else {
+                printf("%s %s, ", types[(m->arg_list)[i]->dtype], (m->arg_list)[i]->id->data);
+            }
         }
         printf(");\n");
         printf("\t\tVariables in tree (Arg count: %d):\n", m->arg_count);
