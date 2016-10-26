@@ -182,7 +182,115 @@ INT: 12345
 INT: 12345
 ;
 INT: 0
-============================================ bookmark TODO
-0.0
-.0
-0.
+DOUBLE: 0.000000
+.
+INT: 0
+lexical error
+DOUBLE: 0.000000
+DOUBLE: 0.000000
+DOUBLE: 0.000000
+.
+DOUBLE: 0.000000
+.
+DOUBLE: 0.000000
+.
+ID: E0
+DOUBLE: 0.000000
+.
+ID: e0
+DOUBLE: 100.000000
+DOUBLE: 1.000000
+DOUBLE: 100.000000
+.
+INT: 1
+DOUBLE: 1.000000
+.
+INT: 1
+DOUBLE: 100000000000.000000
+DOUBLE: 100000000000.000000
+ID: a
+ID: a10e10
+ID: a10e10a
+lexical error
+lexical error
+DOUBLE: 22000000000.000000
+DOUBLE: 22000000000.000000
+ID: a
+ID: a2
+.
+DOUBLE: 20000000000.000000
+ID: a2
+.
+DOUBLE: 20000000000.000000
+ID: a
+DOUBLE: 2.200000
+ID: ae10
+DOUBLE: 1000.000000
+.
+INT: 2
+DOUBLE: 1000.000000
+.
+lexical error
+DOUBLE: 1000.000000
+.
+INT: 2
+DOUBLE: 1000.000000
+.
+lexical error
+ID: a10e2
+.
+INT: 2
+ID: a10e2
+.
+lexical error
+ID: a10e2
+.
+INT: 2
+ID: a10e2
+.
+lexical error
+lexical error
+lexical error
+DOUBLE: 100000000000.000000
+DOUBLE: 100000000000.000000
+ID: a
+ID: a10E10
+ID: a10E10a
+lexical error
+lexical error
+DOUBLE: 22000000000.000000
+DOUBLE: 22000000000.000000
+ID: a
+ID: a2
+.
+DOUBLE: 20000000000.000000
+ID: a2
+.
+DOUBLE: 20000000000.000000
+ID: a
+lexical error
+DOUBLE: 2.200000
+ID: aE10
+DOUBLE: 1000.000000
+.
+INT: 2
+DOUBLE: 1000.000000
+.
+lexical error
+ID: a10E2
+.
+INT: 2
+ID: a10E2
+.
+lexical error
+lexical error
+lexical error
+STRING: ""
+STRING: "
+STRING: "@"
+STRING: "I"
+STRING: """
+STRING: "ASDF"
+STRING: "_$asd"
+lexical error
+lexical error
