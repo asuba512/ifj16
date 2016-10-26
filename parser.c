@@ -1,10 +1,14 @@
 #include "token.h"
 #include "parser.h"
 #include "scanner.h"
+#include "semantic_analysis.h"
+#include "infinite_string.h"
 
 extern token_t t;
 extern FILE *fd;
 extern int lexerror;
+
+int pass_number; // either first or second
 
 #define next_token() !(lexerror = get_token(fd, t))
 #define is(x) (t->type == x)
@@ -12,6 +16,7 @@ extern int lexerror;
 int c_list(){
 	if(next_token() && t->type == token_k_class){
 		if(next_token() && t->type == token_id){
+			new_class(str_init(t->attr.s->data));
 			if(next_token() && t->type == token_lbrace){
 				if(!memb_list() && t->type == token_rbrace){
 					return c_list();

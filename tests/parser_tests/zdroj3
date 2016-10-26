@@ -17,25 +17,29 @@ Game.play(str1);
 // end of class Main
 class Game
 {
-static void play(String str)
-{
-ifj16.print();
-ifj16.print();
-str = ifj16.readString();
-str = ifj16.sort(str);
-int cmp = ifj16.compare(str, "abcdefgh");
-if (cmp != 0) {
-while (cmp != 0) {
-ifj16.print();
-str = ifj16.readString();
-str = ifj16.sort(str);
-cmp = ifj16.compare(str, "abcdefgh");
-}
-}
-else {
-}
-return;
-}
-// end of static void play(String)
+    static void play(String str)
+    {
+        ifj16.print();
+        ifj16.print();
+        str = ifj16.readString();
+        str = ifj16.sort(str);
+        int cmp = ifj16.compare(str, "abcdefgh");
+        if (cmp != 0) {
+            while (cmp != 0) {
+                ifj16.print();
+                str = ifj16.readString();
+                str = ifj16.sort(str);
+                cmp = ifj16.compare(str, "abcdefgh");
+            }
+        }
+        else {
+        }
+        return;
+    }
+    // end of static void play(String)
 }
 // end of class Game
+
+class Game // try to redefine class
+{
+}

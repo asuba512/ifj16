@@ -2,6 +2,7 @@
 #define IAL_INC 1
 
 #define BST_ERR -1
+#define BST_NODE_ALREADY_EXISTS -2
 
 #include <stdbool.h>
 #include "infinite_string.h"
@@ -23,5 +24,6 @@ int bst_insert(bst_node_t *root_ptr, string_t key, void *data);
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data);
 void bst_delete(bst_node_t *root, string_t key);
 void _bst_del(bst_node_t *node);
+int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data);
 
 #endif

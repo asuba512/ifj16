@@ -1,4 +1,4 @@
-CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
+CFLAGS=-std=c11 -Wall -Wextra -pedantic -g
 CC=gcc
 
 BIN=ifj
@@ -7,7 +7,7 @@ RM=rm -f
 
 .phony: clean
 
-all: scanner.o main.o infinite_string.o ial.o parser.o
+all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
 test: scanner.o sc_test.o infinite_string.o ial.o parser.o

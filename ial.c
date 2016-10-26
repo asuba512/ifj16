@@ -109,6 +109,23 @@ int bst_insert(bst_node_t *root_ptr, string_t key, void *data) {
     }
 }
 
+// almost copy-paste of function above
+int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
+    if(*root_ptr == NULL) {
+        return _bst_create_node(root_ptr, key, data);
+    } else {
+        int cmp = str_compare((*root_ptr)->key, key);
+        if(cmp > 0) {
+            return bst_insert_or_err(&((*root_ptr)->left_p), key, data);
+        } else if(cmp < 0) {
+            return bst_insert_or_err(&((*root_ptr)->right_p), key, data);
+        } else {
+            // normally would update data, but why the hell would I want to cause a memory leak? why??
+            return BST_NODE_ALREADY_EXISTS;
+        }
+    }
+}
+
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     *node_ptr = malloc(sizeof(struct bst_node));
     if(*node_ptr == NULL) return BST_ERR;

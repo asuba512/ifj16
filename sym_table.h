@@ -15,9 +15,14 @@ typedef enum {
 	dt_double,
 	dt_int,
 	dt_String,
-	dt_boolean
+	dt_boolean,
+	t_void
 } datatype;
 
+typedef enum {
+	var,
+	func
+} var_func;
 
 /** 
  * @brief Global class table
@@ -34,6 +39,15 @@ typedef struct class {
 	bst_node_t root; ///< Root node
 } *class_t;
 
+/**
+ * @brief      Represents a local variable or argument in the table of local variables of function.
+ * 
+ * A new set of local variable instances is pushed to the stack whenever a function is called.
+ */
+typedef struct local_var {
+	datatype type; ///< return value for functions, datatype for variable
+	int index; ///< index in array of variable instances in function context, unique within one function
+} *local_var_t;
 
 /**
  * @brief Entry in table of members of class
@@ -47,9 +61,10 @@ typedef struct class_memb {
 		string_t s_val;
 		bool b_val;
 	}; ///< value of global variable, not used by functions
-	datatype type; ///< return value for functions, datatype for variable
+	var_func type; ///< indicates whether entry represents function or variable
+	datatype dtype; ///< return value for functions, datatype for variable
 	int arg_count; ///< argument count, not used by static variable
-	int var_count ///< local variable count, including arguments, not used by static variable
+	int var_count; ///< local variable count, including arguments, not used by static variable
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
@@ -74,18 +89,6 @@ typedef struct local_var_inst {
 	}; ///< value of local variable instance
 } local_var_inst_t;
 
-
-/**
- * @brief      Represents a local variable or argument in the table of local variables of function.
- * 
- * A new set of local variable instances is pushed to the stack whenever a function is called.
- */
-typedef struct local_var {
-	datatype type; ///< return value for functions, datatype for variable
-	int index; ///< index in array of variable instances in function context, unique within one function
-} *local_var_t;
-
-
 /**
  * @brief      Represents one "context" of funcion. Contains an array of local variable values.
  * 
@@ -96,15 +99,20 @@ typedef struct fn_context {
 	local_var_inst_t *vars; ///< array of variable instances in current context
 } *fn_context_t;
 
+// just to avoid one malloc
+struct class_table ctable;
 
 /**
- * Global variable - table of classes.
+ * Global variable - table of classes. Will point to variable above.
  */
-class_table_t class_table;
+class_table_t classes;
 
 /**
  * Global variable - top of function context stack.
  */
 fn_context_t context_stack_top;
+
+void init_class_table();
+int insert_class(string_t id, class_t *target);
 
 #endif

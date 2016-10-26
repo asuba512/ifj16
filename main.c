@@ -8,6 +8,7 @@
 #include "parser.h"
 #include "token.h"
 #include "infinite_string.h"
+#include "sym_table.h"
 #include "ial.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,11 +19,13 @@ extern FILE *fd;
 extern int lexerror;
 
 int main(int argc, char **argv){
+	(void)argc;
 	fd = fopen(argv[1],"r");
 	if(fd == NULL){
 		printf("error\n");
 		return 99;
 	}
+	init_class_table();
 
 	t = malloc(sizeof(struct token));
 
