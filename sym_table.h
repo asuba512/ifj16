@@ -45,7 +45,7 @@ typedef struct class {
  * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
 typedef struct local_var {
-	datatype type; ///< return value for functions, datatype for variable
+	datatype dtype; ///< return value for functions, datatype for variable
 	int index; ///< index in array of variable instances in function context, unique within one function
 } *local_var_t;
 
@@ -64,12 +64,12 @@ typedef struct class_memb {
 	var_func type; ///< indicates whether entry represents function or variable
 	datatype dtype; ///< return value for functions, datatype for variable
 	int arg_count; ///< argument count, not used by static variable
+	int _max_arg_count;
 	int var_count; ///< local variable count, including arguments, not used by static variable
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
 	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
-	bool defined; ///< indicates whether variable or function was defined
 	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
 } *class_memb_t;
 
@@ -114,5 +114,7 @@ fn_context_t context_stack_top;
 
 void init_class_table();
 int insert_class(string_t id, class_t *target);
+int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func type, datatype dt);
+int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id);
 
 #endif

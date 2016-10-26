@@ -7,6 +7,7 @@
 extern token_t t;
 extern FILE *fd;
 extern int lexerror;
+extern struct temp_data sem_tmp_data;
 
 int pass_number; // either first or second
 
@@ -16,7 +17,7 @@ int pass_number; // either first or second
 int c_list(){
 	if(next_token() && t->type == token_k_class){
 		if(next_token() && t->type == token_id){
-			new_class(str_init(t->attr.s->data));
+			sem_new_class(t->attr.s);
 			if(next_token() && t->type == token_lbrace){
 				if(!memb_list() && t->type == token_rbrace){
 					return c_list();
@@ -48,13 +49,16 @@ int c_memb(){
 
 int c_memb1(){
 	if(next_token() && is(token_k_void)){
+		sem_tmp_data.dt = t_void;
 		if(next_token() && is(token_id)){
+			sem_tmp_data.id = t->attr.s;
 			if(next_token())
 				return c_memb_func();
 		}
 	}
 	else if(!type()){
 		if(next_token() && is(token_id)){
+			sem_tmp_data.id = t->attr.s;
 			return c_memb2();
 		}
 	}
@@ -62,7 +66,17 @@ int c_memb1(){
 }
 
 int type(){
-	if(is(token_k_int) || is(token_k_double) || is(token_k_string) || is(token_k_boolean)){
+	if(is(token_k_int)){
+		sem_tmp_data.dt = dt_int;
+		return 0;
+	} else if (is(token_k_double)) {
+		sem_tmp_data.dt = dt_double;
+		return 0;
+	} else if(is(token_k_string)) {
+		sem_tmp_data.dt = dt_String;
+		return 0;
+	} else if(is(token_k_boolean)){
+		sem_tmp_data.dt = dt_boolean;
 		return 0;
 	}
 	return 2;
@@ -70,6 +84,7 @@ int type(){
 
 int c_memb_func(){
 	if(is(token_lbracket)){
+		sem_add_member_active_class(func);
 		if(!fn_def_plist() && is(token_rbracket)){
 			if(next_token() && is(token_lbrace)){
 				if(!fn_body() && is(token_rbrace)){
@@ -83,6 +98,7 @@ int c_memb_func(){
 
 int c_memb2(){
 	if(next_token() && is(token_assign)){
+		sem_add_member_active_class(var);
 		do{
 			if(!next_token())
 				return 1;
@@ -90,6 +106,7 @@ int c_memb2(){
 		return 0;
 	}
 	else if(is(token_semicolon)){
+		sem_add_member_active_class(var);
 		return 0;
 	}
 	else if(is(token_lbracket)){
@@ -124,6 +141,8 @@ int fn_def_plist1(){
 int par_def(){
 	if(!type()){
 		if(next_token() && is(token_id)){
+			sem_tmp_data.id = t->attr.s;
+			sem_add_arg_active_fn();
 			return 0;
 		}
 	}

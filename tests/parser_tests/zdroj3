@@ -1,22 +1,38 @@
 /* Program 3: Prace s retezci a vestavenymi funkcemi */
 class Main
 {
-static int x;
-static void run()
-{
-String str1;
-str1 = "Toto je nejaky text";
-String str2;
-str2 = str1 + ", ktery jeste trochu obohatime";
-Main.x = ifj16.find(str2, "text");
-ifj16.print();
-Game.play(str1);
-}
+    static int x;
+    static void run()
+    {
+        String str1;
+        str1 = "Toto je nejaky text";
+        String str2;
+        str2 = str1 + ", ktery jeste trochu obohatime";
+        Main.x = ifj16.find(str2, "text");
+        ifj16.print();
+        Game.play(str1);
+    }
+
+    static String test1(int a, boolean bool, int c, String str) {
+        
+    }
+
+    static boolean test2(int a, boolean bool, int c, String str) {
+        
+    }
 // end of static void run()
 }
 // end of class Main
 class Game
 {
+    static double test1(int a, boolean bool, int c, String str) {
+        
+    }
+
+    static boolean test2(int a, boolean bool, double dbl, int c, String str, boolean dbl) {
+        
+    }
+
     static void play(String str)
     {
         ifj16.print();
@@ -42,4 +58,5 @@ class Game
 
 class Game // try to redefine class
 {
+
 }

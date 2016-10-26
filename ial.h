@@ -1,8 +1,8 @@
 #ifndef IAL_INC
 #define IAL_INC 1
 
-#define BST_ERR -1
-#define BST_NODE_ALREADY_EXISTS -2
+#define BST_MEM_ERR 99 // internal error code
+#define BST_NODE_ALREADY_EXISTS 3 // trying to redefine something
 
 #include <stdbool.h>
 #include "infinite_string.h"

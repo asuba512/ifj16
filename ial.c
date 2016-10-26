@@ -128,7 +128,7 @@ int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
 
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     *node_ptr = malloc(sizeof(struct bst_node));
-    if(*node_ptr == NULL) return BST_ERR;
+    if(*node_ptr == NULL) return BST_MEM_ERR;
     (*node_ptr)->left_p = (*node_ptr)->right_p = NULL;
     (*node_ptr)->key = key;
     (*node_ptr)->data = data;
