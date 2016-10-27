@@ -32,7 +32,7 @@ int c_list(){
 
 int memb_list(){
 	if(next_token() && is(token_k_static)){
-		return c_memb() || memb_list();
+		return c_memb() ||  memb_list() ? 2 : 0;
 	}
 	else if(is(token_rbrace)){
 		return 0;
