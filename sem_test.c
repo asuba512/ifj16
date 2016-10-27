@@ -29,7 +29,7 @@ int main(int argc, char **argv){
 	t = malloc(sizeof(struct token));
 
 	int retval = c_list();
-	
+	(void)retval;	
 	show_hierarchy();
 	int c;
 	while((c = getc(fd)) != EOF){
