@@ -19,7 +19,7 @@ sem_test: infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o scann
 	make clean-obj
 
 clean: clean-obj
-	$(RM) $(BIN) sc_test
+	$(RM) $(BIN) sc_test sem_test
 
 clean-obj:
 	$(RM) *.o
