@@ -29,7 +29,7 @@ class Game
         
     }
 
-    static boolean test2(int a, boolean bool, double dbl, int c, String str, boolean dbl) {
+    static boolean test2(int a, boolean bool, double dbl, int c, String str, boolean dbl, int c, boolean dbool, double dgsbl, int cga, String sgtr, boolean dgabl) {
         
     }
 
