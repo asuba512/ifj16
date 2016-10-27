@@ -5,16 +5,13 @@
  */
 
 #include "scanner.h"
-#include "parser.h"
+//#include "parser.h"
 #include "token.h"
 #include "infinite_string.h"
-#include "ial.h"
+//#include "ial.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-extern string_t buff; // <- variable which has to be destroyed before exit, internal scanner variable
-extern token_t t;
-extern FILE *fd;
 
 int main(int argc, char **argv){
 
@@ -25,6 +22,8 @@ int main(int argc, char **argv){
 	/* token_string and token_identifier has attribute in form of infinite string .. */
 	/* .. this string can be (duplicated AND destroyed) OR (pointer can be copied and later destroyed) .. */
 	/* .. depends on semantic analysis implementation */
+	FILE *fd;
+	token_t t;
 
 	fd = fopen(argv[1],"r");
 	if(fd == NULL){
@@ -167,8 +166,7 @@ int main(int argc, char **argv){
 			}
 		}
 		else{
-			printf("lexical error\n"); //TODO
-			break;
+			printf("lexical error\n");
 		}
 	}
 

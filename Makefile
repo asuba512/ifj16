@@ -10,7 +10,7 @@ RM=rm -f
 all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
-test: scanner.o sc_test.o infinite_string.o ial.o parser.o
+test: scanner.o sc_test.o infinite_string.o
 	$(CC) $(CFLAGS) -o sc_test $^
 	make clean-obj
 
