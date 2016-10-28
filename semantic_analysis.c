@@ -47,3 +47,7 @@ int sem_add_arg_active_fn() {
     }
     return err;
 }
+
+int sem_prec_reduction() {
+    return 42;
+}

@@ -15,6 +15,7 @@ extern string_t buff; // <- variable which has to be destroyed before exit, inte
 extern token_t t;
 extern FILE *fd;
 extern int lexerror;
+extern int pass_number;
 
 // copypaste
 int main(int argc, char **argv){
@@ -27,7 +28,7 @@ int main(int argc, char **argv){
 	init_class_table();
 
 	t = malloc(sizeof(struct token));
-
+    pass_number = 1;
 	int retval = c_list();
 	(void)retval;	
 	show_hierarchy();

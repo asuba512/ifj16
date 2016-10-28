@@ -17,6 +17,7 @@ extern string_t buff; // <- variable which has to be destroyed before exit, inte
 extern token_t t;
 extern FILE *fd;
 extern int lexerror;
+extern int pass_number;
 
 int main(int argc, char **argv){
 	(void)argc;
@@ -29,6 +30,7 @@ int main(int argc, char **argv){
 
 	t = malloc(sizeof(struct token));
 
+	pass_number = 1;
 	int retval = c_list();
 	
 	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
