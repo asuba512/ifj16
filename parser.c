@@ -9,6 +9,14 @@ extern struct temp_data sem_tmp_data;
 #define next_token() do{ if(FIRST_PASS){ if((lexerror = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
 
+/*
+TODO:
+	- global variable for storing pointers into table of symbols in id()/id1() during SECOND PASS
+	- adding literal into TS as variables
+	- add inserting in expr queue in other places (maybe function, maybe inline implementation)
+	- debugging (a lot)
+*/
+
 int c_list(){
 	next_token();
 	if(is(token_k_class)){
@@ -198,27 +206,59 @@ int opt_assign(){
 	return 2;
 }
 
-/* HUGE MESS */
+/* NOT SO HUGE MESS */
 int assign(){
-	next_token();
-	if(!id()){ // this will fail if "= ID;", usually there cannot be ';' after id, because we have "=E;" not "=ID;" in grammar
-		// add token to queue
-		if(is(token_lbracket)){
-			//func call, can clear the queue
-			if(!fn_plist()) //&& is(token_rbracket)){
-				if(is(token_semicolon)) //next_token() && is(token_semicolon))
-					return 0;
-			}
-	}
-	else{ // this is mess... until we have precedence, it has to stay this way
-		if(is(token_semicolon))
-			return 0;
-//		if(is(token_semicolon)) // temporary fix for "=ID;"
+	if(FIRST_PASS){
 		do{
-			next_token(); //adding tokens to queue until semicolon
+			next_token();
 		} while(!is(token_semicolon));
-		// here you would call precedence analysis
 		return 0;
+	}
+	if(SECOND_PASS){
+		next_token();
+		if(!id() /* && isFun */){
+			if(is(token_lbracket)){
+				if(!fn_plist())
+					if(is(token_semicolon))
+						return 0;
+			}
+		}
+		else{
+			/*	token_t tmp;
+				tok_que_t expr_queue = tok_que_init();
+			    if(id_loc){
+					tmp.type = token_id;
+					tmp.attr.p = id_loc;
+					tok_enqueue(expr_queue, tmp);
+				}
+				else if(t.type > token_string)
+					return 2;				
+
+			do{
+				if(!is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){
+					tok_enqueue(expr_queue, t);
+					next_token();
+				}
+				if(is(token_id)){
+					if(!id()){
+						tmp.type = token_id;
+						tmp.attr.p = id_loc;
+						tok_enqueue(expr_queue, tmp);
+					}
+					else
+						return 2;
+				}
+				else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
+					// insert as variable into TS
+					tmp.type = token_id;
+					tmp.attr.p = loc; << location in TS
+					next_token();	
+				}
+			} while(t.type <= token_string);
+			*/
+			// here you would call precedence analysis
+			return 0;
+		}
 	}
 	return 2;
 }
@@ -275,7 +315,7 @@ int id1(){
 			return 0;	
 		}
 	}
-	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma)){
+	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma) || is(token_addition) || is(token_substraction) || is(token_multiplication) || is(token_division) || is(token_less) || is(token_more) || is(token_lesseq) || is(token_moreeq) || is(token_equal) || is(token_nequal) || is(token_and) || is(token_or) || is(token_not) || is(token_semicolon)){
 		return 0;
 	}
 	return 2;
