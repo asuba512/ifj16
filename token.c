@@ -3,7 +3,7 @@
 tok_que_t tok_que_init() {
     tok_que_t new_que = malloc(sizeof(struct tok_que));
     if(new_que == NULL)
-        return 99;
+        return NULL;
     new_que->head = NULL;
     new_que->tail = NULL;
     return new_que;
