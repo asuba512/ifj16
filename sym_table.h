@@ -24,6 +24,11 @@ typedef enum {
 	func
 } var_func;
 
+typedef enum {
+	local,
+	global
+} local_global;
+
 /** 
  * @brief Global class table
  */
@@ -46,6 +51,7 @@ typedef struct class {
  * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
 typedef struct local_var {
+	local_global l_g; ///< for interpreter
 	string_t id;
 	datatype dtype; ///< return value for functions, datatype for variable
 	int index; ///< index in array of variable instances in function context, unique within one function
@@ -57,6 +63,7 @@ typedef struct local_var {
  * Either static function or static variable.
  */
 typedef struct class_memb {
+	local_global l_g; ///< for interpreter
 	string_t id; // temp
 	union {
 		double d_val;

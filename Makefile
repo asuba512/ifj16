@@ -7,7 +7,7 @@ RM=rm -f
 
 .phony: clean
 
-all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o
+all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o token.o
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
 test: scanner.o sc_test.o infinite_string.o
