@@ -37,6 +37,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
 	m->id = id;
+	m->l_g = global;
 	int err;
 	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
@@ -72,6 +73,7 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	lv->dtype = dt;
 	lv->index = (fn->arg_count)++;
 	lv->id = id;
+	lv->l_g = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK

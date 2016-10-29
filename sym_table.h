@@ -51,9 +51,11 @@ typedef struct class {
  * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
 typedef struct local_var {
+	/** Common part with class_memb */
 	local_global l_g; ///< for interpreter
+	datatype dtype; ///< datatype of variable
 	string_t id;
-	datatype dtype; ///< return value for functions, datatype for variable
+	/** end of common part */
 	int index; ///< index in array of variable instances in function context, unique within one function
 } *local_var_t;
 
@@ -63,8 +65,11 @@ typedef struct local_var {
  * Either static function or static variable.
  */
 typedef struct class_memb {
+	/** Common part with local_var */
 	local_global l_g; ///< for interpreter
+	datatype dtype; ///< return value for functions, datatype for variable
 	string_t id; // temp
+	/** end of common part */
 	union {
 		double d_val;
 		int i_val;
@@ -72,7 +77,6 @@ typedef struct class_memb {
 		bool b_val;
 	}; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
-	datatype dtype; ///< return value for functions, datatype for variable
 	int arg_count; ///< argument count, not used by static variable
 	int _max_arg_count;
 	int var_count; ///< local variable count, including arguments, not used by static variable
