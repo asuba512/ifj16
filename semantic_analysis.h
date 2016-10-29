@@ -14,3 +14,4 @@ int sem_new_class(string_t id);
 int sem_add_member_active_class(var_func member_type);
 int sem_add_arg_active_fn();
 void sem_set_active_class(string_t id);
+void sem_set_active_fn(string_t id);
