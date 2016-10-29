@@ -22,16 +22,16 @@ typedef enum token_type {
 	token_and, // && 10
 	token_or, // || 11
 	token_not, // ! 12
-	token_double, // floating point number 13
-	token_int, // integer number 14
-	token_boolean, // boolean literal 15
-	token_string, // string 16
-	token_lbracket, // ( 17
-	token_rbracket, // ) 18
-	token_lbrace, // { 19
-	token_rbrace, // } 20
-	token_comma, // , 21
-	token_id, // identifier 22
+	token_id, // identifier 13
+	token_lbracket, // ( 14
+	token_rbracket, // ) 15
+	token_double, // floating point number 16
+	token_int, // integer number 17
+	token_boolean, // boolean literal 18
+	token_string, // string 19
+	token_lbrace, // { 20
+	token_rbrace, // } 21
+	token_comma, // , 22
 	token_assign, // = 23
 	token_semicolon, // ; 24
 	token_dot, // . 25
@@ -58,6 +58,7 @@ typedef union attr {
 	int i;
 	string_t s;
 	int b;
+	void *p; // pointer into table of symbols, precedence analysis
 } attr_t;
 
 typedef struct token {
