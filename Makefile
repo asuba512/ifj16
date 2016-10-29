@@ -18,6 +18,10 @@ sem_test: infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o scann
 	$(CC) $(CFLAGS) -o sem_test $^
 	make clean-obj
 
+stack_test: infinite_string.o stack.o stack_test.o
+	$(CC) $(CFLAGS) -o stack_test $^
+	make clean-obj
+
 clean: clean-obj
 	$(RM) $(BIN) sc_test sem_test
 

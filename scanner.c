@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-int get_token(FILE *fd, token_t t) {
+int get_token(FILE *fd, token_t *t) {
 	int c; // var for storing input characters
 	int o = 0; // for indexing c-string | storing octal number
 	char octal[4]; //			    <---'
@@ -27,7 +27,7 @@ int get_token(FILE *fd, token_t t) {
 		c = getc(fd);		
 		if(c == EOF){
 			t->type = token_eof;
-			return EOF;
+			return 0;
 		}
 
         switch(state){

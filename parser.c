@@ -4,34 +4,35 @@
 #include "semantic_analysis.h"
 #include "infinite_string.h"
 
-extern token_t t;
-extern FILE *fd;
-extern int lexerror;
 extern struct temp_data sem_tmp_data;
 
-#define next_token() !(lexerror = get_token(fd, t))
-#define is(x) (t->type == x)
+#define next_token() do{ if(FIRST_PASS){ if((lexerror = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
+#define is(x) (t.type == x)
 
 int c_list(){
-	if(next_token() && t->type == token_k_class){
-		if(next_token() && t->type == token_id){
-			sem_tmp_data.id = t->attr.s;
+	next_token();
+	if(is(token_k_class)){
+		next_token();
+		if(is(token_id)){
+			sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS)
-				sem_new_class(t->attr.s);
-			if(next_token() && t->type == token_lbrace){
-				if(!memb_list() && t->type == token_rbrace){
+				sem_new_class(t.attr.s);
+			next_token();
+			if(is(token_lbrace)){
+				if(!memb_list() && is(token_rbrace)){
 					return c_list();
 				}
 			}
 		}
 	}
-	else if(t->type == token_eof)
+	else if(is(token_eof))
 		return 0;
 	return 2;
 }
 
 int memb_list(){
-	if(next_token() && is(token_k_static)){
+	next_token();
+	if(is(token_k_static)){
 		return c_memb() ||  memb_list() ? 2 : 0;
 	}
 	else if(is(token_rbrace)){
@@ -42,24 +43,27 @@ int memb_list(){
 
 int c_memb(){
 	if(is(token_k_static)){
-			return c_memb1();
+		return c_memb1();
 	}
 	return 2;
 }
 
 int c_memb1(){
-	if(next_token() && is(token_k_void)){
+	next_token();
+	if(is(token_k_void)){
 		if(FIRST_PASS)
 			sem_tmp_data.dt = t_void;
-		if(next_token() && is(token_id)){
-			sem_tmp_data.id = t->attr.s;
-			if(next_token())
-				return c_memb_func();
+		next_token();
+		if(is(token_id)){
+			sem_tmp_data.id = t.attr.s;
+			next_token();
+			return c_memb_func();
 		}
 	}
 	else if(!type()){
-		if(next_token() && is(token_id)){
-			sem_tmp_data.id = t->attr.s;
+		next_token();
+		if(is(token_id)){
+			sem_tmp_data.id = t.attr.s;
 			return c_memb2();
 		}
 	}
@@ -92,7 +96,8 @@ int c_memb_func(){
 		if (FIRST_PASS)
 			sem_add_member_active_class(func);
 		if(!fn_def_plist() && is(token_rbracket)){
-			if(next_token() && is(token_lbrace)){
+			next_token();
+			if(is(token_lbrace)){
 				if(!fn_body() && is(token_rbrace)){
 					return 0;
 				}
@@ -103,12 +108,12 @@ int c_memb_func(){
 }
 
 int c_memb2(){
-	if(next_token() && is(token_assign)){
+	next_token();
+	if(is(token_assign)){
 		if (FIRST_PASS)
 			sem_add_member_active_class(var);
 		do{
-			if(!next_token())
-				return 1;
+			next_token();
 		} while(!is(token_semicolon));
 		return 0;
 	}
@@ -124,7 +129,8 @@ int c_memb2(){
 }
 
 int fn_def_plist(){
-	if(next_token() && is(token_rbracket))
+	next_token();
+	if(is(token_rbracket))
 		return 0;
 	else if(is(token_k_int) || is(token_k_double) || is(token_k_string) || is(token_k_boolean)){
 		if(!par_def()){
@@ -135,8 +141,10 @@ int fn_def_plist(){
 }
 
 int fn_def_plist1(){
-	if(next_token() && is(token_comma)){
-		if(next_token() && !par_def()){
+	next_token();
+	if(is(token_comma)){
+		next_token();
+		if(!par_def()){
 			return fn_def_plist1();
 		}
 	}
@@ -148,8 +156,9 @@ int fn_def_plist1(){
 
 int par_def(){
 	if(!type()){
-		if(next_token() && is(token_id)){
-			sem_tmp_data.id = t->attr.s;
+		next_token();
+		if(is(token_id)){
+			sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS)
 				sem_add_arg_active_fn();		
 			return 0;
@@ -159,13 +168,15 @@ int par_def(){
 }
 
 int fn_body(){
-	if(next_token() && (is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return))){
+	next_token();
+	if(is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
 		if(!stat()){
 			return fn_body();
 		}
 	}
 	else if(!type()){
-		if(next_token() && is(token_id)){
+		next_token();
+		if(is(token_id)){
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
 			}
@@ -177,7 +188,8 @@ int fn_body(){
 }
 
 int opt_assign(){
-	if(next_token() && is(token_assign)){
+	next_token();
+	if(is(token_assign)){
 		return assign();
 	}
 	else if(is(token_semicolon)){
@@ -188,7 +200,8 @@ int opt_assign(){
 
 /* HUGE MESS */
 int assign(){
-	if(next_token() && !id()){ // this will fail if "= ID;", usually there cannot be ';' after id, because we have "=E;" not "=ID;" in grammar
+	next_token();
+	if(!id()){ // this will fail if "= ID;", usually there cannot be ';' after id, because we have "=E;" not "=ID;" in grammar
 		// add token to queue
 		if(is(token_lbracket)){
 			//func call, can clear the queue
@@ -202,8 +215,7 @@ int assign(){
 			return 0;
 //		if(is(token_semicolon)) // temporary fix for "=ID;"
 		do{
-			if(!next_token()) //adding tokens to queue until semicolon
-				return 1;
+			next_token(); //adding tokens to queue until semicolon
 		} while(!is(token_semicolon));
 		// here you would call precedence analysis
 		return 0;
@@ -212,9 +224,10 @@ int assign(){
 }
 
 int fn_plist(){
-	if(next_token() && is(token_rbracket)){
-		if(next_token())
-			return 0;
+	next_token();
+	if(is(token_rbracket)){
+		next_token();
+		return 0;
 	}
 	else if(!val_id()){
 		return fn_plist1();
@@ -224,11 +237,12 @@ int fn_plist(){
 
 int fn_plist1(){
 	if(is(token_rbracket)){
-		if(next_token())
-			return 0;
+		next_token();
+		return 0;
 	}
 	else if(is(token_comma)){
-		if(next_token() && !val_id())
+		next_token();
+		if(!val_id())
 			return fn_plist1();
 	}
 	return 2;
@@ -239,8 +253,8 @@ int val_id(){
 		return 0;
 	}
 	if(is(token_int) || is(token_double) || is(token_string) || is(token_boolean)){
-		if(next_token())
-			return 0;
+		next_token();
+		return 0;
 	}
 	return 2;
 }
@@ -253,10 +267,12 @@ int id(){
 }
 
 int id1(){
-	if(next_token() && is(token_dot)){
-		if(next_token() && is(token_id)){
-			if(next_token())
-				return 0;	
+	next_token();
+	if(is(token_dot)){
+		next_token();
+		if(is(token_id)){
+			next_token();
+			return 0;	
 		}
 	}
 	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma)){
@@ -277,18 +293,21 @@ int stat(){
 		return stat_com();
 	}
 	else if(is(token_k_if)){
-		if(next_token() && is(token_lbracket)){
+		next_token();
+		if(is(token_lbracket)){
 			lb++;
 			do{
-				if(!next_token())
-					return 1;
+				next_token();
 				if(is(token_lbracket)) lb++;
 				if(is(token_rbracket)) rb++;
 			} while(lb != rb || !is(token_rbracket));
 			lb = rb = 0;
-			if(next_token() && !stat_com()){
-				if(next_token() && is(token_k_else)){
-					if(next_token() && !stat_com()){
+			next_token();
+			if(!stat_com()){
+				next_token();
+				if(is(token_k_else)){
+					next_token();
+					if(!stat_com()){
 						return 0;
 					}
 				}		
@@ -296,16 +315,17 @@ int stat(){
 		}
 	}
 	else if(is(token_k_while)){
-		if(next_token() && is(token_lbracket)){
+		next_token();
+		if(is(token_lbracket)){
 			lb++;
 			do{
-				if(!next_token())
-					return 1;
+				next_token();
 				if(is(token_lbracket)) lb++;
 				if(is(token_rbracket)) rb++;
 			} while(lb != rb || !is(token_rbracket));
 			lb = rb = 0;
-			if(next_token() && !stat_com()){
+			next_token();
+			if(!stat_com()){
 				return 0;
 			}
 		}
@@ -328,7 +348,8 @@ int stat_com(){
 }
 
 int stat_list(){
-	if(next_token() && (is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return))){
+	next_token();
+	if(is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
 		if(!stat()){
 			return stat_list();
 		}
@@ -351,8 +372,7 @@ int as_ca(){
 
 int ret_val(){
 	do{
-		if(!next_token())
-			return 1;
+		next_token();
 	} while(!is(token_semicolon));
 	return 0;
 }
