@@ -37,7 +37,7 @@ void tok_que_destroy(tok_que_t queue) {
     for(tok_que_node_t item = prev->next; item != NULL; item = item->next) {
 		free(prev);
 		prev = item;
-	}
-	free(prev);
+    }
+    free(prev);
     queue->head = queue->tail = NULL;
 }
