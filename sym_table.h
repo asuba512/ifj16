@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "infinite_string.h"
 #include "ial.h"
+#include "token.h"
 
 typedef enum {
 	dt_double,
@@ -26,8 +27,9 @@ typedef enum {
 
 typedef enum {
 	local,
-	global
-} local_global;
+	global,
+	literal
+} scope;
 
 /** 
  * @brief Global class table
@@ -36,6 +38,21 @@ typedef struct class_table {
 	bst_node_t root; ///< Root node
 } *class_table_t;
 
+typedef struct literal {
+	scope sc; ///< for interpreter
+	datatype dtype; ///< datatype of literal
+	union {
+		double d_val;
+		int i_val;
+		string_t s_val;
+		bool b_val;
+	}; ///< value of literal
+} *literal_t;
+
+struct literal_arr {
+	int length, max_length;
+	literal_t arr;
+} literals;
 
 /** 
  * @brief Pointer to class entry in global class table
@@ -52,7 +69,7 @@ typedef struct class {
  */
 typedef struct local_var {
 	/** Common part with class_memb */
-	local_global l_g; ///< for interpreter
+	scope sc; ///< for interpreter
 	datatype dtype; ///< datatype of variable
 	string_t id;
 	/** end of common part */
@@ -66,7 +83,7 @@ typedef struct local_var {
  */
 typedef struct class_memb {
 	/** Common part with local_var */
-	local_global l_g; ///< for interpreter
+	scope sc; ///< for interpreter
 	datatype dtype; ///< return value for functions, datatype for variable
 	string_t id; // temp
 	/** end of common part */
@@ -132,5 +149,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id);
 class_t st_getclass(string_t id);
 class_memb_t st_getmemb(class_t c, string_t id);
+literal_t add_literal(struct token t);
+local_var_t st_get_loc_var(class_memb_t m, string_t id);
 
 #endif

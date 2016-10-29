@@ -59,3 +59,40 @@ void sem_set_active_fn(string_t id) {
 int sem_prec_reduction() {
     return 42;
 }
+
+static void _print_decoded_id(void *symbol) {
+    if(symbol == NULL) {
+        printf("Nothing decoded.. \n");
+        return;
+    }
+    local_var_t elem = (local_var_t) symbol;
+    if(elem->sc != literal) {
+        printf("Decoded id (%d): %s\n", elem->sc, elem->id->data);
+    }
+}
+
+static void _print_demand() {
+    if(sem_id_decoded.class_id != NULL) {
+        printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+    } else  {
+        printf("Demanded: %s\n", sem_id_decoded.memb_id->data);
+    }
+}
+
+void sem_search() {
+    _print_demand();
+    void *symbol = NULL;
+    if (sem_id_decoded.class_id == NULL) {
+        symbol = st_get_loc_var(active_function, sem_id_decoded.memb_id);
+        if(!symbol)
+            symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+    } else {
+        class_t class = st_getclass(sem_id_decoded.class_id);
+        if (class) {
+            symbol = st_getmemb(class, sem_id_decoded.memb_id);
+        }
+    }
+    sem_id_decoded.ptr = symbol;
+    _print_decoded_id(symbol);
+}
+

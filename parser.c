@@ -5,6 +5,7 @@
 #include "infinite_string.h"
 
 extern struct temp_data sem_tmp_data;
+extern struct fq sem_id_decoded;
 
 #define next_token() do{ if(FIRST_PASS){ if((lexerror = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
@@ -18,13 +19,16 @@ TODO:
 */
 
 int c_list(){
+	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
 	next_token();
 	if(is(token_k_class)){
 		next_token();
 		if(is(token_id)){
 			sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS)
-				sem_new_class(t.attr.s);
+				sem_new_class(t.attr.s); // first pass adds this class into symbols table
+			else if(SECOND_PASS)
+				sem_set_active_class(t.attr.s); // second pass marks this class as active scope for searching members
 			next_token();
 			if(is(token_lbrace)){
 				if(!memb_list() && is(token_rbrace)){
@@ -102,7 +106,9 @@ int type(){
 int c_memb_func(){
 	if(is(token_lbracket)){
 		if (FIRST_PASS)
-			sem_add_member_active_class(func);
+			sem_add_member_active_class(func); // first pass adds function to symbol table
+		else if (SECOND_PASS)
+			sem_set_active_fn(t.attr.s); // second pass marks this function as active local scope
 		if(!fn_def_plist() && is(token_rbracket)){
 			next_token();
 			if(is(token_lbrace)){
@@ -307,17 +313,30 @@ int id(){
 }
 
 int id1(){
+	if(SECOND_PASS)
+		sem_id_decoded.class_id = t.attr.s;
 	next_token();
 	if(is(token_dot)){
 		next_token();
 		if(is(token_id)){
+			if(SECOND_PASS) {
+				sem_id_decoded.memb_id = t.attr.s;
+				sem_search();
+			}
 			next_token();
 			return 0;	
 		}
 	}
 	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma) || is(token_addition) || is(token_substraction) || is(token_multiplication) || is(token_division) || is(token_less) || is(token_more) || is(token_lesseq) || is(token_moreeq) || is(token_equal) || is(token_nequal) || is(token_and) || is(token_or) || is(token_not) || is(token_semicolon)){
+		if(SECOND_PASS) {
+			sem_id_decoded.memb_id = sem_id_decoded.class_id;
+			sem_id_decoded.class_id = NULL;
+			sem_search();
+		}		
 		return 0;
 	}
+	if(SECOND_PASS)
+		sem_id_decoded.ptr = NULL;
 	return 2;
 }
 

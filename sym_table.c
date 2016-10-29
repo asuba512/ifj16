@@ -7,6 +7,8 @@
 
 void init_class_table() {
 	classes = &ctable; // yep that's all
+	literals.length = 0; // initializing literal array as well
+	literals.max_length = 0;
 }
 
 int insert_class(string_t id, class_t *target) {
@@ -37,7 +39,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
 	m->id = id;
-	m->l_g = global;
+	m->sc = global;
 	int err;
 	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
@@ -73,7 +75,7 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	lv->dtype = dt;
 	lv->index = (fn->arg_count)++;
 	lv->id = id;
-	lv->l_g = local;
+	lv->sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
@@ -84,10 +86,56 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 }
 
 class_t st_getclass(string_t id) {
-	return (class_t)(bst_search_get(classes->root, id)->data);
+	bst_node_t result = bst_search_get(classes->root, id);
+	return result ? (class_t)(result->data) : NULL;
 }
 
 
 class_memb_t st_getmemb(class_t c, string_t id) {
-	return (class_memb_t)(bst_search_get(c->root, id)->data);
+	bst_node_t result = bst_search_get(c->root, id);
+	return result ? (class_memb_t)(result->data) : NULL;
+}
+
+local_var_t st_get_loc_var(class_memb_t m, string_t id) {
+	bst_node_t result = bst_search_get(m->local_sym_table_root, id);
+	return result ? (local_var_t)(result->data) : NULL;
+}
+
+static int _add_literal_space() {
+	literal_t new_space = realloc(literals.arr, (literals.length + 100) * sizeof(struct literal));
+	if(new_space == NULL)
+		return 99;
+	literals.arr = new_space;
+	literals.max_length += 100;
+	return 0;
+}
+
+literal_t add_literal(struct token t) {
+	if(literals.length == literals.max_length) 
+		if(_add_literal_space() != 0) {
+			return NULL;
+		}
+	switch(t.type) {
+		case token_double:
+			literals.arr[literals.length].d_val = t.attr.d;
+			literals.arr[literals.length].dtype = dt_double;
+			break;
+		case token_int:
+			literals.arr[literals.length].i_val = t.attr.i;
+			literals.arr[literals.length].dtype = dt_int;
+			break;
+		case token_string:
+			literals.arr[literals.length].s_val = t.attr.s;
+			literals.arr[literals.length].dtype = dt_String;
+			break;
+		case token_boolean:
+			literals.arr[literals.length].b_val = t.attr.b;
+			literals.arr[literals.length].dtype = dt_boolean;
+			break;
+		default:
+			break;
+	}
+	literals.arr[literals.length].sc = literal; // just interpret things
+	literals.length++;
+	return &(literals.arr[literals.length-1]);
 }
