@@ -48,6 +48,14 @@ int sem_add_arg_active_fn() {
     return err;
 }
 
+void sem_set_active_class(string_t id) {
+    active_class = st_getclass(id);
+}
+
+void sem_set_active_fn(string_t id) {
+    active_function = st_getmemb(active_class, id);
+}
+
 int sem_prec_reduction() {
     return 42;
 }

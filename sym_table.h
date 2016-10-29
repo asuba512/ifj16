@@ -130,5 +130,7 @@ void init_class_table();
 int insert_class(string_t id, class_t *target);
 int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func type, datatype dt);
 int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id);
+class_t st_getclass(string_t id);
+class_memb_t st_getmemb(class_t c, string_t id);
 
 #endif
