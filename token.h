@@ -63,7 +63,7 @@ typedef union attr {
 typedef struct token {
 	token_type type;
 	attr_t attr;
-} *token_t;
+} token_t;
 
 
 typedef struct tok_que_node {

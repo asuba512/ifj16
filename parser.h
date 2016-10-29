@@ -8,6 +8,7 @@ token_t t;
 FILE *fd;
 int lexerror;
 int pass_number; // either first or second
+tok_que_t tok_q;
 
 int c_list();
 int c_memb(); 

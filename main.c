@@ -18,6 +18,7 @@ extern token_t t;
 extern FILE *fd;
 extern int lexerror;
 extern int pass_number;
+extern tok_que_t tok_q;
 
 int main(int argc, char **argv){
 	(void)argc;
@@ -27,14 +28,15 @@ int main(int argc, char **argv){
 		return 99;
 	}
 	init_class_table();
-
-	t = malloc(sizeof(struct token));
-
+	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	
 	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
-	printf("current token: %d\n", t->type);
+	printf("current token: %d\n", t.type);
+	pass_number = 2;
+	retval = c_list();
+	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
+	printf("current token: %d\n", t.type);
 	int c;
 	while((c = getc(fd)) != EOF){
 		putchar(c);
@@ -42,7 +44,6 @@ int main(int argc, char **argv){
 	
 	str_destroy(buff);
 
-	free(t);
 	fclose(fd);
     return 0;
 }
