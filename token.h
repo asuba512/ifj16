@@ -8,7 +8,7 @@
 
 #include "infinite_string.h"
 
-typedef enum token_type{
+typedef enum token_type {
 	token_multiplication, // * 0
 	token_division, // / 1
 	token_addition, // + 2
@@ -53,16 +53,32 @@ typedef enum token_type{
 	token_eof
 } token_type;
 
-typedef union attr{
+typedef union attr {
 	double d;
 	int i;
 	string_t s;
 	int b;
 } attr_t;
 
-typedef struct token{
+typedef struct token {
 	token_type type;
 	attr_t attr;
 } *token_t;
+
+
+typedef struct tok_que_node {
+	struct token tok;
+	struct tok_que_node *next;
+} *tok_que_node_t;
+
+typedef struct tok_que {
+	tok_que_node_t head;
+	tok_que_node_t tail;
+} *tok_que_t;
+
+tok_que_t tok_que_init();
+int tok_enqueue(tok_que_t queue, struct token t);
+void tok_remove_head(tok_que_t queue);
+void tok_que_destroy(tok_que_t queue);
 
 #endif
