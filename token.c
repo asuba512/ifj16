@@ -1,5 +1,6 @@
 #include "token.h"
 #include <stdlib.h>
+
 tok_que_t tok_que_init() {
     tok_que_t new_que = malloc(sizeof(struct tok_que));
     if(new_que == NULL)
