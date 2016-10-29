@@ -82,3 +82,12 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	free(lv);
 	return err;
 }
+
+class_t st_getclass(string_t id) {
+	return (class_t)(bst_search_get(classes->root, id)->data);
+}
+
+
+class_memb_t st_getmemb(class_t c, string_t id) {
+	return (class_memb_t)(bst_search_get(c->root, id)->data);
+}
