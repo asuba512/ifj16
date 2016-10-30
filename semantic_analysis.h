@@ -24,3 +24,4 @@ void sem_set_active_class(string_t id);
 void sem_set_active_fn(string_t id);
 void sem_search();
 void setIsFunFlag(void *symbol);
+int sem_new_loc_var(datatype dt, string_t id);

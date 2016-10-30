@@ -85,6 +85,23 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	return err;
 }
 
+int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
+	local_var_t lv;
+	if ((lv = malloc(sizeof(struct local_var))) == NULL)
+		return 99;
+	lv->dtype = dt;
+	lv->index = (fn->var_count)++;
+	lv->id = id;
+	lv->sc = local;
+	int err;
+	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
+		return 0; // OK
+	}
+	if(err == 3) (fn->arg_count)--; // doesn't matter anyways, if there's an error
+	free(lv);
+	return err;
+}
+
 class_t st_getclass(string_t id) {
 	bst_node_t result = bst_search_get(classes->root, id);
 	return result ? (class_t)(result->data) : NULL;

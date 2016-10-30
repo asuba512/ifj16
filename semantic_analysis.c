@@ -114,3 +114,16 @@ void setIsFunFlag(void *symbol) {
             sem_id_decoded.isFun = false;
     }
 }
+
+int sem_new_loc_var(datatype dt, string_t id) {
+    int err = st_add_fn_locvar(active_function, dt, id);
+    if (err == 0) {
+        printf("Function local var: %s added, %d.\n", id->data, dt);
+        return 0;
+    } else if(err == 3) {
+        fprintf(stderr, "ERR: Function local variable with same identifier already exists.\n");
+    } else if(err == 99) {
+        fprintf(stderr, "ERR: Internal error.\n");
+    }
+    return err;
+}

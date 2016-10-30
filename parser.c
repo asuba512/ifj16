@@ -84,20 +84,16 @@ int c_memb1(){
 
 int type(){
 	if(is(token_k_int)){
-		if (FIRST_PASS)
-			sem_tmp_data.dt = dt_int;
+		sem_tmp_data.dt = dt_int;
 		return 0;
 	} else if (is(token_k_double)) {
-		if (FIRST_PASS)
-			sem_tmp_data.dt = dt_double;
+		sem_tmp_data.dt = dt_double;
 		return 0;
 	} else if(is(token_k_string)) {
-		if (FIRST_PASS)
-			sem_tmp_data.dt = dt_String;
+		sem_tmp_data.dt = dt_String;
 		return 0;
 	} else if(is(token_k_boolean)){
-		if (FIRST_PASS)
-			sem_tmp_data.dt = dt_boolean;
+		sem_tmp_data.dt = dt_boolean;
 		return 0;
 	}
 	return 2;
@@ -191,6 +187,8 @@ int fn_body(){
 	else if(!type()){
 		next_token();
 		if(is(token_id)){
+			if(SECOND_PASS)
+				sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
 			}
