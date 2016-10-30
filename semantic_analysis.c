@@ -98,6 +98,19 @@ void sem_search() {
         }
     }
     sem_id_decoded.ptr = symbol;
+    setIsFunFlag(symbol);
     _print_decoded_id(symbol);
 }
 
+void setIsFunFlag(void *symbol) {
+    if(symbol != NULL) {
+        class_memb_t memb = (class_memb_t)symbol;
+        if(memb->sc == global)
+            if(memb->type == func)
+                sem_id_decoded.isFun = true;
+            else
+                sem_id_decoded.isFun = false;
+        else
+            sem_id_decoded.isFun = false;
+    }
+}

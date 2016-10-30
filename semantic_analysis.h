@@ -12,6 +12,7 @@ struct temp_data {
 struct fq {
     string_t class_id;
     string_t memb_id;
+    bool isFun;
     void* ptr;
 } sem_id_decoded;
 
@@ -22,3 +23,4 @@ int sem_add_arg_active_fn();
 void sem_set_active_class(string_t id);
 void sem_set_active_fn(string_t id);
 void sem_search();
+void setIsFunFlag(void *symbol);
