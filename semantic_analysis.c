@@ -3,6 +3,8 @@
 #include "infinite_string.h"
 #include <stdio.h>
 
+bool print_bullshit;
+
 int sem_new_class(string_t id) {
     class_t c;
     int err = insert_class(id, &c);
@@ -61,17 +63,19 @@ int sem_prec_reduction() {
 }
 
 static void _print_decoded_id(void *symbol) {
+    if(!print_bullshit) return;
     if(symbol == NULL) {
         printf("Nothing decoded.. \n");
         return;
     }
     local_var_t elem = (local_var_t) symbol;
     if(elem->sc != literal) {
-        printf("Decoded id (%d): %s\n", elem->sc, elem->id->data);
+        printf("Decoded id (%d): %s (%p)\n", elem->sc, elem->id->data, symbol);
     }
 }
 
 static void _print_demand() {
+    if(!print_bullshit) return;
     if(sem_id_decoded.class_id != NULL) {
         printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
     } else  {
@@ -80,6 +84,7 @@ static void _print_demand() {
 }
 
 void sem_search() {
+    print_bullshit = false;
     _print_demand();
     void *symbol = NULL;
     if (sem_id_decoded.class_id == NULL) {

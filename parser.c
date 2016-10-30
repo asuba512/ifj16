@@ -214,13 +214,13 @@ int opt_assign(){
 
 /* NOT SO HUGE MESS */
 int assign(){
-	if(FIRST_PASS){
+	if(42){ // for test purposes, change to FIRST_PASS
 		do{
 			next_token();
 		} while(!is(token_semicolon));
 		return 0;
 	}
-	if(SECOND_PASS){
+	if(0){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() /* && isFun */){
 			if(is(token_lbracket)){
