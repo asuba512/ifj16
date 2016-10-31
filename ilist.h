@@ -36,6 +36,5 @@ typedef enum instruction_type{
 	if_jump,
 	//for functions
 	push,
-	pop,
-	f_return //retrn from function
+	f_return //return from function
 }instruction_type;
