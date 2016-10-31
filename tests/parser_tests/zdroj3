@@ -2,6 +2,8 @@
 class Main
 {
     static int x;
+
+    
     static void run()
     {
         String str1;
@@ -12,6 +14,7 @@ class Main
         ifj16.print();
         Game.play(str1);
     }
+
 
     static String test1(int a, boolean bool, int c, String str) {
         

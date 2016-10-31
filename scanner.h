@@ -38,6 +38,6 @@ typedef enum {
 	_state_string_octalxx
 } t_state;
 
-int get_token(FILE *, token_t t);
+int get_token(FILE *, token_t *t);
 
 #endif

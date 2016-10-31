@@ -8,7 +8,7 @@
 
 #include "infinite_string.h"
 
-typedef enum token_type{
+typedef enum token_type {
 	token_multiplication, // * 0
 	token_division, // / 1
 	token_addition, // + 2
@@ -22,16 +22,16 @@ typedef enum token_type{
 	token_and, // && 10
 	token_or, // || 11
 	token_not, // ! 12
-	token_double, // floating point number 13
-	token_int, // integer number 14
-	token_boolean, // boolean literal 15
-	token_string, // string 16
-	token_lbracket, // ( 17
-	token_rbracket, // ) 18
-	token_lbrace, // { 19
-	token_rbrace, // } 20
-	token_comma, // , 21
-	token_id, // identifier 22
+	token_id, // identifier 13
+	token_lbracket, // ( 14
+	token_rbracket, // ) 15
+	token_double, // floating point number 16
+	token_int, // integer number 17
+	token_boolean, // boolean literal 18
+	token_string, // string 19
+	token_lbrace, // { 20
+	token_rbrace, // } 21
+	token_comma, // , 22
 	token_assign, // = 23
 	token_semicolon, // ; 24
 	token_dot, // . 25
@@ -53,16 +53,33 @@ typedef enum token_type{
 	token_eof
 } token_type;
 
-typedef union attr{
+typedef union attr {
 	double d;
 	int i;
 	string_t s;
 	int b;
+	void *p; // pointer into table of symbols, precedence analysis
 } attr_t;
 
-typedef struct token{
+typedef struct token {
 	token_type type;
 	attr_t attr;
-} *token_t;
+} token_t;
+
+
+typedef struct tok_que_node {
+	struct token tok;
+	struct tok_que_node *next;
+} *tok_que_node_t;
+
+typedef struct tok_que {
+	tok_que_node_t head;
+	tok_que_node_t tail;
+} *tok_que_t;
+
+tok_que_t tok_que_init();
+int tok_enqueue(tok_que_t queue, struct token t);
+void tok_remove_head(tok_que_t queue);
+void tok_que_destroy(tok_que_t queue);
 
 #endif

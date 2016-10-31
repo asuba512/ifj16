@@ -3,6 +3,8 @@
 #include "infinite_string.h"
 #include <stdio.h>
 
+bool print_bullshit;
+
 int sem_new_class(string_t id) {
     class_t c;
     int err = insert_class(id, &c);
@@ -48,6 +50,80 @@ int sem_add_arg_active_fn() {
     return err;
 }
 
+void sem_set_active_class(string_t id) {
+    active_class = st_getclass(id);
+}
+
+void sem_set_active_fn(string_t id) {
+    active_function = st_getmemb(active_class, id);
+}
+
 int sem_prec_reduction() {
     return 42;
+}
+
+static void _print_decoded_id(void *symbol) {
+    if(!print_bullshit) return;
+    if(symbol == NULL) {
+        printf("Nothing decoded.. \n");
+        return;
+    }
+    local_var_t elem = (local_var_t) symbol;
+    if(elem->sc != literal) {
+        printf("Decoded id (%d): %s (%p)\n", elem->sc, elem->id->data, symbol);
+    }
+}
+
+static void _print_demand() {
+    if(!print_bullshit) return;
+    if(sem_id_decoded.class_id != NULL) {
+        printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+    } else  {
+        printf("Demanded: %s\n", sem_id_decoded.memb_id->data);
+    }
+}
+
+void sem_search() {
+    print_bullshit = false;
+    _print_demand();
+    void *symbol = NULL;
+    if (sem_id_decoded.class_id == NULL) {
+        symbol = st_get_loc_var(active_function, sem_id_decoded.memb_id);
+        if(!symbol)
+            symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+    } else {
+        class_t class = st_getclass(sem_id_decoded.class_id);
+        if (class) {
+            symbol = st_getmemb(class, sem_id_decoded.memb_id);
+        }
+    }
+    sem_id_decoded.ptr = symbol;
+    setIsFunFlag(symbol);
+    _print_decoded_id(symbol);
+}
+
+void setIsFunFlag(void *symbol) {
+    if(symbol != NULL) {
+        class_memb_t memb = (class_memb_t)symbol;
+        if(memb->sc == global)
+            if(memb->type == func)
+                sem_id_decoded.isFun = true;
+            else
+                sem_id_decoded.isFun = false;
+        else
+            sem_id_decoded.isFun = false;
+    }
+}
+
+int sem_new_loc_var(datatype dt, string_t id) {
+    int err = st_add_fn_locvar(active_function, dt, id);
+    if (err == 0) {
+        printf("Function local var: %s added, %d.\n", id->data, dt);
+        return 0;
+    } else if(err == 3) {
+        fprintf(stderr, "ERR: Function local variable with same identifier already exists.\n");
+    } else if(err == 99) {
+        fprintf(stderr, "ERR: Internal error.\n");
+    }
+    return err;
 }

@@ -9,7 +9,19 @@ struct temp_data {
     datatype dt;
 } sem_tmp_data;
 
+struct fq {
+    string_t class_id;
+    string_t memb_id;
+    bool isFun;
+    void* ptr;
+} sem_id_decoded;
+
 
 int sem_new_class(string_t id);
 int sem_add_member_active_class(var_func member_type);
 int sem_add_arg_active_fn();
+void sem_set_active_class(string_t id);
+void sem_set_active_fn(string_t id);
+void sem_search();
+void setIsFunFlag(void *symbol);
+int sem_new_loc_var(datatype dt, string_t id);
