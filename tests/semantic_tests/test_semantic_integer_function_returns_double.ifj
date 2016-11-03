@@ -1,0 +1,13 @@
+class Main
+{
+	static void run()
+	{
+		double d;
+		d=function();
+	}
+
+	static int function()
+	{
+		return 5/3;
+	}
+}

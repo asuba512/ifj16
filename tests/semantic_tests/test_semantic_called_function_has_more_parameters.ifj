@@ -1,0 +1,13 @@
+class Main
+{
+	static void run()
+	{
+		function(5, 5);
+	}
+
+	static void function(int i)
+	{
+		return;
+	}
+
+}
