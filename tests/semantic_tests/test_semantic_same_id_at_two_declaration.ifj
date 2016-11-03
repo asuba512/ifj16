@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		int asd=5;
+		double asd="Double is string!";
+	}
+}
