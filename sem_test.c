@@ -29,16 +29,16 @@ int main(int argc, char **argv){
     tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
-	printf("current token: %d\n", t.type);
+	//printf("retval: %d\n", lexerror == 1 ? 1 : retval);
+	//printf("current token: %d\n", t.type);
 	pass_number = 2;
 	retval = c_list();
-	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
-	printf("current token: %d\n", t.type);
+	//printf("retval: %d\n", lexerror == 1 ? 1 : retval);
+	//printf("current token: %d\n", t.type);
 	show_hierarchy();
 	int c;
 	while((c = getc(fd)) != EOF){
-		putchar(c);
+		//putchar(c);
 	}
 	
 	str_destroy(buff);
