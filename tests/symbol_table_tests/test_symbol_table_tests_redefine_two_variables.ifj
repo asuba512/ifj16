@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		int a = 1;
+		double c = 1.1;
+
+		int a = 3;
+		double c = 3.3;
+}

@@ -1,0 +1,27 @@
+class Main
+{
+	static void run()
+	{		
+		function_one();
+		function_two();
+	}
+
+	static void function_one()
+	{
+		int a = 1;
+		double b = 1.1;
+
+		int a = 2;
+		double b = 2.2;
+	}
+
+	static void function_two()
+	{
+		int a = 1;
+		double b = 1.1;
+
+		int a = 3;
+		double b = 3.3;
+	}
+
+}
