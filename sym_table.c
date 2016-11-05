@@ -80,7 +80,10 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
-	if(err == 3) (fn->arg_count)--; // doesn't matter anyways, if there's an error
+	if(err == 3) {
+		(fn->arg_count)--; // doesn't matter anyways, if there's an error
+		(fn->var_count)--;
+	}
 	free(lv);
 	return err;
 }
@@ -97,7 +100,7 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
-	if(err == 3) (fn->arg_count)--; // doesn't matter anyways, if there's an error
+	if(err == 3) (fn->var_count)--; // doesn't matter anyways, if there's an error
 	free(lv);
 	return err;
 }
