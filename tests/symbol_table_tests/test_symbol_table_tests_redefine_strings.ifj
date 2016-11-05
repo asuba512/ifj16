@@ -2,38 +2,9 @@ class Main
 {
 	static void run()
 	{
-		int a = 1;
-		int b = 2;
-		double c = 3.3;
-		double d = 4.4;
-		
-		function_one();
-		function_two();
-		function_three();
+		String str;
+		str = "This is string!";
+		String str;
+		str = "This is second string!";
 	}
-
-	static void function_one()
-	{
-		int a = 1;
-		int b = 2;
-		double c = 3.3;
-		double d = 4.4;
-	}
-
-	static void function_two()
-	{
-		int a = 1;
-		int b = 2;
-		double c = 3.3;
-		double d = 4.4;
-	}
-
-	static void function_three()
-	{
-		int a = 1;
-		int b = 2;
-		double c = 3.3;
-		double d = 4.4;
-	}
-
 }

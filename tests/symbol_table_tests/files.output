@@ -1,4 +1,0 @@
-test_symbol_table_tests_OK_01.ifj , =OK= ,
-test_symbol_table_tests_redefine_two_functions.ifj , =ERROR= , 2(variable) , 1(class_member) ,
-test_symbol_table_tests_redefine_two_variables.ifj , =ERROR= , 2(variable) ,
-test_symbol_table_tests_redefine_two_variables_in_function.ifj , =ERROR= , 4(variable) ,
