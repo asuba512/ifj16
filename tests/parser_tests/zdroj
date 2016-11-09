@@ -1,6 +1,7 @@
 class Main{
 	static void run(){
 		int p;
+		{ ;; }
 		double q = 32 + 55;
 		boolean z = foo();
 		String u = foo2(x, z);

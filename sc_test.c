@@ -8,10 +8,14 @@
 //#include "parser.h"
 #include "token.h"
 #include "infinite_string.h"
+#include "parser.h"
 //#include "ial.h"
 #include <stdio.h>
 #include <stdlib.h>
 
+extern string_t buff; // <- variable which has to be destroyed before exit, internal scanner variable
+extern token_t t;
+extern FILE *fd;
 
 int main(int argc, char **argv){
 
@@ -23,37 +27,34 @@ int main(int argc, char **argv){
 	/* .. this string can be (duplicated AND destroyed) OR (pointer can be copied and later destroyed) .. */
 	/* .. depends on semantic analysis implementation */
 	FILE *fd;
-	token_t t;
 
 	fd = fopen(argv[1],"r");
 	if(fd == NULL){
 		printf("error\n");
 		return 99;
 	}
-
-	t = malloc(sizeof(struct token));
 	
 	int retval;
-
-	while((retval = get_token(fd, t)) != EOF){
+	(retval = get_token(fd, &t));
+	while(t.type!=token_eof){
 		if(retval != 1){ // <<< THIS IS ERROR no. 1
-			switch(t->type){
+			switch(t.type){
 				case token_double:
-					printf("DOUBLE: %f\n", t->attr.d);
+					printf("DOUBLE: %f\n", t.attr.d);
 					break;
 				case token_int:
-					printf("INT: %d\n", t->attr.i);
+					printf("INT: %d\n", t.attr.i);
 					break;
 				case token_string:
-					printf("STRING: %s\n", t->attr.s->data);
-					str_destroy(t->attr.s);
+					printf("STRING: %s\n", t.attr.s->data);
+					str_destroy(t.attr.s);
 					break;
 				case token_id:
-					printf("ID: %s\n", t->attr.s->data);
-					str_destroy(t->attr.s);
+					printf("ID: %s\n", t.attr.s->data);
+					str_destroy(t.attr.s);
 					break;
 				case token_boolean:
-					printf("BOOL: %s\n", t->attr.b ? "true" : "false");
+					printf("%s\n", t.attr.b ? "true" : "false");
 					break;
 				case token_division:
 					printf("/\n");
@@ -163,11 +164,14 @@ int main(int argc, char **argv){
 				case token_dot:
 					printf(".\n");
 					break;
+				case token_eof:
+					printf("eof\n");
+					break;
 			}
 		}
 		else{
-			printf("lexical error\n");
 		}
+		(retval = get_token(fd, &t));
 	}
 
 	/* 
@@ -176,7 +180,6 @@ int main(int argc, char **argv){
 	*/
 	str_destroy(buff);
 
-	free(t);
 	fclose(fd);
     return 0;
 }
