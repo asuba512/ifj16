@@ -1,8 +1,8 @@
 class Main{
 	static void run(){
-		int d;
-		int q = (d + 55) * 26;
-		d = foo();
+		if(5 + d + (65 - 25) *5){}
+		else{}
+		double d = foo();
 		return 1;
 	}
 	static int foo(){

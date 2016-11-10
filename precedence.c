@@ -67,7 +67,7 @@ int precedence(tok_que_t queue){
 						prec_stack_pop();
 						tmp = stack.top;
 						if(tmp && tmp->data.type == token_nonterminal){
-							printf("%d", *((int*)(tmp->data.attr.p))); // needs to be stored in tmp_var (doesn't exist yet)
+							printf("E");// *((int*)(tmp->data.attr.p))); // needs to be stored in tmp_var (doesn't exist yet)
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_lbracket){
@@ -80,14 +80,14 @@ int precedence(tok_que_t queue){
 						}
 					}
 					else if(tmp && tmp->data.type == token_nonterminal){ // E -> E ? E
-						printf("%d", *((int*)(tmp->data.attr.p))); // needs to be stored in tmp_var (doesn't exist yet)
+						printf("E"); // *((int*)(tmp->data.attr.p))); // needs to be stored in tmp_var (doesn't exist yet)
 						prec_stack_pop(); // move to next token on stack
 						tmp = stack.top;
 						if(tmp && tmp->data.type == token_addition){ // E -> E + E
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("+%d\n", *((int*)(tmp->data.attr.p))); // generate (+, tmp_var, tmp->data.attr.p), result into new variable
+								printf("+E\n");// *((int*)(tmp->data.attr.p))); // generate (+, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -98,7 +98,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("-%d\n", *((int*)(tmp->data.attr.p))); // generate (-, tmp_var, tmp->data.attr.p), result into new variable
+								printf("-E\n");// *((int*)(tmp->data.attr.p))); // generate (-, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -109,7 +109,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("*%d\n", *((int*)(tmp->data.attr.p))); // generate (*, tmp_var, tmp->data.attr.p), result into new variable
+								printf("*E\n");// *((int*)(tmp->data.attr.p))); // generate (*, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -120,7 +120,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("/%d\n", *((int*)(tmp->data.attr.p))); // generate (/, tmp_var, tmp->data.attr.p), result into new variable
+								printf("/E\n");// *((int*)(tmp->data.attr.p))); // generate (/, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -131,7 +131,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("<%d\n", *((int*)(tmp->data.attr.p))); // generate (<, tmp_var, tmp->data.attr.p), result into new variable
+								printf("<E\n");// *((int*)(tmp->data.attr.p))); // generate (<, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -142,7 +142,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf(">%d\n", *((int*)(tmp->data.attr.p))); // generate (>, tmp_var, tmp->data.attr.p), result into new variable
+								printf(">E\n");// *((int*)(tmp->data.attr.p))); // generate (>, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -153,7 +153,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("<=%d\n", *((int*)(tmp->data.attr.p))); // generate (<=, tmp_var, tmp->data.attr.p), result into new variable
+								printf("<=E\n");// *((int*)(tmp->data.attr.p))); // generate (<=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -164,7 +164,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf(">=%d\n", *((int*)(tmp->data.attr.p))); // generate (>=, tmp_var, tmp->data.attr.p), result into new variable
+								printf(">=E\n");// *((int*)(tmp->data.attr.p))); // generate (>=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -175,7 +175,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("==%d\n", *((int*)(tmp->data.attr.p))); // generate (==, tmp_var, tmp->data.attr.p), result into new variable
+								printf("==E\n");// *((int*)(tmp->data.attr.p))); // generate (==, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -186,7 +186,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("!=%d\n", *((int*)(tmp->data.attr.p))); // generate (!=, tmp_var, tmp->data.attr.p), result into new variable
+								printf("!=E\n");// *((int*)(tmp->data.attr.p))); // generate (!=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -197,7 +197,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("&&%d\n", *((int*)(tmp->data.attr.p))); // generate (&&, tmp_var, tmp->data.attr.p), result into new variable
+								printf("&&E\n");// *((int*)(tmp->data.attr.p))); // generate (&&, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
@@ -208,7 +208,7 @@ int precedence(tok_que_t queue){
 							prec_stack_pop();
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){
-								printf("||%d\n", *((int*)(tmp->data.attr.p))); // generate (||, tmp_var, tmp->data.attr.p), result into new variable
+								printf("||E\n");// *((int*)(tmp->data.attr.p))); // generate (||, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								//nonterminal.attr.p = result variable from instruction above
 								prec_stack_push(nonterminal);
