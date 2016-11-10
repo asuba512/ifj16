@@ -15,23 +15,30 @@ int main(){
 
 	tok_que_t q = tok_que_init();
 
+	t.type = token_lbracket;
+	tok_enqueue(q, t);
+
 	t.type = token_id;
 	t.attr.p = (void *)&a; 
 	tok_enqueue(q, t);
 	
-	t.type = token_substraction;
+	t.type = token_multiplication;
 	tok_enqueue(q, t);
 
 	t.type = token_id;
 	t.attr.p = (void *)&b; 
 	tok_enqueue(q, t);
 	
-	t.type = token_addition;
+	t.type = token_rbracket;
+	tok_enqueue(q, t);
+
+	t.type = token_and;
 	tok_enqueue(q, t);
 
 	t.type = token_id;
 	t.attr.p = (void *)&c; 
 	tok_enqueue(q, t);
+
 	t.type = token_eof;
 	tok_enqueue(q, t);
 

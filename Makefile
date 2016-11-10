@@ -7,7 +7,7 @@ RM=rm -f
 
 .phony: clean
 
-all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o token.o
+all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o token.o precedence.o
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
 test: scanner.o sc_test.o infinite_string.o
@@ -23,7 +23,7 @@ prec_test: prec_test.o infinite_string.o token.o precedence.o
 	make clean-obj
 
 clean: clean-obj
-	$(RM) $(BIN) sc_test sem_test
+	$(RM) $(BIN) sc_test sem_test prec_test
 
 clean-obj:
 	$(RM) *.o

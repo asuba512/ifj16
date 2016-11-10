@@ -23,17 +23,19 @@ typedef struct prec_s{
 
 int precedence(tok_que_t);
 
-void prec_stack_init(prec_stack_t *);
-int prec_stack_push(prec_stack_t *, token_t);
-void prec_stack_pop(prec_stack_t *);
-prec_st_element *prec_stack_top(prec_stack_t *);
-int prec_stack_is_empty(prec_stack_t *);
+void prec_stack_init();
+int prec_stack_push(token_t);
+void prec_stack_pop();
+prec_st_element *prec_stack_top();
+int prec_stack_is_empty();
 
-void prec_auxstack_init(prec_auxstack_t *);
-int prec_auxstack_push(prec_auxstack_t *, prec_st_element *);
-void prec_auxstack_pop(prec_auxstack_t *);
-prec_st_element prec_auxstack_top(prec_auxstack_t *);
-int prec_auxstack_is_empty(prec_auxstack_t *);
+void prec_auxstack_init();
+int prec_auxstack_push(prec_st_element *);
+void prec_auxstack_pop();
+prec_st_element prec_auxstack_top();
+int prec_auxstack_is_empty();
 
+prec_auxstack_t auxstack;
+prec_stack_t stack;
 
 #endif

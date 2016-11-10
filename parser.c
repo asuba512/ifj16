@@ -2,7 +2,9 @@
 #include "parser.h"
 #include "scanner.h"
 #include "semantic_analysis.h"
+#include "sym_table.h"
 #include "infinite_string.h"
+#include "precedence.h"
 
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
@@ -212,15 +214,15 @@ int opt_assign(){
 
 /* NOT SO HUGE MESS */
 int assign(){
-	if(42){ // for test purposes, change to FIRST_PASS
+	if(FIRST_PASS){ // for test purposes, change to FIRST_PASS
 		do{
 			next_token();
 		} while(!is(token_semicolon));
 		return 0;
 	}
-	if(0){ // for test purposes, change to SECOND_PASS
+	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
-		if(!id() /* && isFun */){
+		if(!id() && sem_id_decoded.isFun){
 			if(is(token_lbracket)){
 				if(!fn_plist())
 					if(is(token_semicolon))
@@ -228,17 +230,16 @@ int assign(){
 			}
 		}
 		else{
-			/*	token_t tmp;
-				tok_que_t expr_queue = tok_que_init();
-			    if(id_loc){
-					tmp.type = token_id;
-					tmp.attr.p = id_loc;
-					tok_enqueue(expr_queue, tmp);
-				}
-				else if(t.type > token_string)
-					return 2;				
-
-			do{
+			token_t tmp;
+			tok_que_t expr_queue = tok_que_init();
+			   if(sem_id_decoded.ptr){
+				tmp.type = token_id;
+				tmp.attr.p = sem_id_decoded.ptr;
+				tok_enqueue(expr_queue, tmp);
+			}
+			else if(t.type > token_string)
+				return 2;				
+			do{	
 				if(!is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){
 					tok_enqueue(expr_queue, t);
 					next_token();
@@ -246,22 +247,22 @@ int assign(){
 				if(is(token_id)){
 					if(!id()){
 						tmp.type = token_id;
-						tmp.attr.p = id_loc;
+						tmp.attr.p = sem_id_decoded.ptr;
 						tok_enqueue(expr_queue, tmp);
 					}
 					else
 						return 2;
 				}
 				else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
-					// insert as variable into TS
 					tmp.type = token_id;
-					tmp.attr.p = loc; << location in TS
+					tmp.attr.p = add_literal(t); // insert as variable into TS
+					tok_enqueue(expr_queue, tmp);
 					next_token();	
 				}
 			} while(t.type <= token_string);
-			*/
-			// here you would call precedence analysis
-			return 0;
+			tmp.type = token_eof;
+			tok_enqueue(expr_queue, tmp);
+			return precedence(expr_queue);
 		}
 	}
 	return 2;
