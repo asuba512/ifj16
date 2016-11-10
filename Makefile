@@ -18,8 +18,8 @@ sem_test: infinite_string.o ial.o parser.o semantic_analysis.o sym_table.o scann
 	$(CC) $(CFLAGS) -o sem_test $^
 	make clean-obj
 
-stack_test: infinite_string.o stack.o stack_test.o
-	$(CC) $(CFLAGS) -o stack_test $^
+prec_test: prec_test.o infinite_string.o token.o precedence.o
+	$(CC) $(CFLAGS) -o prec_test $^
 	make clean-obj
 
 clean: clean-obj

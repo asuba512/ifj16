@@ -24,15 +24,18 @@ int tok_enqueue(tok_que_t queue, struct token t) {
     return 0;
 }
 
-void tok_remove_head(tok_que_t queue) {
+token_t tok_remove_head(tok_que_t queue) {
+	token_t token_tmp;
     if(queue->head != NULL) {
         tok_que_node_t tmp = queue->head;
-        queue->head = queue->head->next;
+	    queue->head = queue->head->next;
+		token_tmp = tmp->tok;
         free(tmp);
     }
+	return token_tmp;
 }
 
-void tok_que_destroy(tok_que_t queue) {
+void tok_que_destroy(tok_que_t queue) { // check for empty queue?
     tok_que_node_t prev = queue->head;
     for(tok_que_node_t item = prev->next; item != NULL; item = item->next) {
 		free(prev);
@@ -40,4 +43,8 @@ void tok_que_destroy(tok_que_t queue) {
     }
     free(prev);
     queue->head = queue->tail = NULL;
+}
+
+int tok_que_empty(tok_que_t queue){
+	return queue->head == NULL;
 }
