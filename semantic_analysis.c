@@ -3,6 +3,8 @@
 #include "infinite_string.h"
 #include <stdio.h>
 
+#define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
+
 bool print_bullshit;
 
 int sem_new_class(string_t id) {
@@ -84,7 +86,7 @@ static void _print_demand() {
 }
 
 void sem_search() {
-    print_bullshit = false;
+    print_bullshit = true;
     _print_demand();
     void *symbol = NULL;
     if (sem_id_decoded.class_id == NULL) {
@@ -112,7 +114,8 @@ void setIsFunFlag(void *symbol) {
                 sem_id_decoded.isFun = false;
         else
             sem_id_decoded.isFun = false;
-    }
+    } else
+        sem_id_decoded.isFun = false;
 }
 
 int sem_new_loc_var(datatype dt, string_t id) {
@@ -147,12 +150,130 @@ local_var_t sem_new_tmp_var(datatype dt) {
     return tmpvar;
 }
 
-int sem_generate(instr_type_t type, op_t src1, op_t src2, op_t dst) {
-    struct instr i;
+int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
+    op_t new_var, new_dst;
+    struct instr i, conv;
+    // just default values
     i.type = type;
     i.src1 = src1;
     i.src2 = src2;
-    i.dst = dst;
+    *dst = NULL;
+    // dst will be set at the end because we don't know its datatype yet
+
+    if(src1->dtype == dt_String || src2->dtype == dt_String) {
+        if(type == add) {
+            i.type = conc; // concatenation of strings and addicion are different instructions
+            new_dst = (op_t)sem_new_tmp_var(dt_String); // result of concatenation
+            // conversion and further modifications are needed, when one of operands is not a string  
+            if(src1->dtype != dt_String || src2->dtype != dt_String) {   
+                new_var = (op_t)sem_new_tmp_var(dt_String); // converted operand     
+                conv.src2 = NULL; 
+                if(src1->dtype != dt_String) {
+                    switch(src1->dtype) {
+                        case dt_double: conv.type = dbl_to_str; break;
+                        case dt_int: conv.type = int_to_str; break;
+                        case dt_boolean: conv.type = bool_to_str; break;
+                        default: break;
+                    }
+                    conv.src1 = src1;
+                    i.src1 = new_var;
+                } else {
+                    switch(src2->dtype) {
+                        case dt_double: conv.type = dbl_to_str; break;
+                        case dt_int: conv.type = int_to_str; break;
+                        case dt_boolean: conv.type = bool_to_str; break;
+                        default: break;
+                    }
+                    conv.src1 = src2;
+                    i.src2 = new_var;
+                }  
+                conv.dst = new_var;
+                if(st_add_fn_instr(active_function, conv) != 0) {
+                    fprintf(stderr, "ERR: Internal error.\n");
+                    return 99;
+                }
+            }
+            
+        } else {
+            fprintf(stderr, "ERR: Strings can only be concatenated with '+'.\n");
+            return 4;
+        }
+    } else {
+        if(type == add || type == sub || type == imul || type == idiv) {
+            if(isNum(src1) && isNum(src2)) {
+                if(src1->dtype == dt_int && src2->dtype == dt_int) {
+                    new_dst = (op_t)sem_new_tmp_var(dt_int); // TODO internal err
+                } else {
+                    new_dst = (op_t)sem_new_tmp_var(dt_double); // TODO internal err
+                }
+            } else {
+                fprintf(stderr, "ERR: Incompatible types of operands.\n");
+                return 4;
+            }
+        } else if(type == eql || type == neq) { // either numbers or booleans can be tested for equivalence
+            new_dst = (op_t)sem_new_tmp_var(dt_boolean); // TODO internal err
+            if(isNum(src1) && isNum(src2)) {
+                if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
+                    new_var = (op_t)sem_new_tmp_var(dt_double); // converted operand
+                    conv.type = int_to_dbl;
+                    conv.src2 = NULL;
+                    conv.dst = new_var; 
+                    if(src1->dtype == dt_double && src2->dtype == dt_int) {
+                        conv.src1 = src2;
+                        i.src2 = new_var;
+                    } else /* (src1->dtype == dt_int && src2->dtype == dt_double) */ {
+                        conv.src1 = src1;
+                        i.src1 = new_var;
+                    }
+                    st_add_fn_instr(active_function, conv);
+                }
+            } else if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) {
+                // OK
+            } else { // combination of number and boolean is prohibited
+                fprintf(stderr, "ERR: Incompatible types of operands.\n");
+                return 4;
+            }
+        } else if(type == leq || type == geq || type == gre || type == less) { 
+            new_dst = (op_t)sem_new_tmp_var(dt_boolean); // TODO internal err
+            if(isNum(src1) && isNum(src2)) {
+                if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
+                    new_var = (op_t)sem_new_tmp_var(dt_double); // converted operand
+                    conv.type = int_to_dbl;
+                    conv.src2 = NULL;
+                    conv.dst = new_var; 
+                    if(src1->dtype == dt_double && src2->dtype == dt_int) {
+                        conv.src1 = src2;
+                        i.src2 = new_var;
+                    } else /* (src1->dtype == dt_int && src2->dtype == dt_double) */ {
+                        conv.src1 = src1;
+                        i.src1 = new_var;
+                    }
+                    st_add_fn_instr(active_function, conv);
+                }
+            } else { // booleans cannot be compared this way
+                fprintf(stderr, "ERR: Incompatible types of operands.\n");
+                return 4;
+            }
+        } else if(type == and || type == or) {
+            new_dst = (op_t)sem_new_tmp_var(dt_boolean);
+            if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) { // both operands must be boolean
+                // OK
+            } else { // everything else if prohibited
+                fprintf(stderr, "ERR: Incompatible types of operands.\n");
+                return 4;
+            }
+        } else if(type == not) {
+            new_dst = (op_t)sem_new_tmp_var(dt_boolean);
+            i.src2 = NULL;
+            if(src1->dtype == dt_boolean) { // operand must be boolean
+                // OK
+            } else { // everything else if prohibited
+                fprintf(stderr, "ERR: Incompatible types of operands.\n");
+                return 4;
+            }
+        }
+    }
+    *dst = i.dst = new_dst;
     if(st_add_fn_instr(active_function, i) != 0) {
         fprintf(stderr, "ERR: Internal error.\n");
         return 99;

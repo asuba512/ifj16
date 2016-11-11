@@ -308,6 +308,7 @@ int id(){
 	if(is(token_id)){
 		return id1();
 	}
+	sem_id_decoded.ptr = NULL;
 	return 2;
 }
 

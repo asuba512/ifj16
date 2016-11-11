@@ -11,6 +11,7 @@
 #include "infinite_string.h"
 #include "ial.h"
 #include "token.h"
+#include "ilist.h"
 
 typedef enum {
 	dt_double,
@@ -31,7 +32,18 @@ typedef enum {
 	literal
 } scope;
 
-#include "ilist.h" // do not move xD
+// generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)
+typedef struct operand {
+	scope sc;
+	datatype dtype;
+	void* instr; // jump target
+} *op_t;
+
+typedef struct instr {
+	instr_type_t type;
+	op_t src1, src2, dst;
+	struct instr *next;
+} *instr_t;
 
 /** 
  * @brief Global class table
@@ -157,6 +169,6 @@ class_t st_getclass(string_t id);
 class_memb_t st_getmemb(class_t c, string_t id);
 literal_t add_literal(struct token t);
 local_var_t st_get_loc_var(class_memb_t m, string_t id);
-int st_add_fn_instr(class_memb_t fn, struct instr);
+int st_add_fn_instr(class_memb_t fn, struct instr i);
 
 #endif
