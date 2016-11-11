@@ -1,40 +1,51 @@
-typedef enum instruction_type{
-	halt, //return 0
-	//arithemtic - maybe each for all types of int,double combination
+#ifndef ILIST_INC
+#define ILIST_INC 1
+
+typedef enum instruction_type {
+	halt, //return void
+	//arithmetic - maybe each for all types of int,double combination
 	add,
 	sub,
-	mul,
-	div,
-	//concatonate
-	concatonate,
+	imul,
+	idiv, // added 'i' to avoid conflict with stdlib
+	//concatenate
+	conc,
 	//comparing - maybe each for all typet of int,double combination
-	equal,
-	not_equal,
-	greater,
+	eql,
+	neq,
+	gre,
 	less,
-	greater_equal,
-	less_equal,
+	geq,
+	leq,
 	//logical
-	log_or,
-	log_and,
-	log_not,
+	or,
+	and,
+	not,
 	//assign
-	assign,
+	mov, // avoided symbol conflict (there's already function called "assign()" in parser)
+	//conversion
+	int_to_dbl,
+	int_to_str,
+	bool_to_str,
+	dbl_to_str,
 	//built in functions
 	print, //todo - maybe each for int,double,string
-	read_int,
-	read_double,
-	read_string,
-	length,
-	substr,
-	compare,
-	find,
-	sort,
+	cmp,
+	sframe, // prepare function stackframe (before pushing)
+	call,
 	//jumps //todo
 	label,
-	jump,
-	if_jump,
+	jmp,
+	jmpif,
 	//for functions
 	push,
-	f_return //return from function
-}instruction_type;
+	ret //return from function
+} instr_type_t;
+
+typedef struct instr {
+	instr_type_t type;
+	op_t src1, src2, dst;
+	struct instr *next;
+} *instr_t;
+
+#endif

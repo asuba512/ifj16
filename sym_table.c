@@ -4,6 +4,7 @@
 #include "infinite_string.h"
 #include "ial.h"
 #include "sym_table.h"
+#include "ilist.h"
 
 void init_class_table() {
 	classes = &ctable; // yep that's all
@@ -40,6 +41,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->initialized = false;
 	m->id = id;
 	m->sc = global;
+	m->instr_list = m->instr_list_end = NULL;
 	int err;
 	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
@@ -158,4 +160,18 @@ literal_t add_literal(struct token t) {
 	literals.arr[literals.length].sc = literal; // just interpret things
 	literals.length++;
 	return &(literals.arr[literals.length-1]);
+}
+
+int st_add_fn_instr(class_memb_t fn, struct instr i) {
+	instr_t new_instr = malloc(sizeof(struct instr));
+    if(new_instr == NULL)
+        return 99;
+    *new_instr = i;
+	new_instr->next = NULL;
+    if(fn->instr_list == NULL)
+        fn->instr_list = new_instr;
+    else
+        fn->instr_list_end->next = new_instr;
+    fn->instr_list_end = new_instr;
+    return 0;
 }

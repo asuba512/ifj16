@@ -11,6 +11,7 @@
 #include "infinite_string.h"
 #include "ial.h"
 #include "token.h"
+#include "ilist.h"
 
 typedef enum {
 	dt_double,
@@ -37,6 +38,13 @@ typedef enum {
 typedef struct class_table {
 	bst_node_t root; ///< Root node
 } *class_table_t;
+
+// generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)
+typedef struct operand {
+	scope sc;
+	datatype dt;
+	instr_t instr; // jump target
+} op_t;
 
 typedef struct literal {
 	scope sc; ///< for interpreter
@@ -102,6 +110,8 @@ typedef struct class_memb {
 	                       ///< not used by static variable
 	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
 	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
+	instr_t instr_list;
+	instr_t instr_list_end;
 } *class_memb_t;
 
 
@@ -152,5 +162,6 @@ class_t st_getclass(string_t id);
 class_memb_t st_getmemb(class_t c, string_t id);
 literal_t add_literal(struct token t);
 local_var_t st_get_loc_var(class_memb_t m, string_t id);
+int st_add_fn_instr(class_memb_t fn, struct instr);
 
 #endif
