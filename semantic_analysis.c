@@ -127,3 +127,35 @@ int sem_new_loc_var(datatype dt, string_t id) {
     }
     return err;
 }
+
+local_var_t sem_new_tmp_var(datatype dt) {
+    static int id = 0;
+    char name[8];
+    sprintf(name, "^%d", id);
+    string_t str = str_init(name);
+    if (str == NULL) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        return NULL;
+    }
+    local_var_t tmpvar = st_fn_add_tmpvar(active_function, dt, str);
+    if (tmpvar == NULL) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        str_destroy(str);
+        return NULL;
+    }
+    id++;
+    return tmpvar;
+}
+
+int sem_generate(instr_type_t type, op_t src1, op_t src2, op_t dst) {
+    struct instr i;
+    i.type = type;
+    i.src1 = src1;
+    i.src2 = src2;
+    i.dst = dst;
+    if(st_add_fn_instr(active_function, i) != 0) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        return 99;
+    }
+    return 0;
+}

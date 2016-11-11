@@ -1,6 +1,8 @@
 #ifndef ILIST_INC
 #define ILIST_INC 1
 
+#include "sym_table.h"
+
 typedef enum instruction_type {
 	halt, //return void
 	//arithmetic - maybe each for all types of int,double combination
@@ -36,11 +38,19 @@ typedef enum instruction_type {
 	//jumps //todo
 	label,
 	jmp,
-	jmpif,
+	jmpifn, // jump if not
+	jmpif, // jump if
 	//for functions
 	push,
 	ret //return from function
 } instr_type_t;
+
+// generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)
+typedef struct operand {
+	scope sc;
+	datatype dt;
+	void* instr; // jump target
+} op_t;
 
 typedef struct instr {
 	instr_type_t type;

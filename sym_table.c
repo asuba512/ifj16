@@ -175,3 +175,20 @@ int st_add_fn_instr(class_memb_t fn, struct instr i) {
     fn->instr_list_end = new_instr;
     return 0;
 }
+
+local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
+	local_var_t tmp;
+	if ((tmp = malloc(sizeof(struct local_var))) == NULL)
+		return NULL;
+	tmp->dtype = dt;
+	tmp->index = (fn->var_count)++;
+	tmp->id = id;
+	tmp->sc = local;
+	int err;
+	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {
+		return tmp; // OK
+	}
+	if(err == 3) (fn->var_count)--; // doesn't matter anyways, if there's an error
+	free(tmp);
+	return NULL;
+}
