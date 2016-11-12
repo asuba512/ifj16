@@ -16,7 +16,7 @@
 extern string_t buff; // <- variable which has to be destroyed before exit, internal scanner variable
 extern token_t t;
 extern FILE *fd;
-extern int lexerror;
+extern int errno;
 extern int pass_number;
 extern tok_que_t tok_q;
 
@@ -34,11 +34,11 @@ int main(int argc, char **argv){
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
+	printf("retval: %d\n", errno == 2 ? retval : errno);
 	printf("current token: %d\n", t.type);
 	pass_number = 2;
 	retval = c_list();
-	printf("retval: %d\n", lexerror == 1 ? 1 : retval);
+	printf("retval: %d\n", errno == 1 ? 1 : retval);
 	printf("current token: %d\n", t.type);
 	int c;
 	while((c = getc(fd)) != EOF){
