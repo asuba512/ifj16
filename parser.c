@@ -9,7 +9,7 @@
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
 
-#define next_token() do{ if(FIRST_PASS){ if((lexerror = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
+#define next_token() do{ if(FIRST_PASS){ if((errno = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
 
 /*
@@ -241,10 +241,11 @@ int assign(){
 				tmp.attr.p = sem_id_decoded.ptr;
 				tok_enqueue(expr_queue, tmp);
 			}
-			else if(t.type > token_string) // unsupported tokens
+			else if(t.type > token_string){ // unsupported tokens
 				return 2;				
+			}
 			do{	
-				if(!is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
+				if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
 					tok_enqueue(expr_queue, t);
 					next_token();
 				}
@@ -252,7 +253,7 @@ int assign(){
 					if(!id()){ // already next_token, don't need to get another one
 						if(sem_id_decoded.ptr == NULL) {
 							fprintf(stderr, "ERR: Undefined variable.\n");
-							return 4;
+							return errno = 4;
 						}						
 						tmp.type = token_id;
 						tmp.attr.p = sem_id_decoded.ptr;
@@ -270,7 +271,7 @@ int assign(){
 			} while(t.type <= token_string);
 			tmp.type = token_eof; // add eof to the end of queue
 			tok_enqueue(expr_queue, tmp);
-			return precedence(expr_queue, &precedence_result);
+			return errno =precedence(expr_queue, &precedence_result);
 		}
 	}
 	return 2;
@@ -366,7 +367,7 @@ int stat(){
 			token_t tmp;
 			if(SECOND_PASS){
 				do{
-					if(!is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
+					if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
 						if(is(token_lbracket)) lb++; // pairing brackets
 						if(is(token_rbracket)) rb++;
 						tok_enqueue(expr_queue, t);

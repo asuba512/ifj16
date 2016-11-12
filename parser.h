@@ -6,7 +6,7 @@
 
 token_t t;
 FILE *fd;
-int lexerror;
+int errno;
 int pass_number; // either first or second
 tok_que_t tok_q;
 
