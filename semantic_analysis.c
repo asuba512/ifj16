@@ -413,3 +413,40 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
     st_add_fn_instr(active_function, i);
     return 0;
 }
+
+int sem_generate_jmpifn(op_t src) {
+    struct instr i;
+    i.type = jmpifn;
+    if(src->dtype != dt_boolean) {
+        fprintf(stderr, "ERR: Non-boolean value used as condition.\n");
+        return 4;
+    }
+    i.src2 = i.dst = NULL;
+    i.src1 = src;
+    st_add_fn_instr(active_function, i);
+    return 0;
+}
+
+int sem_generate_label() {
+    struct instr i;
+    i.type = label;
+    i.src1 = i.src2 = i.dst = NULL;
+    st_add_fn_instr(active_function, i);
+    // if err return 99
+    return 0;
+}
+
+int sem_generate_jmp(op_t dst) {
+    struct instr i;
+    i.type = jmp;
+    i.src1 = i.src2 = NULL;
+    i.dst = dst;
+    st_add_fn_instr(active_function, i);
+    // if err return 99
+    return 0;
+}
+
+int sem_set_jmp_dst(instr_t i, op_t dst) {
+    i->dst = dst;
+    return 0;
+}

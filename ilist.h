@@ -30,17 +30,17 @@ typedef enum instruction_type {
 	dbl_to_str,
 	//built in functions
 	sframe, // prepare function stackframe (before pushing)
-	call,
+	call, // save next address on stack and jump to first instruction of dst
 	//jumps //todo
 	label,
-	jmp,
-	jmpifn, // jump if not
-	jmpif, // jump if
+	jmp, // jump to dst
+	jmpifn, // jump to dst if not src1
+	jmpif, // jump to dst if src1
 	//for functions
 	push,
 	ret, //return from function (will assign entire union to special place)
-	movr, // move from register to dst
-	i_d_r // convert register to dst
+	movr, // move from register to dst 
+	i_d_r // convert register i_val to d_val
 } instr_type_t;
 
 #endif

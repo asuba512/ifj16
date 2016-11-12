@@ -139,19 +139,19 @@ literal_t add_literal(struct token t) {
 		}
 	switch(t.type) {
 		case token_double:
-			literals.arr[literals.length].d_val = t.attr.d;
+			literals.arr[literals.length].val.d_val = t.attr.d;
 			literals.arr[literals.length].dtype = dt_double;
 			break;
 		case token_int:
-			literals.arr[literals.length].i_val = t.attr.i;
+			literals.arr[literals.length].val.i_val = t.attr.i;
 			literals.arr[literals.length].dtype = dt_int;
 			break;
 		case token_string:
-			literals.arr[literals.length].s_val = t.attr.s;
+			literals.arr[literals.length].val.s_val = t.attr.s;
 			literals.arr[literals.length].dtype = dt_String;
 			break;
 		case token_boolean:
-			literals.arr[literals.length].b_val = t.attr.b;
+			literals.arr[literals.length].val.b_val = t.attr.b;
 			literals.arr[literals.length].dtype = dt_boolean;
 			break;
 		default:

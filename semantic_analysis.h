@@ -36,3 +36,7 @@ void sem_rst_argcount();
 bool sem_args_ok(class_memb_t);
 int sem_generate_movr(class_memb_t called_fn, op_t dst);
 int sem_generate_call(class_memb_t);
+int sem_generate_jmpifn(op_t src);
+int sem_generate_label();
+int sem_generate_jmp(op_t);
+int sem_set_jmp_dst(instr_t, op_t);

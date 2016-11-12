@@ -401,6 +401,8 @@ int stat(){
 		return stat_com();
 	}
 	else if(is(token_k_if)){
+		instr_t if_jmp_instr;
+		instr_t pre_else_jmp;
 		next_token();
 		if(is(token_lbracket)){
 			tok_que_t expr_queue = tok_que_init();
@@ -433,6 +435,8 @@ int stat(){
 				tok_enqueue(expr_queue, tmp);
 				if(precedence(expr_queue, &precedence_result)) // in case of precedence error, will have to use error var to distinguish this error
 					return 2;
+				sem_generate_jmpifn(precedence_result);
+				if_jmp_instr = active_function->instr_list_end; // we'll add jump target later
 			}
 			else{
 				do{ // in first pass skip the whole expression
@@ -443,9 +447,20 @@ int stat(){
 			}
 			if(!stat_com()){
 				next_token();
-				if(is(token_k_else)){
+				if(is(token_k_else)) {
+					if(SECOND_PASS) {
+						sem_generate_jmp(NULL);
+						pre_else_jmp = active_function->instr_list_end; // another jump we will correct later
+						sem_generate_label();
+						sem_set_jmp_dst(if_jmp_instr, (op_t)(active_function->instr_list_end)); //set label we just created as a jump target
+					}					
 					next_token();
 					if(!stat_com()){
+						if(SECOND_PASS) {
+							sem_generate_label();
+							sem_set_jmp_dst(pre_else_jmp, (op_t)(active_function->instr_list_end));
+						}
+						
 						return 0;
 					}
 				}		

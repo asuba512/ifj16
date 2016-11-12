@@ -37,7 +37,6 @@ typedef enum {
 typedef struct operand {
 	scope sc;
 	datatype dtype;
-	void* instr; // jump target
 } *op_t;
 
 typedef struct instr {
