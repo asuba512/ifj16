@@ -419,6 +419,11 @@ int stat(){
 		}
 	}
 	else if(is(token_k_while)){
+		instr_t while_label, while_jmp;
+		if(SECOND_PASS) {
+			sem_generate_label();
+			while_label = active_function->instr_list_end;
+		}
 		next_token();
 		if(is(token_lbracket)){
 			tok_que_t expr_queue = tok_que_init(); // init new queue
@@ -427,7 +432,8 @@ int stat(){
 					return 2;
 				if((errno = precedence(expr_queue, &precedence_result)))
 					return 2;
-				//semantic actions
+				sem_generate_jmpifn(precedence_result);
+				while_jmp = active_function->instr_list_end;
 			}
 			else{
 				do{ // in first pass skip the whole expression
@@ -437,6 +443,11 @@ int stat(){
 				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
 			}
 			if(!stat_com()){
+				if(SECOND_PASS) {
+					sem_generate_jmp((op_t)while_label);
+					sem_generate_label();
+					sem_set_jmp_dst(while_jmp, (op_t)(active_function->instr_list_end));
+				}
 				return 0;
 			}
 		}
