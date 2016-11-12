@@ -20,7 +20,8 @@ extern int lexerror;
 extern int pass_number;
 extern tok_que_t tok_q;
 
-char *op[20] = {"halt", "add", "sub", "imul", "idiv", "conc", "eql", "neq", "gre", "less", "geq", "leq", "or", "and", "not", "mov", "i_dbl", "i_str", "b_str", "d_str"};
+char *op[30] = {"halt", "add", "sub", "imul", "idiv", "conc", "eql", "neq", "gre", "less", "geq", "leq", "or", "and", "not", "mov", "i_dbl",
+				"i_str", "b_str", "d_str", "sframe", "call", "label", "jmp", "jmpifn", "jmpif", "push", "ret", "movr", "idr"};
 
 int main(int argc, char **argv){
 	(void)argc;

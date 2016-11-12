@@ -73,7 +73,7 @@ static void _print_decoded_id(void *symbol) {
     }
     local_var_t elem = (local_var_t) symbol;
     if(elem->sc != literal) {
-        printf("Decoded id (%d): %s (%p)\n", elem->sc, elem->id->data, symbol);
+        printf("Decoded %s (%d): %s (%p)\n", sem_id_decoded.isFun ? "fun" : "var", elem->sc, elem->id->data, symbol);
     }
 }
 
@@ -321,5 +321,95 @@ int sem_generate_mov(op_t src, op_t dst) {
     i.src2 = NULL;
     if(active_function)
         st_add_fn_instr(active_function, i);
+    return 0;
+}
+
+int sem_generate_prepare(class_memb_t fn) {
+    struct instr i;
+    i.type = sframe;
+    i.src1 = (op_t)fn;
+    i.src2 = i.dst = NULL;
+    if(st_add_fn_instr(active_function, i)) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        return 99;
+    }
+    calling_function = fn;
+    return 0;
+}
+
+int sem_generate_push(class_memb_t called_fn, op_t arg) {
+    if(arg_counter == called_fn->arg_count) {
+        fprintf(stderr, "ERR: Too many arguments\n");
+        return 4;
+    }
+    struct instr i;
+    i.type = push;
+    i.src2 = i.dst = NULL;
+    i.src1 = arg;
+    if(arg->sc == global && (((class_memb_t)(arg))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as variable.\n");
+        return 4;
+    }
+    if(arg->dtype == ((called_fn->arg_list)[arg_counter])->dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->dtype == dt_double)) { 
+        // OK
+    } else {
+        fprintf(stderr, "ERR: Incompatible type of argument.\n");
+        return 4;
+    }
+    if(st_add_fn_instr(active_function, i)) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        return 99;
+    }
+    arg_counter++;
+    return 0;
+}
+
+void sem_rst_argcount() {
+    arg_counter = 0;
+}
+
+bool sem_args_ok(class_memb_t called_fn) {
+    if((called_fn->arg_count != arg_counter))
+        fprintf(stderr,"ERR: Too few arguments.\n");
+    return called_fn->arg_count == arg_counter;
+}
+
+int sem_generate_call(class_memb_t called_fn) {
+    struct instr i;
+    i.type = call;
+    i.dst = (op_t)called_fn;
+    i.src1 = i.src2 = NULL;
+    if(st_add_fn_instr(active_function, i)) {
+        fprintf(stderr, "ERR: Internal error.\n");
+        return 99;
+    }
+    return 0;
+}
+
+int sem_generate_movr(class_memb_t called_fn, op_t dst) {
+    struct instr i;
+    i.type = movr;
+    if (!dst) { // undefined dst
+        fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
+        return 3;
+    } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
+        return 4;
+    }
+    if(called_fn->dtype == dst->dtype) {
+        // OK
+    } else if(called_fn->dtype == dt_int && dst->dtype == dt_double) {
+        struct instr conv;
+        conv.type = i_d_r;
+        conv.dst = conv.src2 = conv.src1 = NULL;
+        // no operands, just convert value in register
+        st_add_fn_instr(active_function, conv);
+    } else {
+        fprintf(stderr, "ERR: Incompatible types of operands.\n");
+        return 99;
+    }
+    i.dst = dst;
+    i.src1 = i.src2 = NULL;
+    st_add_fn_instr(active_function, i);
     return 0;
 }

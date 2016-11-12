@@ -8,6 +8,7 @@
 
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
+extern class_memb_t calling_function;
 
 #define next_token() do{ if(FIRST_PASS){ if((lexerror = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
@@ -22,6 +23,7 @@ TODO:
 
 int c_list(){
 	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
+	calling_function = NULL;
 	next_token();
 	if(is(token_k_class)){
 		next_token();
@@ -190,8 +192,12 @@ int fn_body(){
 	else if(!type()){
 		next_token();
 		if(is(token_id)){
-			if(SECOND_PASS)
+			if(SECOND_PASS) {
 				sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
+				sem_id_decoded.memb_id = t.attr.s;
+				sem_id_decoded.class_id = NULL;
+				sem_search();
+			}
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
 			}
@@ -207,7 +213,22 @@ int fn_body(){
 int opt_assign(){
 	next_token();
 	if(is(token_assign)){
-		return assign();
+		op_t tmp_dst;
+		if(SECOND_PASS) {
+			tmp_dst = (op_t)(sem_id_decoded.ptr);
+		}
+		int err = assign();
+		if(err == 0 && SECOND_PASS) {
+			if(!calling_function) {
+				if((err = sem_generate_mov(precedence_result, tmp_dst)))
+					return err;
+			} else {
+				if((err = sem_generate_movr(calling_function, tmp_dst)))
+					return err;
+				calling_function = NULL;
+			}
+		}
+		return err;
 	}
 	else if(is(token_semicolon)){
 		return 0;
@@ -226,11 +247,16 @@ int assign(){
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
-
+			sem_generate_prepare((class_memb_t)sem_id_decoded.ptr);
 			if(is(token_lbracket)){
 				if(!fn_plist())
-					if(is(token_semicolon))
+					if(is(token_semicolon)){					
+						if(!sem_args_ok(calling_function)) {
+							return 4;
+						}
+						sem_generate_call(calling_function);
 						return 0;
+					}
 			}
 		}
 		else{ // expression
@@ -278,6 +304,8 @@ int assign(){
 
 int fn_plist(){
 	next_token();
+	if(SECOND_PASS)
+		sem_rst_argcount();
 	if(is(token_rbracket)){
 		next_token();
 		return 0;
@@ -303,9 +331,21 @@ int fn_plist1(){
 
 int val_id(){
 	if(!id()){
+		if(SECOND_PASS) {
+			if(calling_function) {
+				sem_generate_push(calling_function, (op_t)sem_id_decoded.ptr);
+			}
+		}
 		return 0;
 	}
 	if(is(token_int) || is(token_double) || is(token_string) || is(token_boolean)){
+		if(SECOND_PASS) {
+			if(calling_function) {
+				op_t literal = (op_t)add_literal(t);
+				//printf("Literal: %d (%p)\n", ((literal_t)literal)->i_val, (void*)literal);
+				sem_generate_push(calling_function, literal);
+			}
+		}
 		next_token();
 		return 0;
 	}
@@ -468,8 +508,14 @@ int as_ca(){
 		}
 		int err = assign();
 		if(err == 0 && SECOND_PASS) {
-			if((err = sem_generate_mov(precedence_result, tmp_dst)))
-				return err;
+			if(!calling_function) {
+				if((err = sem_generate_mov(precedence_result, tmp_dst)))
+					return err;
+			} else {
+				if((err = sem_generate_movr(calling_function, tmp_dst)))
+					return err;
+				calling_function = NULL;
+			}
 		}
 		return err;
 	}

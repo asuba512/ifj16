@@ -4,17 +4,22 @@ class Main
     static int x;
     static void run()
     {
-        x = 5 + 5 * 5 - 5 / 5;
+        double b;
+        int a = 5;
+        b = test1(5, true, 42, "ok");
+        b = a+54* 5 - 8 + 6*6 / 42;
+        boolean bool = !(42 == 5);
+        a = 5/4;
         String str1;
-        str1 = "Toto je nejaky text";
+        str1 = "Toto je nejaky text" + 6;
         String str2;
         str2 = str1 + ", ktery jeste trochu obohatime";
-        Main.x = ifj16.find(str2, "text");
+        Main.x = 42;
         x = 6;
         Game.play(str1);
     }
 
-    static String test1(int a, boolean bool, int c, String str) {
+    static int test1(int a, boolean bool, int c, String str) {
         
     }
     static boolean test2(int a, boolean bool, int c, String str) {
@@ -37,18 +42,16 @@ class Game
     {
         Main.run();
         main.test1();
-        a = 2;
         double d = 42;
         int cmp = 42;
         if (cmp != 0) {
             while (cmp != 0) {
-                a = 4+4;
+                //a = 4+4;
             }
         }
         else {
         }
         boolean f;
-        double d;
         return;
     }
     // end of static void play(String)

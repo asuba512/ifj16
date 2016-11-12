@@ -4,6 +4,8 @@
 
 class_t active_class;
 class_memb_t active_function;
+class_memb_t calling_function;
+int arg_counter;
 op_t precedence_result;
 struct temp_data {
     string_t id;
@@ -28,3 +30,9 @@ void setIsFunFlag(void *symbol);
 int sem_new_loc_var(datatype dt, string_t id);
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst);
 int sem_generate_mov(op_t src, op_t dst);
+int sem_generate_prepare(class_memb_t fn);
+int sem_generate_push(class_memb_t called_fn, op_t arg);
+void sem_rst_argcount();
+bool sem_args_ok(class_memb_t);
+int sem_generate_movr(class_memb_t called_fn, op_t dst);
+int sem_generate_call(class_memb_t);

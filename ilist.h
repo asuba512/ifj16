@@ -29,8 +29,6 @@ typedef enum instruction_type {
 	bool_to_str,
 	dbl_to_str,
 	//built in functions
-	print, //todo - maybe each for int,double,string
-	cmp,
 	sframe, // prepare function stackframe (before pushing)
 	call,
 	//jumps //todo
@@ -40,7 +38,9 @@ typedef enum instruction_type {
 	jmpif, // jump if
 	//for functions
 	push,
-	ret //return from function
+	ret, //return from function (will assign entire union to special place)
+	movr, // move from register to dst
+	i_d_r // convert register to dst
 } instr_type_t;
 
 #endif
