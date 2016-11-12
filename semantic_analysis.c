@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
+#define INTERNAL_ERR {fprintf(stderr, "ERR: Internal error.\n"); return 99;}
 
 bool print_bullshit;
 
@@ -171,9 +172,11 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         if(type == add) {
             i.type = conc; // concatenation of strings and addicion are different instructions
             new_dst = (op_t)sem_new_tmp_var(dt_String); // result of concatenation
+            if(!new_dst) INTERNAL_ERR
             // conversion and further modifications are needed, when one of operands is not a string  
             if(src1->dtype != dt_String || src2->dtype != dt_String) {   
-                new_var = (op_t)sem_new_tmp_var(dt_String); // converted operand     
+                new_var = (op_t)sem_new_tmp_var(dt_String); // converted operand   
+                if(!new_var) INTERNAL_ERR  
                 conv.src2 = NULL; 
                 if(src1->dtype != dt_String) {
                     switch(src1->dtype) {
@@ -195,10 +198,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                     i.src2 = new_var;
                 }  
                 conv.dst = new_var;
-                if(st_add_fn_instr(active_function, conv) != 0) {
-                    fprintf(stderr, "ERR: Internal error.\n");
-                    return 99;
-                }
+                if(st_add_fn_instr(active_function, conv) != 0) INTERNAL_ERR
             }
             
         } else {
@@ -209,16 +209,18 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         if(type == add || type == sub || type == imul || type == idiv) {
             if(isNum(src1) && isNum(src2)) {
                 if(src1->dtype == dt_int && src2->dtype == dt_int) {
-                    new_dst = (op_t)sem_new_tmp_var(dt_int); // TODO internal err
+                    new_dst = (op_t)sem_new_tmp_var(dt_int); 
                 } else {
-                    new_dst = (op_t)sem_new_tmp_var(dt_double); // TODO internal err
+                    new_dst = (op_t)sem_new_tmp_var(dt_double); 
                 }
+                if(!new_dst) INTERNAL_ERR
             } else {
                 fprintf(stderr, "ERR: Incompatible types of operands.\n");
                 return 4;
             }
         } else if(type == eql || type == neq) { // either numbers or booleans can be tested for equivalence
-            new_dst = (op_t)sem_new_tmp_var(dt_boolean); // TODO internal err
+            new_dst = (op_t)sem_new_tmp_var(dt_boolean); 
+            if(!new_dst) INTERNAL_ERR
             if(isNum(src1) && isNum(src2)) {
                 if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
                     new_var = (op_t)sem_new_tmp_var(dt_double); // converted operand
@@ -232,7 +234,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                         conv.src1 = src1;
                         i.src1 = new_var;
                     }
-                    st_add_fn_instr(active_function, conv);
+                    if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
                 }
             } else if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) {
                 // OK
@@ -245,6 +247,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             if(isNum(src1) && isNum(src2)) {
                 if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
                     new_var = (op_t)sem_new_tmp_var(dt_double); // converted operand
+                    if(!new_var) INTERNAL_ERR
                     conv.type = int_to_dbl;
                     conv.src2 = NULL;
                     conv.dst = new_var; 
@@ -255,7 +258,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                         conv.src1 = src1;
                         i.src1 = new_var;
                     }
-                    st_add_fn_instr(active_function, conv);
+                    if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
                 }
             } else { // booleans cannot be compared this way
                 fprintf(stderr, "ERR: Incompatible types of operands.\n");
@@ -263,6 +266,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             }
         } else if(type == and || type == or) {
             new_dst = (op_t)sem_new_tmp_var(dt_boolean);
+            if(!new_dst) INTERNAL_ERR
             if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) { // both operands must be boolean
                 // OK
             } else { // everything else if prohibited
@@ -271,6 +275,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             }
         } else if(type == not) {
             new_dst = (op_t)sem_new_tmp_var(dt_boolean);
+            if(!new_dst) INTERNAL_ERR
             i.src2 = NULL;
             if(src1->dtype == dt_boolean) { // operand must be boolean
                 // OK
@@ -281,10 +286,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         }
     }
     *dst = i.dst = new_dst;
-    if(st_add_fn_instr(active_function, i) != 0) {
-        fprintf(stderr, "ERR: Internal error.\n");
-        return 99;
-    }
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -309,18 +311,18 @@ int sem_generate_mov(op_t src, op_t dst) {
         conv.src1 = src;
         conv.src2 = NULL;
         if(active_function) {
-            conv.dst = (op_t)sem_new_tmp_var(dt_double); // TODO
-            st_add_fn_instr(active_function, conv); // TODO
+            conv.dst = (op_t)sem_new_tmp_var(dt_double);
+            if(!conv.dst || st_add_fn_instr(active_function, conv)) INTERNAL_ERR
         }
         i.src1 = conv.dst;
     } else {
         fprintf(stderr, "ERR: Incompatible types of operands.\n");
-        return 99;
+        return 4;
     }
     i.dst = dst;
     i.src2 = NULL;
     if(active_function)
-        st_add_fn_instr(active_function, i);
+        if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -329,10 +331,7 @@ int sem_generate_prepare(class_memb_t fn) {
     i.type = sframe;
     i.src1 = (op_t)fn;
     i.src2 = i.dst = NULL;
-    if(st_add_fn_instr(active_function, i)) {
-        fprintf(stderr, "ERR: Internal error.\n");
-        return 99;
-    }
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     calling_function = fn;
     return 0;
 }
@@ -356,10 +355,7 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
         fprintf(stderr, "ERR: Incompatible type of argument.\n");
         return 4;
     }
-    if(st_add_fn_instr(active_function, i)) {
-        fprintf(stderr, "ERR: Internal error.\n");
-        return 99;
-    }
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     arg_counter++;
     return 0;
 }
@@ -379,10 +375,7 @@ int sem_generate_call(class_memb_t called_fn) {
     i.type = call;
     i.dst = (op_t)called_fn;
     i.src1 = i.src2 = NULL;
-    if(st_add_fn_instr(active_function, i)) {
-        fprintf(stderr, "ERR: Internal error.\n");
-        return 99;
-    }
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -403,14 +396,14 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
         conv.type = i_d_r;
         conv.dst = conv.src2 = conv.src1 = NULL;
         // no operands, just convert value in register
-        st_add_fn_instr(active_function, conv);
+        if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
     } else {
         fprintf(stderr, "ERR: Incompatible types of operands.\n");
-        return 99;
+        return 4;
     }
     i.dst = dst;
     i.src1 = i.src2 = NULL;
-    st_add_fn_instr(active_function, i);
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -423,7 +416,7 @@ int sem_generate_jmpifn(op_t src) {
     }
     i.src2 = i.dst = NULL;
     i.src1 = src;
-    st_add_fn_instr(active_function, i);
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -431,8 +424,7 @@ int sem_generate_label() {
     struct instr i;
     i.type = label;
     i.src1 = i.src2 = i.dst = NULL;
-    st_add_fn_instr(active_function, i);
-    // if err return 99
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
@@ -441,8 +433,7 @@ int sem_generate_jmp(op_t dst) {
     i.type = jmp;
     i.src1 = i.src2 = NULL;
     i.dst = dst;
-    st_add_fn_instr(active_function, i);
-    // if err return 99
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
 
