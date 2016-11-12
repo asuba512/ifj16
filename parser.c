@@ -270,34 +270,9 @@ int assign(){
 			else if(t.type > token_string){ // unsupported tokens
 				return 2;				
 			}
-			do{	
-				if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
-					tok_enqueue(expr_queue, t);
-					next_token();
-				}
-				if(is(token_id)){ // id processing
-					if(!id()){ // already next_token, don't need to get another one
-						if(sem_id_decoded.ptr == NULL) {
-							fprintf(stderr, "ERR: Undefined variable.\n");
-							return errno = 4;
-						}						
-						tmp.type = token_id;
-						tmp.attr.p = sem_id_decoded.ptr;
-						tok_enqueue(expr_queue, tmp);
-					}
-					else
-						return 2;
-				}
-				else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
-					tmp.type = token_id;
-					tmp.attr.p = add_literal(t); // insert as variable into TS
-					tok_enqueue(expr_queue, tmp);
-					next_token();	
-				}
-			} while(t.type <= token_string);
-			tmp.type = token_eof; // add eof to the end of queue
-			tok_enqueue(expr_queue, tmp);
-			return errno =precedence(expr_queue, &precedence_result);
+			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
+				return 2;
+			return errno = precedence(expr_queue, &precedence_result);
 		}
 	}
 	return 2;
@@ -405,35 +380,11 @@ int stat(){
 		instr_t pre_else_jmp;
 		next_token();
 		if(is(token_lbracket)){
-			tok_que_t expr_queue = tok_que_init();
-			token_t tmp;
+			tok_que_t expr_queue = tok_que_init(); // init new queue
 			if(SECOND_PASS){
-				do{
-					if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
-						if(is(token_lbracket)) lb++; // pairing brackets
-						if(is(token_rbracket)) rb++;
-						tok_enqueue(expr_queue, t);
-						next_token();
-					}
-					if(is(token_id)){ // id processing
-						if(!id()){ // already next_token, don't need to get another one
-							tmp.type = token_id;
-							tmp.attr.p = sem_id_decoded.ptr;
-							tok_enqueue(expr_queue, tmp);
-							}
-						else
-							return 2;
-					}
-					else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
-						tmp.type = token_id;
-						tmp.attr.p = add_literal(t); // insert as variable into TS
-						tok_enqueue(expr_queue, tmp);
-						next_token();	
-					}
-				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
-				tmp.type = token_eof; // add eof to the end of queue
-				tok_enqueue(expr_queue, tmp);
-				if(precedence(expr_queue, &precedence_result)) // in case of precedence error, will have to use error var to distinguish this error
+				if(_cond_fill_que(expr_queue, true)) // fill queue, counting brackets is on
+					return 2;
+				if((errno = precedence(expr_queue, &precedence_result)))
 					return 2;
 				sem_generate_jmpifn(precedence_result);
 				if_jmp_instr = active_function->instr_list_end; // we'll add jump target later
@@ -470,14 +421,21 @@ int stat(){
 	else if(is(token_k_while)){
 		next_token();
 		if(is(token_lbracket)){
-			lb++;
-			do{
-				next_token();
-				if(is(token_lbracket)) lb++;
-				if(is(token_rbracket)) rb++;
-			} while(lb != rb || !is(token_rbracket));
-			lb = rb = 0;
-			next_token();
+			tok_que_t expr_queue = tok_que_init(); // init new queue
+			if(SECOND_PASS){
+				if(_cond_fill_que(expr_queue, true)) // fill queue, counting brackets is on
+					return 2;
+				if((errno = precedence(expr_queue, &precedence_result)))
+					return 2;
+				//semantic actions
+			}
+			else{
+				do{ // in first pass skip the whole expression
+					if(is(token_lbracket)) lb++;
+					if(is(token_rbracket)) rb++;
+					next_token();
+				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
+			}
 			if(!stat_com()){
 				return 0;
 			}
@@ -539,8 +497,53 @@ int as_ca(){
 }
 
 int ret_val(){
+	next_token();
+	tok_que_t expr_queue = tok_que_init(); // init new queue
+	if(SECOND_PASS){
+		if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
+			return 2;
+		if((errno = precedence(expr_queue, &precedence_result)))
+			return 2;
+		//semantic actions
+		}
+	else{
+		do{ // in first pass skip the whole expression
+			next_token();
+		} while(t.type <= token_string);
+	}
+	return 0;
+}
+
+int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
+	token_t tmp;
+	int lb, rb;
+	lb = rb = 0;
 	do{
-		next_token();
-	} while(!is(token_semicolon));
+		if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
+			if(count_brackets){
+				if(is(token_lbracket)) lb++;
+				if(is(token_rbracket)) rb++;
+			}
+			tok_enqueue(expr_queue, t);
+			next_token();
+		}
+		if(is(token_id)){ // id processing
+			if(!id()){ // already next_token, don't need to get another one
+				tmp.type = token_id;
+				tmp.attr.p = sem_id_decoded.ptr;
+				tok_enqueue(expr_queue, tmp);
+			}
+			else
+				return 2;
+		}
+		else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
+			tmp.type = token_id;
+			tmp.attr.p = add_literal(t); // insert as variable into TS
+			tok_enqueue(expr_queue, tmp);
+			next_token();	
+		}
+	} while((count_brackets ? (lb != rb || is(token_rbracket)) : 1) && t.type <= token_string);
+	tmp.type = token_eof; // add eof to the end of queue
+	tok_enqueue(expr_queue, tmp);
 	return 0;
 }

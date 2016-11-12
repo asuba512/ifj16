@@ -1,5 +1,6 @@
 #include "token.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 #define FIRST_PASS (pass_number == 1)
 #define SECOND_PASS (pass_number == 2)
@@ -33,3 +34,4 @@ int ret_val();
 int fn_plist();
 int fn_plist1();
 int val_id();
+int _cond_fill_que(tok_que_t, bool);
