@@ -226,6 +226,7 @@ int assign(){
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
+
 			if(is(token_lbracket)){
 				if(!fn_plist())
 					if(is(token_semicolon))
@@ -249,6 +250,10 @@ int assign(){
 				}
 				if(is(token_id)){ // id processing
 					if(!id()){ // already next_token, don't need to get another one
+						if(sem_id_decoded.ptr == NULL) {
+							fprintf(stderr, "ERR: Undefined variable.\n");
+							return 4;
+						}						
 						tmp.type = token_id;
 						tmp.attr.p = sem_id_decoded.ptr;
 						tok_enqueue(expr_queue, tmp);
@@ -347,7 +352,6 @@ int stat(){
 	int lb = 0, rb = 0;
 	if(is(token_id)){
 		if(!id()){
-
 			if(!as_ca() && is(token_semicolon))
 				return 0;
 		}
@@ -457,8 +461,17 @@ int as_ca(){
 	if(is(token_lbracket)){
 		return fn_plist();
 	}
-	else if(is(token_assign)){
-		return assign();
+	else if(is(token_assign)) {
+		op_t tmp_dst;
+		if(SECOND_PASS) {
+			tmp_dst = (op_t)(sem_id_decoded.ptr);
+		}
+		int err = assign();
+		if(err == 0 && SECOND_PASS) {
+			if((err = sem_generate_mov(precedence_result, tmp_dst)))
+				return err;
+		}
+		return err;
 	}
 	return 2;
 }

@@ -160,7 +160,13 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     i.src2 = src2;
     *dst = NULL;
     // dst will be set at the end because we don't know its datatype yet
-
+    if(src1->sc == global && (((class_memb_t)(src1))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as variable.\n");
+        return 4;
+    } else if (src2 && src2->sc == global && (((class_memb_t)(src2))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as variable.\n");
+        return 4;
+    }
     if(src1->dtype == dt_String || (src2 && src2->dtype == dt_String)) {
         if(type == add) {
             i.type = conc; // concatenation of strings and addicion are different instructions
@@ -285,6 +291,16 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
 int sem_generate_mov(op_t src, op_t dst) {
     struct instr i;
     i.type = mov;
+    if(src->sc == global && (((class_memb_t)(src))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as variable.\n");
+        return 4;
+    } else if (!dst) { // undefined dst
+        fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
+        return 3;
+    } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
+        fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
+        return 4;
+    }
     if(src->dtype == dst->dtype) {
         i.src1 = src;
     } else if(src->dtype == dt_int && dst->dtype == dt_double) {
@@ -297,6 +313,9 @@ int sem_generate_mov(op_t src, op_t dst) {
             st_add_fn_instr(active_function, conv); // TODO
         }
         i.src1 = conv.dst;
+    } else {
+        fprintf(stderr, "ERR: Incompatible types of operands.\n");
+        return 99;
     }
     i.dst = dst;
     i.src2 = NULL;

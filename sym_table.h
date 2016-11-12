@@ -29,7 +29,8 @@ typedef enum {
 typedef enum {
 	local,
 	global,
-	literal
+	literal,
+	retval // says interpreter 
 } scope;
 
 // generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)

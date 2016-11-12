@@ -27,3 +27,4 @@ void sem_search();
 void setIsFunFlag(void *symbol);
 int sem_new_loc_var(datatype dt, string_t id);
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst);
+int sem_generate_mov(op_t src, op_t dst);
