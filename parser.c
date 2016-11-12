@@ -45,6 +45,7 @@ int c_list(){
 }
 
 int memb_list(){
+	active_function = NULL;
 	next_token();
 	if(is(token_k_static)){
 		return c_memb() ||  memb_list() ? 2 : 0;
@@ -196,8 +197,10 @@ int fn_body(){
 			}
 		}
 	}
-	else if(is(token_rbrace))
+	else if(is(token_rbrace)) {
+		active_function = NULL;
 		return 0;
+	}
 	return 2;
 }
 
@@ -262,7 +265,7 @@ int assign(){
 			} while(t.type <= token_string);
 			tmp.type = token_eof; // add eof to the end of queue
 			tok_enqueue(expr_queue, tmp);
-			return precedence(expr_queue);
+			return precedence(expr_queue, &precedence_result);
 		}
 	}
 	return 2;
@@ -344,6 +347,7 @@ int stat(){
 	int lb = 0, rb = 0;
 	if(is(token_id)){
 		if(!id()){
+
 			if(!as_ca() && is(token_semicolon))
 				return 0;
 		}
@@ -382,7 +386,7 @@ int stat(){
 				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
 				tmp.type = token_eof; // add eof to the end of queue
 				tok_enqueue(expr_queue, tmp);
-				if(precedence(expr_queue)) // in case of precedence error, will have to use error var to distinguish this error
+				if(precedence(expr_queue, &precedence_result)) // in case of precedence error, will have to use error var to distinguish this error
 					return 2;
 			}
 			else{

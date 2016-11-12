@@ -4,6 +4,7 @@
 
 class_t active_class;
 class_memb_t active_function;
+op_t precedence_result;
 struct temp_data {
     string_t id;
     datatype dt;

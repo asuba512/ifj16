@@ -166,12 +166,12 @@ int st_add_fn_instr(class_memb_t fn, struct instr i) {
 	instr_t new_instr = malloc(sizeof(struct instr));
     if(new_instr == NULL)
         return 99;
-    *new_instr = i;
+	*new_instr = i;
 	new_instr->next = NULL;
     if(fn->instr_list == NULL)
         fn->instr_list = new_instr;
     else
-        fn->instr_list_end->next = new_instr;
+		fn->instr_list_end->next = new_instr;
     fn->instr_list_end = new_instr;
     return 0;
 }

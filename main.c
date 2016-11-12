@@ -20,6 +20,8 @@ extern int lexerror;
 extern int pass_number;
 extern tok_que_t tok_q;
 
+char *op[20] = {"halt", "add", "sub", "imul", "idiv", "conc", "eql", "neq", "gre", "less", "geq", "leq", "or", "and", "not", "mov", "i_dbl", "i_str", "b_str", "d_str"};
+
 int main(int argc, char **argv){
 	(void)argc;
 	fd = fopen(argv[1],"r");
@@ -43,7 +45,10 @@ int main(int argc, char **argv){
 	}
 	
 	str_destroy(buff);
-
+	instr_t i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+		printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+	}
 	fclose(fd);
     return 0;
 }

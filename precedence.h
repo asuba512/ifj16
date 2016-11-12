@@ -1,6 +1,7 @@
 #ifndef PRECEDENCE_H
 #define PRECEDENCE_H
 #include "token.h"
+#include "sym_table.h"
 
 typedef struct prec_stack_element{
 	token_t data;
@@ -21,7 +22,7 @@ typedef struct prec_s{
 	prec_auxst_element top;
 } prec_auxstack_t;
 
-int precedence(tok_que_t);
+int precedence(tok_que_t, op_t*);
 
 void prec_stack_init();
 int prec_stack_push(token_t);

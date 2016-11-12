@@ -1,6 +1,7 @@
 #include "sym_table.h"
 #include "semantic_analysis.h"
 #include "infinite_string.h"
+
 #include <stdio.h>
 
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
@@ -86,7 +87,7 @@ static void _print_demand() {
 }
 
 void sem_search() {
-    print_bullshit = true;
+    print_bullshit = false;
     _print_demand();
     void *symbol = NULL;
     if (sem_id_decoded.class_id == NULL) {
@@ -152,7 +153,7 @@ local_var_t sem_new_tmp_var(datatype dt) {
 
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     op_t new_var, new_dst;
-    struct instr i, conv;
+    struct instr i, conv; // i - main instruction, conv - helper conversion instruction
     // just default values
     i.type = type;
     i.src1 = src1;
@@ -160,7 +161,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     *dst = NULL;
     // dst will be set at the end because we don't know its datatype yet
 
-    if(src1->dtype == dt_String || src2->dtype == dt_String) {
+    if(src1->dtype == dt_String || (src2 && src2->dtype == dt_String)) {
         if(type == add) {
             i.type = conc; // concatenation of strings and addicion are different instructions
             new_dst = (op_t)sem_new_tmp_var(dt_String); // result of concatenation
@@ -278,5 +279,28 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         fprintf(stderr, "ERR: Internal error.\n");
         return 99;
     }
+    return 0;
+}
+
+int sem_generate_mov(op_t src, op_t dst) {
+    struct instr i;
+    i.type = mov;
+    if(src->dtype == dst->dtype) {
+        i.src1 = src;
+    } else if(src->dtype == dt_int && dst->dtype == dt_double) {
+        struct instr conv;
+        conv.type = int_to_dbl;
+        conv.src1 = src;
+        conv.src2 = NULL;
+        if(active_function) {
+            conv.dst = (op_t)sem_new_tmp_var(dt_double); // TODO
+            st_add_fn_instr(active_function, conv); // TODO
+        }
+        i.src1 = conv.dst;
+    }
+    i.dst = dst;
+    i.src2 = NULL;
+    if(active_function)
+        st_add_fn_instr(active_function, i);
     return 0;
 }
