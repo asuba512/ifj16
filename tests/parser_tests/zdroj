@@ -1,12 +1,9 @@
 class Main{
 	static void run(){
-		int d = 5;
-		int x = 5 * (d - 3);
-		while(d >= x){}
-		return (x+d-3);
+		ifj16.print(5 + 5 + "");
 	}
-	static int foo(){
-		return 2;
+	static int foo(int x){
+		return x + 2;
 	}
 
 }

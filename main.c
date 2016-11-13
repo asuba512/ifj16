@@ -36,17 +36,21 @@ int main(int argc, char **argv){
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	printf("retval: %d\n", errno == 2 ? retval : errno);
+	printf("retval: %d\n", errno == 0 ? retval : errno);
 	printf("current token: %d\n", t.type);
+	if(retval != 0){	
+		int c;
+		while((c = getc(fd)) != EOF){
+			putchar(c);
+		}
+		printf("ERR: First pass failed.\n");
+		return 9999999;
+	}
 	pass_number = 2;
 	retval = c_list();
-	printf("retval: %d\n", errno == 1 ? 1 : retval);
+	printf("retval: %d\n", errno == 0 ? retval : errno);
 	printf("current token: %d\n", t.type);
-	int c;
-	while((c = getc(fd)) != EOF){
-		putchar(c);
-	}
-	
+
 	str_destroy(buff);
 	instr_t i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
 	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
