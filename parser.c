@@ -346,6 +346,11 @@ int id1(){
 			if(SECOND_PASS) {
 				sem_id_decoded.memb_id = t.attr.s;
 				sem_search();
+				if(!sem_id_decoded.ptr) {
+					fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+					errno = 3;
+					return 3;
+				}
 			}
 			next_token();
 			return 0;	
@@ -356,6 +361,11 @@ int id1(){
 			sem_id_decoded.memb_id = sem_id_decoded.class_id;
 			sem_id_decoded.class_id = NULL;
 			sem_search();
+			if(!sem_id_decoded.ptr) {
+				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
+				errno = 3;
+				return 3;
+			}
 		}		
 		return 0;
 	}
@@ -454,6 +464,11 @@ int stat(){
 	}
 	else if(is(token_k_return)){
 		if(!ret_val() && is(token_semicolon)){
+			if(SECOND_PASS) {
+				if((errno = sem_generate_ret(precedence_result))) {
+					return 4;
+				}
+			}
 			return 0;
 		}
 	}
@@ -484,7 +499,22 @@ int stat_list(){
 
 int as_ca(){
 	if(is(token_lbracket)){
-		return fn_plist();
+		if(SECOND_PASS) {
+			sem_generate_prepare((class_memb_t)sem_id_decoded.ptr);
+		}
+			
+		int err = fn_plist();
+		if(SECOND_PASS) {
+			if(is(token_semicolon)){					
+				if(!sem_args_ok(calling_function)) {
+					return 4;
+				}
+				sem_generate_call(calling_function);
+				calling_function = NULL;
+				return 0;
+			}
+		}
+		return err;
 	}
 	else if(is(token_assign)) {
 		op_t tmp_dst;
@@ -508,7 +538,10 @@ int as_ca(){
 }
 
 int ret_val(){
+	precedence_result = NULL;
 	next_token();
+	if(is(token_semicolon))
+		return 0;
 	tok_que_t expr_queue = tok_que_init(); // init new queue
 	if(SECOND_PASS){
 		if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
@@ -516,7 +549,7 @@ int ret_val(){
 		if((errno = precedence(expr_queue, &precedence_result)))
 			return 2;
 		//semantic actions
-		}
+	}
 	else{
 		do{ // in first pass skip the whole expression
 			next_token();

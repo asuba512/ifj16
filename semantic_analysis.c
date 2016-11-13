@@ -441,3 +441,31 @@ int sem_set_jmp_dst(instr_t i, op_t dst) {
     i->dst = dst;
     return 0;
 }
+
+int sem_generate_ret(op_t src) {
+    struct instr i;
+    i.type = ret;
+    i.src2 = i.dst = NULL;
+    if(active_function->dtype != t_void && !src) {
+        fprintf(stderr,"ERR: Non-void-function must return a value.\n");
+        return 4;
+    } else if(active_function->dtype == t_void && src) {
+        fprintf(stderr,"ERR: Void-function can't return a value.\n");
+        return 4;
+    } else if((active_function->dtype == t_void && !src) || active_function->dtype == src->dtype) {
+        i.src1 = src;
+    } else if(active_function->dtype == dt_double && src->dtype == dt_int) {
+        struct instr conv;
+        conv.type = int_to_dbl;
+        conv.src1 = src;
+        conv.src2 = NULL;
+        conv.dst = (op_t)sem_new_tmp_var(dt_double);
+        if(!conv.dst || st_add_fn_instr(active_function, conv)) INTERNAL_ERR
+        i.src1 = conv.dst;
+    } else {
+        fprintf(stderr,"ERR: Function does not return a value of compatible type.\n");
+        return 4;
+    }
+    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
+    return 0;
+}
