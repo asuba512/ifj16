@@ -152,6 +152,7 @@ class_table_t classes;
  */
 fn_context_t context_stack_top;
 
+
 void init_class_table();
 int insert_class(string_t id, class_t *target);
 int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func type, datatype dt);
