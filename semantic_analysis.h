@@ -41,3 +41,4 @@ int sem_generate_label();
 int sem_generate_jmp(op_t);
 int sem_set_jmp_dst(instr_t, op_t);
 int sem_generate_ret(op_t src);
+int sem_generate_halt();

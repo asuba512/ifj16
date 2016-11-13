@@ -29,9 +29,15 @@ typedef enum {
 typedef enum {
 	local,
 	global,
-	literal,
-	retval // says interpreter 
+	literal
 } scope;
+
+typedef union {
+	double d_val;
+	int i_val;
+	string_t s_val;
+	bool b_val;
+} var_value;
 
 // generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)
 typedef struct operand {
@@ -55,12 +61,7 @@ typedef struct class_table {
 typedef struct literal {
 	scope sc; ///< for interpreter
 	datatype dtype; ///< datatype of literal
-	union {
-		double d_val;
-		int i_val;
-		string_t s_val;
-		bool b_val;
-	} val; ///< value of literal
+	var_value val; ///< value of literal
 } *literal_t;
 
 struct literal_arr {
@@ -101,12 +102,7 @@ typedef struct class_memb {
 	datatype dtype; ///< return value for functions, datatype for variable
 	string_t id; // temp
 	/** end of common part */
-	union {
-		double d_val;
-		int i_val;
-		string_t s_val;
-		bool b_val;
-	} val; ///< value of global variable, not used by functions
+	var_value val; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
 	int arg_count; ///< argument count, not used by static variable
 	int _max_arg_count;
@@ -128,12 +124,7 @@ typedef struct class_memb {
  */
 typedef struct local_var_inst {
 	bool initialized; ///< indicates whether local variable was initialized or not
-	union {
-		double d_val;
-		int i_val;
-		string_t s_val;
-		bool b_val;
-	} val; ///< value of local variable instance
+	var_value val; ///< value of local variable instance
 } local_var_inst_t;
 
 /**
@@ -144,13 +135,8 @@ typedef struct local_var_inst {
 typedef struct fn_context {
 	struct fn_context *next; ///< pointer to next function context on the stack
 	local_var_inst_t *vars; ///< array of variable instances in current context
-	instr_t ret_addr;
-	union {
-		double d_val;
-		int i_val;
-		string_t s_val;
-		bool b_val;
-	} eax; // "register", where return value is stored after returning from function
+	instr_t ret_addr; ///< store next instruction here before calling function
+	var_value eax; // "register", where return value is stored after returning from function
 } *fn_context_t;
 
 // just to avoid one malloc

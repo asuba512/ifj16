@@ -469,3 +469,11 @@ int sem_generate_ret(op_t src) {
     if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
+
+int sem_generate_halt() {
+    struct instr i;
+    i.type = halt;
+    i.dst = i.src1 = i.src2 = NULL;
+    if (st_add_fn_instr(active_function, i)) INTERNAL_ERR
+    return 0;
+}

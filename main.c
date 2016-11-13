@@ -10,6 +10,7 @@
 #include "infinite_string.h"
 #include "sym_table.h"
 #include "ial.h"
+#include "ifj16_class.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,6 +32,7 @@ int main(int argc, char **argv){
 		return 99;
 	}
 	init_class_table();
+	populate_sym_table();
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();

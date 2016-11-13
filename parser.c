@@ -5,6 +5,7 @@
 #include "sym_table.h"
 #include "infinite_string.h"
 #include "precedence.h"
+#include "ifj16_class.h"
 
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
@@ -204,6 +205,12 @@ int fn_body(){
 		}
 	}
 	else if(is(token_rbrace)) {
+		if(SECOND_PASS) {
+			if(active_function->dtype == t_void)
+				sem_generate_ret(NULL); // append ret instruction at the end of void function
+			else
+				sem_generate_halt(); // append halt instruction at the end of non-void function. correct funcion should not reach this instruction
+		}
 		active_function = NULL;
 		return 0;
 	}
