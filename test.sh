@@ -17,12 +17,12 @@ for i in `ls $GOOD_dir`
 do
 	counter=$(expr $counter + 1)
 	printf "== $counter.) $i \n"
-    ./ifj $GOOD_dir/$i >file 2>&1 
+    ./ifj $GOOD_dir/$i >>subor 2>&1
     printf "\tECHO $ ? = $?\n"
-    error=$(cat file | grep ^ERR.* | wc -l)
+    error=$(cat subor | grep ^ERR.* | wc -l)
     printf "\tERROR    = %s\n" "$error"
 
-    rm file
+    rm subor
 done
 
 ############################################################
@@ -33,10 +33,10 @@ for i in `ls $BAD_dir`
 do
 	counter=$(expr $counter + 1)
 	printf "== $counter.) $i \n"
-    ./ifj $BAD_dir/$i >file 2>&1 
+    ./ifj $BAD_dir/$i >>subor 2>&1
     printf "\tECHO $ ? = $?\n"
-    error=$(cat file | grep ^ERR.* | wc -l)
+    error=$(cat subor | grep ^ERR.* | wc -l)
     printf "\tERROR    = %s\n" "$error"
 
-    rm file
+    rm subor
 done
