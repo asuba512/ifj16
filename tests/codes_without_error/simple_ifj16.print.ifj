@@ -1,0 +1,7 @@
+class Main
+{
+	static void run()
+	{
+		ifj16.print("This is a simple ifj16.print test.");
+	}	
+}

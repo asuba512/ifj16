@@ -1,0 +1,15 @@
+class Main
+{
+	static void run()
+	{
+		int a = 2;
+		double b = 8.8;
+		double c = division(b, a);
+	}
+
+	static double division(double b, int a)
+	{
+		double output = b / a;
+		return output;
+	}
+}
