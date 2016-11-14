@@ -21,8 +21,8 @@ do
     exitvalue=$?
     error=$(cat subor | grep ^ERR.* | wc -l)
     if [ $exitvalue -ne 0 ] && [ $error -ne 0 ]; then
-        printf "\tECHO $ ? = $exitvalue\n"
-        printf "\tERROR    = %s\n" "$error"
+        printf "\t"$""?"    = $exitvalue\n"
+        printf "\tERROR = %s\n" "$error"
     fi
 
     rm subor
@@ -40,8 +40,8 @@ do
     exitvalue=$?
     error=$(cat subor | grep ^ERR.* | wc -l)
     if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
-        printf "\tECHO $ ? = $exitvalue\n"
-        printf "\tERROR    = %s\n" "$error"
+        printf "\t"$""?"    = $exitvalue\n"
+        printf "\tERROR = %s\n" "$error"
     fi
     rm subor
 done
