@@ -10,7 +10,7 @@ make clean
 make
 
 ############################################################
-printf "\n\n=== TESTS WITHOUT ERROR === IF ($ ? == 0) AND (ERROR == 0) THEN TEST PASSED\n"
+printf "\n\n=== TESTS WITHOUT ERROR === IF ("$""?" == 0) AND (ERROR == 0) THEN TEST PASSED\n"
 
 counter=0
 for i in `ls $GOOD_dir`
@@ -29,7 +29,7 @@ do
 done
 
 ############################################################
-printf "\n\n=== TESTS WITH ERROR === IF ($ ? != 0) AND (ERROR != 0) THEN TEST PASSED\n"
+printf "\n\n=== TESTS WITH ERROR === IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED\n"
 
 counter=0
 for i in `ls $BAD_dir`
