@@ -6,6 +6,7 @@
 #include "infinite_string.h"
 #include "precedence.h"
 #include "ifj16_class.h"
+#include <string.h>
 
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
@@ -335,12 +336,36 @@ int val_id(){
 
 int id(){
 	if(is(token_id)){
+		if(SECOND_PASS) {
+			sem_id_decoded.memb_id = t.attr.s;
+			sem_id_decoded.class_id = NULL;
+			sem_search();
+			if(!sem_id_decoded.ptr) {
+				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
+				errno = 3;
+				return 3;
+			}
+		}
 		return 0;
 	}
 	else if(is(token_fqid)){
+		if(SECOND_PASS) {
+			char *ptr = strchr(t.attr.s->data, '.');
+			*ptr = 0;
+			sem_id_decoded.class_id = str_init(t.attr.s->data);
+			sem_id_decoded.memb_id = str_init(ptr + 1);
+			str_destroy(t.attr.s);
+			sem_search();
+			if(!sem_id_decoded.ptr) {
+				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+				errno = 3;
+				return 3;
+			}
+		}
 		return 0;
 	}
-//	sem_id_decoded.ptr = NULL;
+	if(SECOND_PASS)
+		sem_id_decoded.ptr = NULL;
 	return 2;
 }
 /*
