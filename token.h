@@ -25,8 +25,8 @@ typedef enum token_type {
 	token_or, // || 13
 	token_not, // ! 14
 	token_id, // identifier 15
-	token_fqid, // fully qualified identifier 16
-	token_eof, // 17
+	token_eof, // 16
+	token_fqid, // fully qualified identifier 17
 	token_double, // floating point number 18
 	token_int, // integer number 19
 	token_boolean, // boolean literal 20

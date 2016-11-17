@@ -12,6 +12,7 @@ extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
 extern class_memb_t calling_function;
 extern class_memb_t print_fn;
+extern op_t precedence_result;
 
 #define next_token() do{ if(FIRST_PASS){ if((errno = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
@@ -243,7 +244,7 @@ int assign(){
 	if(FIRST_PASS){ // for test purposes, change to FIRST_PASS
 		do{
 			next_token();
-		} while(!is(token_semicolon));
+		} while(t.type <= token_string || is(token_comma));
 		return 0;
 	}
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
@@ -263,13 +264,13 @@ int assign(){
 			}
 		}
 		else{ // expression
-			next_token();
 			token_t tmp;
 			tok_que_t expr_queue = tok_que_init();
 			if(sem_id_decoded.ptr){ // if there was id as first token
 				tmp.type = token_id;
 				tmp.attr.p = sem_id_decoded.ptr;
 				tok_enqueue(expr_queue, tmp);
+				next_token(); // if there was an id(), you should take another token
 			}
 			else if(t.type > token_string){ // unsupported tokens
 				return 2;				
@@ -290,24 +291,21 @@ int fn_plist(){
 		next_token();
 		return 0;
 	}
-	else if(!val_id()){
-		next_token();
+	else if(!val_id())
 		return fn_plist1();
-	}
 	return 2;
 }
 
 int fn_plist1(){
+	next_token();
 	if(is(token_rbracket)){
 		next_token();
 		return 0;
 	}
 	else if(is(token_comma)){
 		next_token();
-		if(!val_id()){
-			next_token();
+		if(!val_id())
 			return fn_plist1();
-		}
 	}
 	return 2;
 }
@@ -368,45 +366,7 @@ int id(){
 		sem_id_decoded.ptr = NULL;
 	return 2;
 }
-/*
-int id1(){
-	if(SECOND_PASS)
-		sem_id_decoded.class_id = t.attr.s;
-	next_token();
-	if(is(token_dot)){
-		next_token();
-		if(is(token_id)){
-			if(SECOND_PASS) {
-				sem_id_decoded.memb_id = t.attr.s;
-				sem_search();
-				if(!sem_id_decoded.ptr) {
-					fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
-					errno = 3;
-					return 3;
-				}
-			}
-			next_token();
-			return 0;	
-		}
-	}
-	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma) || is(token_addition) || is(token_substraction) || is(token_multiplication) || is(token_division) || is(token_less) || is(token_more) || is(token_lesseq) || is(token_moreeq) || is(token_equal) || is(token_nequal) || is(token_and) || is(token_or) || is(token_not) || is(token_semicolon)){
-		if(SECOND_PASS) {
-			sem_id_decoded.memb_id = sem_id_decoded.class_id;
-			sem_id_decoded.class_id = NULL;
-			sem_search();
-			if(!sem_id_decoded.ptr) {
-				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
-				errno = 3;
-				return 3;
-			}
-		}		
-		return 0;
-	}
-	if(SECOND_PASS)
-		sem_id_decoded.ptr = NULL;
-	return 2;
-}
-*/
+
 int stat(){
 	int lb = 0, rb = 0;
 	if(is(token_id) || is(token_fqid)){
@@ -540,29 +500,31 @@ int as_ca(){
 			if(sem_id_decoded.ptr == print_fn){ // in case of ifj16.print()
 				int counter = 1;
 				bool is_string = false;
-				op_t literal, result;
-
-				token_t eps = {.type = token_string, .attr.s = str_init("")}; // empty string
-				result = (op_t)add_literal(eps);
-
+				tok_que_t expr_queue = tok_que_init();
+				token_t tmp;
 				next_token();
 				do{
 					if((counter%2 == 0 && !is(token_addition)) || (counter%2 == 1 && is(token_addition))){
 						fprintf(stderr, "ERR: Function ifj16.print() supports only simple concatenation expressions.\n");
 						return 2;
 					}
+				
+					if(is(token_addition))
+						tok_enqueue(expr_queue, t);
 					
-					/*
-					if((is(token_id) || is(token_fqid) && !id()){
-						concatenate sem_id_decoded.ptr to result
+					if((is(token_id) || is(token_fqid)) && !id()){
+						if(((class_memb_t)sem_id_decoded.ptr)->dtype == dt_String)
+							is_string = true;
+						tmp.type = token_id;
+						tmp.attr.p = sem_id_decoded.ptr;
+						tok_enqueue(expr_queue, tmp);
 					}
-					if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
-						literal = (op_t)add_literal(t);
-						concatenate literal to result
-					}
-					*/
-					if(is(token_string)){ //TODO OR id is of type string
-						is_string = true;
+					else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
+						if(is(token_string))
+							is_string = true;
+						tmp.type = token_id;
+						tmp.attr.p = add_literal(t); // insert as variable into TS
+						tok_enqueue(expr_queue, tmp);
 					}
 
 					next_token();
@@ -572,10 +534,18 @@ int as_ca(){
 					printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
 					return errno = 3; //TODO !!!IDK corrent return value.
 				}
-				next_token(); // should be semicolon
+				tmp.type = token_eof;
+				tok_enqueue(expr_queue, tmp);
+				err = precedence(expr_queue, &precedence_result);
+				if(err)
+					return errno = err;
+				sem_rst_argcount();	
+				sem_generate_push(calling_function, precedence_result); // push result of concatenation
 
-				sem_rst_argcount();				
-				sem_generate_push(calling_function, result); // push result of concatenation
+				if(is(token_rbracket))
+					next_token();
+				else
+					return 2;
 			}
 			else
 				err = fn_plist();
@@ -594,9 +564,11 @@ int as_ca(){
 			do{
 				next_token();
 			} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
-			next_token();
-			if(is(token_semicolon)){
-				return 0;
+			if(is(token_rbracket)){
+				next_token();
+				if(is(token_semicolon)){
+					return 0;
+				}
 			}
 			return 2;
 		}

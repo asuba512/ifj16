@@ -3,7 +3,7 @@ class Main
 static void run()
 {
 int a;
-ifj16.print();
+ifj16.print("" + 5 + 3 + "kostka cukru");
 a = ifj16.readInt();
 int vysl;
 if (a < 0) { // nacitani zaporneho cisla nemusite podporovat
