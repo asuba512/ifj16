@@ -144,7 +144,13 @@ int get_token(FILE *fd, token_t *t) {
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_')
 					str_addchar(buff, c);	
+		else if(c == '.'){
+					str_addchar(buff, c);
+					state = _state_dot_fqidentifier;
+		}
                 else{
+					if(c == '"') // characters that can't follow right after identifier
+						return 1;
 					ungetc(c, fd);
 					if(!strcmp(buff->data, "boolean")){
 						t->type = token_k_boolean;
@@ -201,8 +207,40 @@ int get_token(FILE *fd, token_t *t) {
 						return 0;
 					}
 					return 0;
-                }
-                break;
+		                }
+		                break;
+			case _state_dot_fqidentifier:
+				if(c == '_'){
+					str_addchar(buff, c);
+					state = _state_fqidentifier;
+				}
+				else if(isalpha(c) || c == '$'){
+					str_addchar(buff, c);
+					state = state_fqidentifier;
+				}
+				else
+					return 1;
+				break;
+			case _state_fqidentifier:
+				if(c == '_' || c == '$' || isalnum(c)){
+					str_addchar(buff, c);
+					state = state_fqidentifier;
+				}
+				else
+					return 1;
+				break;
+			case state_fqidentifier:
+				if(isalnum(c) || c == '$' || c == '_')
+					str_addchar(buff, c);
+				else{
+					if(c == '"' || c == '.') // characters that cannot follow right after identifier
+						return 1;
+					ungetc(c, fd);
+					t->type = token_fqid;
+					t->attr.s = str_init(buff->data);
+					return 0;
+				}
+				break;
 			case state_less:
 				if(c == '=')
 					t->type = token_lesseq;
@@ -301,6 +339,8 @@ int get_token(FILE *fd, token_t *t) {
 					state = _state_double_e;
 				}
 				else{
+					if(isalnum(c))
+						return 1;
 					ungetc(c, fd);
 					t->type = token_double;
 					t->attr.d = strtod(buff->data, &endptr);

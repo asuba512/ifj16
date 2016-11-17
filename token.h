@@ -25,33 +25,34 @@ typedef enum token_type {
 	token_or, // || 13
 	token_not, // ! 14
 	token_id, // identifier 15
-	token_eof, // 16
-	token_double, // floating point number 17
-	token_int, // integer number 18
-	token_boolean, // boolean literal 19
-	token_string, // string 20
-	token_lbrace, // { 21
-	token_rbrace, // } 22
-	token_comma, // , 23
-	token_assign, // = 24
-	token_semicolon, // ; 25
-	token_dot, // . 26
-	token_k_boolean, // keyword boolean 27
-	token_k_break, // keyword break 28
-	token_k_class, // keyword  class 29
-	token_k_continue, // keyword continue 30
-	token_k_do, // keyword do 31
-	token_k_double, // keyword double 32
-	token_k_else, // keyword else 33
-	token_k_for, // keyword for 34
-	token_k_if, // keyword if 35
-	token_k_int, // keyword int 36
-	token_k_return, // keyword return 37
-	token_k_string, // keyword String 38
-	token_k_static, // keyword static 39
-	token_k_void, // keyword void 40
-	token_k_while, // keyword while 41
-	token_nonterminal
+	token_fqid, // fully qualified identifier 16
+	token_eof, // 17
+	token_double, // floating point number 18
+	token_int, // integer number 19
+	token_boolean, // boolean literal 20
+	token_string, // string 21
+	token_lbrace, // { 22
+	token_rbrace, // } 23
+	token_comma, // , 24
+	token_assign, // = 25
+	token_semicolon, // ; 26
+	token_dot, // . 27
+	token_k_boolean, // keyword boolean 28
+	token_k_break, // keyword break 29
+	token_k_class, // keyword  class 30
+	token_k_continue, // keyword continue 31
+	token_k_do, // keyword do 32
+	token_k_double, // keyword double 33
+	token_k_else, // keyword else 34
+	token_k_for, // keyword for 35
+	token_k_if, // keyword if 36
+	token_k_int, // keyword int 37
+	token_k_return, // keyword return 38
+	token_k_string, // keyword String 39
+	token_k_static, // keyword static 40
+	token_k_void, // keyword void 41
+	token_k_while, // keyword while 42
+	token_nonterminal // for precedence analysis 43
 } token_type;
 
 typedef union attr {
