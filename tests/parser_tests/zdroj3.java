@@ -4,8 +4,11 @@ class Main
     static int x;
     static void run()
     {
+        
         double b;
         int a = 5;
+        Main.run();
+        ifj16.print(5+5+"ok");
         b = test1(5, true, 42, "ok");
         b = a+54* 5 - 8 + 6*6 / 42;
         boolean bool = !(42 == 5);
@@ -14,9 +17,7 @@ class Main
         str1 = "Toto je nejaky text" + 6;
         String str2;
         str2 = str1 + ", ktery jeste trochu obohatime";
-        Main.x = 42;
         x = 6;
-        Game.play(str1);
     }
 
     static int test1(int a, boolean bool, int c, String str) {
@@ -41,7 +42,7 @@ class Game
     static void play(String str)
     {
         Main.run();
-        main.test1();
+        Main.test1(5, true, 5, "ok");
         double d = 42;
         int cmp = 42;
         if (cmp != 0) {
