@@ -29,7 +29,7 @@ typedef enum {
 typedef enum {
 	local,
 	global,
-	literal
+	helper
 } scope;
 
 typedef union {
@@ -58,16 +58,17 @@ typedef struct class_table {
 	bst_node_t root; ///< Root node
 } *class_table_t;
 
-typedef struct literal {
+typedef struct global_helper_var {
 	scope sc; ///< for interpreter
 	datatype dtype; ///< datatype of literal
+	bool initialized;
 	var_value val; ///< value of literal
-} *literal_t;
+} *glob_helper_var_t;
 
-struct literal_arr {
+struct global_helper_var_arr {
 	int length, max_length;
-	literal_t arr;
-} literals;
+	glob_helper_var_t arr;
+} glob_helper_vars;
 
 /** 
  * @brief Pointer to class entry in global class table
@@ -139,6 +140,13 @@ typedef struct fn_context {
 	var_value eax; // "register", where return value is stored after returning from function
 } *fn_context_t;
 
+typedef struct instr_list {
+	instr_t head;
+	instr_t tail;
+} instr_list_t;
+
+instr_list_t glob_instr_list;
+
 // just to avoid one malloc
 struct class_table ctable;
 
@@ -161,8 +169,9 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id);
 local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id);
 class_t st_getclass(string_t id);
 class_memb_t st_getmemb(class_t c, string_t id);
-literal_t add_literal(struct token t);
+glob_helper_var_t add_global_helper_var(struct token t, bool initialized);
 local_var_t st_get_loc_var(class_memb_t m, string_t id);
 int st_add_fn_instr(class_memb_t fn, struct instr i);
+int st_add_glob_instr(struct instr i);
 
 #endif

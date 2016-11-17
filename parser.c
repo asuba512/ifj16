@@ -324,8 +324,8 @@ int val_id(){
 	if(is(token_int) || is(token_double) || is(token_string) || is(token_boolean)){
 		if(SECOND_PASS) {
 			if(calling_function) {
-				op_t literal = (op_t)add_literal(t);
-				//printf("Literal: %d (%p)\n", ((literal_t)literal)->i_val, (void*)literal);
+				op_t literal = (op_t)add_global_helper_var(t, true);
+				//printf("Literal: %d (%p)\n", ((glob_helper_var_t)literal)->i_val, (void*)literal);
 				sem_generate_push(calling_function, literal);
 			}
 		}
@@ -368,45 +368,7 @@ int id(){
 		sem_id_decoded.ptr = NULL;
 	return 2;
 }
-/*
-int id1(){
-	if(SECOND_PASS)
-		sem_id_decoded.class_id = t.attr.s;
-	next_token();
-	if(is(token_dot)){
-		next_token();
-		if(is(token_id)){
-			if(SECOND_PASS) {
-				sem_id_decoded.memb_id = t.attr.s;
-				sem_search();
-				if(!sem_id_decoded.ptr) {
-					fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
-					errno = 3;
-					return 3;
-				}
-			}
-			next_token();
-			return 0;	
-		}
-	}
-	else if(is(token_lbracket) || is(token_rbracket) || is(token_assign) || is(token_comma) || is(token_addition) || is(token_substraction) || is(token_multiplication) || is(token_division) || is(token_less) || is(token_more) || is(token_lesseq) || is(token_moreeq) || is(token_equal) || is(token_nequal) || is(token_and) || is(token_or) || is(token_not) || is(token_semicolon)){
-		if(SECOND_PASS) {
-			sem_id_decoded.memb_id = sem_id_decoded.class_id;
-			sem_id_decoded.class_id = NULL;
-			sem_search();
-			if(!sem_id_decoded.ptr) {
-				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
-				errno = 3;
-				return 3;
-			}
-		}		
-		return 0;
-	}
-	if(SECOND_PASS)
-		sem_id_decoded.ptr = NULL;
-	return 2;
-}
-*/
+
 int stat(){
 	int lb = 0, rb = 0;
 	if(is(token_id) || is(token_fqid)){
@@ -543,7 +505,7 @@ int as_ca(){
 				op_t literal, result;
 
 				token_t eps = {.type = token_string, .attr.s = str_init("")}; // empty string
-				result = (op_t)add_literal(eps);
+				result = (op_t)add_global_helper_var(eps, true);
 
 				next_token();
 				do{
@@ -557,7 +519,7 @@ int as_ca(){
 						concatenate sem_id_decoded.ptr to result
 					}
 					if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
-						literal = (op_t)add_literal(t);
+						literal = (op_t)add_global_helper_var(t, true);
 						concatenate literal to result
 					}
 					*/
@@ -668,7 +630,7 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 		}
 		else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
 			tmp.type = token_id;
-			tmp.attr.p = add_literal(t); // insert as variable into TS
+			tmp.attr.p = add_global_helper_var(t, true); // insert as variable into TS
 			tok_enqueue(expr_queue, tmp);
 			next_token();	
 		}

@@ -8,8 +8,8 @@
 
 void init_class_table() {
 	classes = &ctable; // yep that's all
-	literals.length = 0; // initializing literal array as well
-	literals.max_length = 0;
+	glob_helper_vars.length = 0; // initializing literal array as well
+	glob_helper_vars.max_length = 0;
 }
 
 int insert_class(string_t id, class_t *target) {
@@ -123,43 +123,44 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id) {
 	return result ? (local_var_t)(result->data) : NULL;
 }
 
-static int _add_literal_space() {
-	literal_t new_space = realloc(literals.arr, (literals.length + 100) * sizeof(struct literal));
+static int _add_global_helper_var_space() {
+	glob_helper_var_t new_space = realloc(glob_helper_vars.arr, (glob_helper_vars.length + 100) * sizeof(struct global_helper_var));
 	if(new_space == NULL)
 		return 99;
-	literals.arr = new_space;
-	literals.max_length += 100;
+	glob_helper_vars.arr = new_space;
+	glob_helper_vars.max_length += 100;
 	return 0;
 }
 
-literal_t add_literal(struct token t) {
-	if(literals.length == literals.max_length) 
-		if(_add_literal_space() != 0) {
+glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
+	if(glob_helper_vars.length == glob_helper_vars.max_length) 
+		if(_add_global_helper_var_space() != 0) {
 			return NULL;
 		}
 	switch(t.type) {
 		case token_double:
-			literals.arr[literals.length].val.d_val = t.attr.d;
-			literals.arr[literals.length].dtype = dt_double;
+			glob_helper_vars.arr[glob_helper_vars.length].val.d_val = t.attr.d;
+			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_double;
 			break;
 		case token_int:
-			literals.arr[literals.length].val.i_val = t.attr.i;
-			literals.arr[literals.length].dtype = dt_int;
+			glob_helper_vars.arr[glob_helper_vars.length].val.i_val = t.attr.i;
+			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_int;
 			break;
 		case token_string:
-			literals.arr[literals.length].val.s_val = t.attr.s;
-			literals.arr[literals.length].dtype = dt_String;
+			glob_helper_vars.arr[glob_helper_vars.length].val.s_val = t.attr.s;
+			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_String;
 			break;
 		case token_boolean:
-			literals.arr[literals.length].val.b_val = t.attr.b;
-			literals.arr[literals.length].dtype = dt_boolean;
+			glob_helper_vars.arr[glob_helper_vars.length].val.b_val = t.attr.b;
+			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_boolean;
 			break;
 		default:
 			break;
 	}
-	literals.arr[literals.length].sc = literal; // just interpret things
-	literals.length++;
-	return &(literals.arr[literals.length-1]);
+	glob_helper_vars.arr[glob_helper_vars.length].sc = helper; // just interpret things
+	glob_helper_vars.arr[glob_helper_vars.length].initialized = initialized;
+	glob_helper_vars.length++;
+	return &(glob_helper_vars.arr[glob_helper_vars.length-1]);
 }
 
 int st_add_fn_instr(class_memb_t fn, struct instr i) {
@@ -192,3 +193,22 @@ local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
 	free(tmp);
 	return NULL;
 }
+
+void st_init_glob_instr_list() {
+	glob_instr_list.head = glob_instr_list.tail = NULL;
+}
+
+int st_add_glob_instr(struct instr i) {
+	instr_t new_instr = malloc(sizeof(struct instr));
+    if(new_instr == NULL)
+        return 99;
+	*new_instr = i;
+	new_instr->next = NULL;
+    if(glob_instr_list.head == NULL)
+        glob_instr_list.head = new_instr;
+    else
+		glob_instr_list.tail->next = new_instr;
+    glob_instr_list.tail = new_instr;
+    return 0;
+}
+

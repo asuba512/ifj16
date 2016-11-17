@@ -8,18 +8,19 @@
 bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initialized) {
     class_memb_t glob;
     local_var_t loc;
-    literal_t lit;
+    glob_helper_var_t helper;
     if(op->sc == global) {
         glob = (class_memb_t)op;
         *dtype = glob->dtype;
         *target = &(glob->val);
         *initialized = &(glob->initialized);
         return glob->initialized;
-    } else if(op->sc == literal) {
-        lit = (literal_t)op;
-        *dtype = lit->dtype;
-        *target = &(lit->val);
-        return true; // literal is always initialized
+    } else if(op->sc == helper) {
+        helper = (glob_helper_var_t)op;
+        *dtype = helper->dtype;
+        *target = &(helper->val);
+        *initialized = &(helper->initialized);
+        return helper->initialized; // this ain't just literal anymore ...
     } else if(op->sc == local) {
         loc = (local_var_t)op;
         *dtype = loc->dtype;

@@ -73,7 +73,7 @@ static void _print_decoded_id(void *symbol) {
         return;
     }
     local_var_t elem = (local_var_t) symbol;
-    if(elem->sc != literal) {
+    if(elem->sc != helper) {
         printf("Decoded %s (%d): %s (%p)\n", sem_id_decoded.isFun ? "fun" : "var", elem->sc, elem->id->data, symbol);
     }
 }
