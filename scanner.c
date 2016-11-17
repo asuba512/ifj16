@@ -24,15 +24,10 @@ int get_token(FILE *fd, token_t *t) {
 		str_empty(buff); // if it is a consecutive call of get_token, empty buffer
 	
 	while(1){
-		c = getc(fd);		
-		if(c == EOF){
-			t->type = token_eof;
-			return 0;
-		}
-
-        switch(state){
-            case state_init:
-                if(c == '/')
+		c = getc(fd);
+        	switch(state){
+	            case state_init:
+        	        if(c == '/')
 					state = _state_division;
 				else if(c == '*'){
 					t->type = token_multiplication;
@@ -78,10 +73,6 @@ int get_token(FILE *fd, token_t *t) {
 					t->type = token_comma;
 					return 0;
 				}
-				else if(c == '.'){
-					t->type = token_dot;
-					return 0;
-				}
 				else if(c == '&')
 					state = state_and;
 				else if(c == '|')
@@ -103,9 +94,12 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_string;
 				}
 				else if(isspace(c));
-				else{
-					return 1;
+				else if(c == EOF){
+					t->type = token_eof;
+					return 0;
 				}
+				else
+					return 1;
                 break;
 			case _state_division:
 				if(c == '/')
@@ -119,17 +113,24 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				break;
 			case state_linecomment:
-				if(c == '\n')
+				if(c == '\n' || c == EOF) // EOF in case of file without newline before EOF
 					state = state_init;
 				break;
 			case _state_blockcomment:
 				if(c == '*')
 					state = state_blockcomment;
+				else if(c == EOF){
+					return 1;
+				}
 				break;
 			case state_blockcomment:
 				if(c == '/')
 					state = state_init;
 				else if(c == '*');
+				else if(c == EOF){
+					ungetc(c, fd);
+					return 1;
+				}
 				else
 					state = _state_blockcomment;
 				break;
@@ -138,13 +139,23 @@ int get_token(FILE *fd, token_t *t) {
 						str_addchar(buff, c);
 						state = state_identifier;
 					}
-					else
+					else{
+						ungetc(c, fd);
 						return 1;
+					}
 				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_')
 					str_addchar(buff, c);	
+		else if(c == '.'){
+					str_addchar(buff, c);
+					state = _state_dot_fqidentifier;
+		}
                 else{
+					if(c == '"'){ // characters that can't follow right after identifier
+						ungetc(c, fd);
+						return 1;
+					}
 					ungetc(c, fd);
 					if(!strcmp(buff->data, "boolean")){
 						t->type = token_k_boolean;
@@ -201,8 +212,44 @@ int get_token(FILE *fd, token_t *t) {
 						return 0;
 					}
 					return 0;
-                }
-                break;
+		                }
+		                break;
+			case _state_dot_fqidentifier:
+				if(c == '_'){
+					str_addchar(buff, c);
+					state = _state_fqidentifier;
+				}
+				else if(isalpha(c) || c == '$'){
+					str_addchar(buff, c);
+					state = state_fqidentifier;
+				}
+				else{
+					ungetc(c, fd);
+					return 1;
+				}
+				break;
+			case _state_fqidentifier:
+				if(c == '_' || c == '$' || isalnum(c)){
+					str_addchar(buff, c);
+					state = state_fqidentifier;
+				}
+				else{
+					ungetc(c, fd);
+					return 1;
+				}
+				break;
+			case state_fqidentifier:
+				if(isalnum(c) || c == '$' || c == '_')
+					str_addchar(buff, c);
+				else{
+					ungetc(c, fd);
+					if(c == '"' || c == '.') // characters that cannot follow right after identifier						
+						return 1;
+					t->type = token_fqid;
+					t->attr.s = str_init(buff->data);
+					return 0;
+				}
+				break;
 			case state_less:
 				if(c == '=')
 					t->type = token_lesseq;
@@ -246,6 +293,7 @@ int get_token(FILE *fd, token_t *t) {
 					return 0;
 				}
 				else{
+					ungetc(c, fd);
 					return 1;
 				}
 				break;
@@ -255,6 +303,7 @@ int get_token(FILE *fd, token_t *t) {
 					return 0;
 				}
 				else{
+					ungetc(c, fd);
 					return 1;
 				}
 				break;
@@ -269,12 +318,10 @@ int get_token(FILE *fd, token_t *t) {
 					str_addchar(buff, c);	
 					state = _state_double_e;
 				}
-				else if(isalpha(c)){
-					t = NULL;;
-					return 1;
-				}
 				else{
-					 ungetc(c, fd);
+					ungetc(c, fd);
+					if(isalpha(c))
+						return 1;
 					t->type = token_int;
 					t->attr.i = strtol(buff->data, &endptr, 10);
 					return 0;
@@ -287,8 +334,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_double;
 				}
 				else{
-					ungetc(c, fd); 
-					t = NULL;;
+					ungetc(c, fd);
 					return 1;
 				}
 				break;
@@ -302,6 +348,8 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
+					if(isalpha(c) || c == '.')
+						return 1;
 					t->type = token_double;
 					t->attr.d = strtod(buff->data, &endptr);
 					return 0;
@@ -318,7 +366,6 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
 					return 1;
 				}
 				break;
@@ -329,7 +376,6 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
 					return 1;
 				}
 				break;
@@ -338,6 +384,8 @@ int get_token(FILE *fd, token_t *t) {
 					str_addchar(buff, c);	
 				else{
 					ungetc(c, fd);
+					if(isalpha(c) || c == '.')
+						return 1;
 					t->type = token_double;
 					t->attr.d = strtod(buff->data, &endptr);
 					return 0;
@@ -353,7 +401,7 @@ int get_token(FILE *fd, token_t *t) {
 					t->attr.s = str_init(buff->data);
 					return 0;
 				}
-				else if(c == '\n'){
+				else if(c == '\n' || c == EOF){
 					return 1;
 				}
 				else
@@ -379,7 +427,6 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
 					return 1;
 				}
 				break;
@@ -390,7 +437,6 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
 					return 1;
 				}
 				break;
@@ -406,7 +452,6 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				else{
 					ungetc(c, fd);
-					t = NULL;;
 					return 1;
 				}
 				break;
@@ -415,4 +460,3 @@ int get_token(FILE *fd, token_t *t) {
     }
 	return 0;
 }
-

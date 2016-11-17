@@ -53,6 +53,10 @@ int main(int argc, char **argv){
 					printf("ID: %s\n", t.attr.s->data);
 					str_destroy(t.attr.s);
 					break;
+				case token_fqid:
+					printf("FQID: %s\n", t.attr.s->data);
+					str_destroy(t.attr.s);
+					break;
 				case token_boolean:
 					printf("%s\n", t.attr.b ? "true" : "false");
 					break;
@@ -170,6 +174,7 @@ int main(int argc, char **argv){
 			}
 		}
 		else{
+			printf("lex error\n");
 		}
 		(retval = get_token(fd, &t));
 	}
