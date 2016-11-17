@@ -15,13 +15,6 @@ extern class_memb_t print_fn;
 #define next_token() do{ if(FIRST_PASS){ if((errno = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
 
-/*
-TODO:
-	- global variable for storing pointers into table of symbols in id()/id1() during SECOND PASS
-	- adding literal into TS as variables
-	- add inserting in expr queue in other places (maybe function, maybe inline implementation)
-	- debugging (a lot)
-*/
 
 int c_list(){
 	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
@@ -186,7 +179,7 @@ int par_def(){
 
 int fn_body(){
 	next_token();
-	if(is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
+	if(is(token_id) || is(token_fqid) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
 		if(!stat()){
 			return fn_body();
 		}
@@ -256,6 +249,7 @@ int assign(){
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
 			sem_generate_prepare((class_memb_t)sem_id_decoded.ptr);
+			next_token();
 			if(is(token_lbracket)){
 				if(!fn_plist())
 					if(is(token_semicolon)){					
@@ -268,6 +262,7 @@ int assign(){
 			}
 		}
 		else{ // expression
+			next_token();
 			token_t tmp;
 			tok_que_t expr_queue = tok_que_init();
 			if(sem_id_decoded.ptr){ // if there was id as first token
@@ -295,6 +290,7 @@ int fn_plist(){
 		return 0;
 	}
 	else if(!val_id()){
+		next_token();
 		return fn_plist1();
 	}
 	return 2;
@@ -307,8 +303,10 @@ int fn_plist1(){
 	}
 	else if(is(token_comma)){
 		next_token();
-		if(!val_id())
+		if(!val_id()){
+			next_token();
 			return fn_plist1();
+		}
 	}
 	return 2;
 }
@@ -330,7 +328,6 @@ int val_id(){
 				sem_generate_push(calling_function, literal);
 			}
 		}
-		next_token();
 		return 0;
 	}
 	return 2;
@@ -338,12 +335,15 @@ int val_id(){
 
 int id(){
 	if(is(token_id)){
-		return id1();
+		return 0;
 	}
-	sem_id_decoded.ptr = NULL;
+	else if(is(token_fqid)){
+		return 0;
+	}
+//	sem_id_decoded.ptr = NULL;
 	return 2;
 }
-
+/*
 int id1(){
 	if(SECOND_PASS)
 		sem_id_decoded.class_id = t.attr.s;
@@ -381,11 +381,12 @@ int id1(){
 		sem_id_decoded.ptr = NULL;
 	return 2;
 }
-
+*/
 int stat(){
 	int lb = 0, rb = 0;
-	if(is(token_id)){
+	if(is(token_id) || is(token_fqid)){
 		if(!id()){
+			next_token();
 			if(!as_ca() && is(token_semicolon))
 				return 0;
 		}
@@ -494,7 +495,7 @@ int stat_com(){
 
 int stat_list(){
 	next_token();
-	if(is(token_id) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
+	if(is(token_id) || is(token_fqid) || is(token_lbrace) || is(token_k_if) || is(token_k_while) || is(token_k_return)){
 		if(!stat()){
 			return stat_list();
 		}
@@ -527,7 +528,7 @@ int as_ca(){
 					}
 					
 					/*
-					if(is(token_id) && !id()){
+					if((is(token_id) || is(token_fqid) && !id()){
 						concatenate sem_id_decoded.ptr to result
 					}
 					if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
@@ -541,7 +542,7 @@ int as_ca(){
 
 					next_token();
 					counter++;
-				} while(is(token_id) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition));
+				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition));
 				if(!is_string){
 					printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
 					return errno = 3; //TODO !!!IDK corrent return value.
@@ -567,7 +568,7 @@ int as_ca(){
 		else{ // FIRST_PASS
 			do{
 				next_token();
-			} while(is(token_id) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
+			} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
 			next_token();
 			if(is(token_semicolon)){
 				return 0;
@@ -622,7 +623,7 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 	int lb, rb;
 	lb = rb = 0;
 	do{
-		if(t.type <= token_string && !is(token_id) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
+		if(t.type <= token_string && !is(token_id) && !is(token_fqid) && !is(token_int) && !is(token_double) && !is(token_boolean) && !is(token_string)){ // operators
 			if(count_brackets){
 				if(is(token_lbracket)) lb++;
 				if(is(token_rbracket)) rb++;
@@ -630,11 +631,12 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 			tok_enqueue(expr_queue, t);
 			next_token();
 		}
-		if(is(token_id)){ // id processing
-			if(!id()){ // already next_token, don't need to get another one
+		if(is(token_id) || is(token_fqid)){ // id processing
+			if(!id()){
 				tmp.type = token_id;
 				tmp.attr.p = sem_id_decoded.ptr;
 				tok_enqueue(expr_queue, tmp);
+				next_token();
 			}
 			else
 				return 2;
