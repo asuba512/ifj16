@@ -1,7 +1,0 @@
-class Main
-{
-	static void run()
-	{
-		double d="Double is string!";
-	}
-}

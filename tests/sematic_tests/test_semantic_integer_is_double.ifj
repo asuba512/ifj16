@@ -1,7 +1,0 @@
-class Main
-{
-	static void run()
-	{
-		int i=5.5;
-	}
-}

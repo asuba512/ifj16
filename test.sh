@@ -12,20 +12,26 @@ GOOD_dir_1="`pwd`/tests/codes_without_error"
 switch_BAD_dir_1=0
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
-switch_BAD_dir_2=0
+switch_BAD_dir_2=1
 BAD_dir_2="`pwd`/tests/parser_tests"
 
 switch_SCANNER_DIR=1
 SCANNER_DIR="`pwd`/tests/scanner_tests"
 
+switch_SYMBOLIC_TABLE=1
+SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
+
+# expecting that the code is without error and the existatus of "./ifj FILE" is 0
+switch_MANUAL_CODES=1
+MANUAL_CODES="`pwd`/tests/codes_from_manual"
+
 ############################################################
-if [ $switch_GOOD_dir_1 -eq 0 ] || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ]; then
-	printf "\n\n=== IFJ BUILD ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make ===\n"
-	make
-fi
+printf "\n\n=== IFJ BUILD ===\n"
+printf "=== make clean ===\n"
+make clean
+printf "=== make ===\n"
+make
+
 ############################################################
 if [ $switch_GOOD_dir_1 -eq 0 ]; then
 
@@ -89,10 +95,11 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	counter=0
 	for i in `ls $BAD_dir_2`
 	do
-	    i_cond=$(echo $i | grep ^zdroj.*$ | wc -l) # ak je subor "zdroj......" tak i_cond=1 inak 0
+	    i_cond=$(echo $i | grep ^zdroj.*$ | wc -l) # file name starts with "zdroj..." then skip this file
 	    if [ $i_cond -eq 1 ]; then
 	        continue
 	    fi
+
 	    counter=$(expr $counter + 1)
 	    printf "= $counter.) $i \n"
 	    ./ifj $BAD_dir_2/$i >>subor 2>&1
@@ -104,6 +111,34 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	    fi
 	    rm subor
 	done
+fi
+
+############################################################
+if [ $switch_MANUAL_CODES -eq 0 ]; then
+	
+	dir=$(echo $MANUAL_CODES | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS MANUAL CODES ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) THEN TEST PASSED ===\n"
+
+	counter=0
+	> empty_file
+	for i in `ls $MANUAL_CODES`
+	do
+	    counter=$(expr $counter + 1)
+	    printf "= $counter.) $i \n"
+	    ./ifj $MANUAL_CODES/$i 2>stderr_subor
+	    exitvalue=$?
+	    diff stderr_subor empty_file > /dev/null
+	    exitvalue_diff=$?
+	    if [ $exitvalue -ne 0 ] || [ $exitvalue_diff -ne 0 ]; then
+	        printf "\t"$""?" = $exitvalue\n"
+	        printf "\tSTDERR include errors\n"
+	    fi
+	    rm stderr_subor
+	done
+	rm empty_file
 fi
 
 ############################################################
@@ -123,10 +158,11 @@ if [ $switch_SCANNER_DIR -eq 0 ]; then
 	counter=0
 	for i in `ls $SCANNER_DIR`
 	do
-		i_cond=$(echo $i | grep ^.*output$ | wc -l)
+		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
 		if [ $i_cond -eq 1 ]; then
 			continue
 		fi
+
 	    counter=$(expr $counter + 1)
 	    printf "= $counter.) $i \n"
 	    ./sc_test "$SCANNER_DIR/$i" >subor
@@ -135,6 +171,52 @@ if [ $switch_SCANNER_DIR -eq 0 ]; then
 	    if [ $exitvalue -ne 0 ]; then
 	        printf "\tDIFF "$""?" = 1 (different output)\n"
 	    fi
+	    rm subor
+	done
+fi
+
+############################################################
+if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
+	
+	dir=$(echo $SYMBOLIC_TABLE | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS SYMBOLIC TABLE ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF stdout == .output THEN TEST PASSED ===\n"
+	printf "=== make clean ===\n"
+	make clean
+	printf "=== make sem_test ===\n"
+	make sem_test
+	printf "=== make done ===\n"
+
+	counter=0
+	for i in `ls $SYMBOLIC_TABLE`
+	do
+		ignored_file=$(echo $i | grep ^ignored.*$ | wc -l) # file name starts with "ignored..." then skip this file
+		if [ $ignored_file -eq 1 ]; then
+			continue
+		fi
+
+		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+	    
+	    counter=$(expr $counter + 1)
+	    printf "= $counter.) $i \n"
+	    ./sem_test "$SYMBOLIC_TABLE/$i" >subor 2>stderr_subor
+	    exitvalue=$?
+
+	    ok=$(cat $SYMBOLIC_TABLE/$i.output | head -1)
+	    if [ $ok = "=ERROR=" ]; then
+	   		number_of_errors_file=$(cat $SYMBOLIC_TABLE/$i.output | head -2 | tail -1 | awk '{print $3}')
+	   		number_of_errors_stderr=$(cat stderr_subor | grep ^ERR:.*$ | wc -l)
+	   		if [ $number_of_errors_file -ne $number_of_errors_stderr ]; then
+				printf "Number of stderr errors  = $number_of_errors_stderr\n"
+				printf "Expected count of errors = $number_of_errors_file\n"	   		
+	   		fi
+	    fi
+	    rm stderr_subor
 	    rm subor
 	done
 fi
