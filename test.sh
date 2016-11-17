@@ -1,5 +1,4 @@
 #!/bin/sh
-
 ifj16_dir=pwd
 
 ############################################################
@@ -192,11 +191,6 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 	counter=0
 	for i in `ls $SYMBOLIC_TABLE`
 	do
-		ignored_file=$(echo $i | grep ^ignored.*$ | wc -l) # file name starts with "ignored..." then skip this file
-		if [ $ignored_file -eq 1 ]; then
-			continue
-		fi
-
 		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
 		if [ $i_cond -eq 1 ]; then
 			continue
@@ -205,16 +199,22 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 	    counter=$(expr $counter + 1)
 	    printf "= $counter.) $i \n"
 	    ./sem_test "$SYMBOLIC_TABLE/$i" >subor 2>stderr_subor
-	    exitvalue=$?
 
 	    ok=$(cat $SYMBOLIC_TABLE/$i.output | head -1)
 	    if [ $ok = "=ERROR=" ]; then
 	   		number_of_errors_file=$(cat $SYMBOLIC_TABLE/$i.output | head -2 | tail -1 | awk '{print $3}')
-	   		number_of_errors_stderr=$(cat stderr_subor | grep ^ERR:.*$ | wc -l)
+	   		number_of_errors_stderr=$(cat stderr_subor | grep ^ERR.*$ | wc -l)
 	   		if [ $number_of_errors_file -ne $number_of_errors_stderr ]; then
 				printf "Number of stderr errors  = $number_of_errors_stderr\n"
 				printf "Expected count of errors = $number_of_errors_file\n"	   		
 	   		fi
+	    fi
+	    if [ $ok = "=OK=" ]; then
+	    	number_of_errors_stderr=$(cat stderr_subor | grep ^ERR.*$ | wc -l)
+	    	if [ $number_of_errors_stderr -ne 0 ]; then
+				printf "Number of stderr errors  = $number_of_errors_stderr\n"
+				printf "Expected count of errors = 0\n"		    		
+	    	fi
 	    fi
 	    rm stderr_subor
 	    rm subor
