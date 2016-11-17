@@ -174,6 +174,7 @@ int main(int argc, char **argv){
 			}
 		}
 		else{
+			printf("lex error\n");
 		}
 		(retval = get_token(fd, &t));
 	}
