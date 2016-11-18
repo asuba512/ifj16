@@ -24,8 +24,9 @@ int inter(instr_t I){
     var_value *value1;//pre src1
     var_value *value2;//pre src2
     var_value *dest;//pre dst
+    char arr[50];
 
-    while(1 && I != NULL) { 
+    while(I) { 
         
         switch (I->type)
         {
@@ -65,11 +66,11 @@ int inter(instr_t I){
                 continue;
 
             case ret:
-                I=inter_stack.top->ret_addr;//pokracovat odkial sa skocilo
                 
                 if(I->src1==NULL) { //void, do eax sa nedava nic
+                    I=inter_stack.top->ret_addr;//pokracovat odkial sa skocilo
                     inter_stack_pop();//zrusenie aktualneho ramca
-                    break;
+                    continue;
                 }
                 else {
                     init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));//vo value1 navratova hodnota
@@ -77,8 +78,9 @@ int inter(instr_t I){
                         return -1;
                     }
                     inter_stack.top->next->eax=(*value1);
+                    I=inter_stack.top->ret_addr;//pokracovat odkial sa skocilo
                     inter_stack_pop();//zrusenie aktualneho ramca
-                    break;
+                    continue;
                 }
 
             case movr:
@@ -95,12 +97,19 @@ int inter(instr_t I){
 
             case int_to_dbl:
             case int_to_str:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                sprintf(arr, "%d", value1->i_val);
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                (*init_dest)=true;
+                dest->s_val = str_init(arr);
+                break;
             case bool_to_str:
             case dbl_to_str:
 
 
             case add:
             case sub:
+                break;
             case imul:
                    init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                     if(init!=true) {
@@ -142,6 +151,13 @@ int inter(instr_t I){
                 break;
             case idiv:
             case conc:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1)); // need to check if initialized
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2)); // need to check if initialized
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->s_val = str_init(value1->s_val->data);
+                str_cat(dest->s_val, value2->s_val);
+                *init_dest = true;
+                break;
             case eql:
                 break;
             case neq:
@@ -198,9 +214,9 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
     } else if(op->sc == local) {
         loc = (local_var_t)op;
         *dtype = loc->dtype;
-        *target = &(((call_stack_top->vars)[loc->index]).val);
-        *initialized = &(((call_stack_top->vars)[loc->index]).initialized);
-        return ((call_stack_top->vars)[loc->index]).initialized;
+        *target = &(((inter_stack.top->vars)[loc->index]).val);
+        *initialized = &(((inter_stack.top->vars)[loc->index]).initialized);
+        return ((inter_stack.top->vars)[loc->index]).initialized;
     }
     return false;
 }
