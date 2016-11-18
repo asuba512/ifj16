@@ -1,7 +1,130 @@
 #include "interpret.h"
 #include "sym_table.h"
+#include "ilist.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
+
+
+int inter(instr_t I){
+
+int arg_counter;//pocitadlo argumentov v poli premennych
+stackframe_t new_frame;//novy frame
+//stackframe_t old_frame;//frame na odstranenie
+local_var_inst_t new_arg;//novy argument
+bool init;//pre testovanie inicializacie premennych
+datatype dtype;//pre zistenie datoveho typu
+bool *init_2;//pre nastavenie incializacie
+var_value *value1;//pre src1
+var_value *value2;//pre src2
+var_value *dest;//pre dst
+
+while(1) { 
+    
+    switch (I->type)
+    {
+
+        case halt:
+            return 0;
+            break;
+
+        case sframe:
+            arg_counter=0;
+            new_frame=malloc(sizeof(struct stackframe));
+            if(new_frame==NULL) { 
+                return -1;
+            }
+            new_frame->vars=malloc(sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)); 
+            if(new_frame->vars==NULL) {
+                free(new_frame);
+                return -1;
+            }
+            break;
+
+        case push:
+            init=decode_address(I->src1,&(value1),&(dtype),&(init_2));
+            if(init != true) {
+                return -1; //error
+            }
+            new_arg.initialized=init;  
+            new_arg.val=(*value1);
+            ((new_frame->vars)[arg_counter])=new_arg;
+            arg_counter++;
+            break;
+
+        case call:
+            new_frame->ret_addr=I->next;//ulozi sa adresa navratu
+            inter_stack_push(new_frame);//push sframe na stack
+            I=((class_memb_t)I->dst)->instr_list;//skok na instrukcnu lisitinu volanej funkcie
+            break;
+
+        case ret:
+            I=inter_stack.top->ret_addr;//pokracovat odkial sa skocilo
+            inter_stack_pop();//zrusenie aktualneho ramca
+            if(I->src1==NULL) { //void, do eax sa nedava nic
+                break;
+            }
+            else {
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_2));//vo value1 navratova hodnota
+                if(init != true) {
+                    return -1;
+                }
+                inter_stack.top->eax=(*value1);
+                break;
+            }
+
+        case movr:
+        case i_d_r:
+
+        case jmp:
+            I=(instr_t)I->dst;
+            break;
+        case jmpif:
+            if()
+        case jmpifn:
+        case label:
+            break;
+
+        case int_to_dbl:
+        case int_to_str:
+        case bool_to_str:
+        case dbl_to_str:
+
+
+        case add:
+        case sub:
+        case imul:
+        case idiv:
+        case conc:
+        case eql:
+        case neq:
+        case gre:
+        case less:
+        case geq:
+        case leq:
+
+        case or:
+        case and:
+        case not:
+
+        case mov:
+        case r_str:
+        case r_int:
+        case r_dbl:
+        case len:
+        case subs:
+        case cmp:
+        case findstr:
+        case sortstr:
+        case prnt:
+            break;
+
+    }
+
+     I=I->next;//next instruction
+}
+}
 // you should aways check whether variable is initialized by return value
 // to mark dst initialized use what "iniliazed" parameter returns
 // when decoding literal, "initialized" is undefined
@@ -30,3 +153,30 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
     }
     return false;
 }
+
+void inter_stack_init(){
+    inter_stack.top=NULL;
+}
+//kontrolovat ci neni NULL pri volani
+/*stackframe_t inter_stack_top(){
+    stackframe_t top;
+    top=inter_stack.top;
+    return top;
+}*/
+
+void inter_stack_push(stackframe_t context){
+    context->next=inter_stack.top;
+    inter_stack.top=context;
+}
+
+void inter_stack_pop(){
+    if(inter_stack.top!=NULL){
+        stackframe_t tmp;
+        tmp=inter_stack.top;
+        inter_stack.top=inter_stack.top->next;
+        free(tmp->vars);
+        free(tmp);
+    }
+}
+
+
