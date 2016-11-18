@@ -46,8 +46,8 @@ int sem_generate_halt();
 
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
 #define INTERNAL_ERR {fprintf(stderr, "ERR: Internal error.\n"); return 99;}
-#define NEW_STRING(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_String); else {t.type = token_string; d = (op_t)add_global_helper_var(t, false);}
-#define NEW_DOUBLE(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_double); else {t.type = token_double; d = (op_t)add_global_helper_var(t, false);}
-#define NEW_BOOLEAN(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_boolean); else {t.type = token_boolean; d = (op_t)add_global_helper_var(t, false);}
-#define NEW_INT(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_int); else {t.type = token_int; d = (op_t)add_global_helper_var(t, false);}
+#define NEW_STRING(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_String); else {t.type = token_string; d = (op_t)add_global_helper_var(t, false);}
+#define NEW_DOUBLE(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_double); else {t.type = token_double; d = (op_t)add_global_helper_var(t, false);}
+#define NEW_BOOLEAN(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_boolean); else {t.type = token_boolean; d = (op_t)add_global_helper_var(t, false);}
+#define NEW_INT(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_int); else {t.type = token_int; d = (op_t)add_global_helper_var(t, false);}
 #define INSTR(i) if(outside_func) { err = st_add_glob_instr( i ); } else { err = st_add_fn_instr(active_function, i ); }

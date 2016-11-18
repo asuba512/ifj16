@@ -124,11 +124,34 @@ int c_memb_func(){
 int c_memb2(){
 	next_token();
 	if(is(token_assign)){
-		if (FIRST_PASS)
+		if (FIRST_PASS) {
 			sem_add_member_active_class(var);
-		do{
+			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
 			next_token();
-		} while(!is(token_semicolon));
+			token_t tmp;
+			tok_que_t expr_queue = tok_que_init();
+			if(sem_id_decoded.ptr){ // if there was id as first token
+				tmp.type = token_id;
+				tmp.attr.p = sem_id_decoded.ptr;
+				tok_enqueue(expr_queue, tmp);
+				next_token(); // if there was an id(), you should take another token
+			}
+			else if(t.type > token_string){ // unsupported tokens
+				return 2;				
+			}
+			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
+				return 2;
+			errno = precedence(expr_queue, &precedence_result);
+			if(!errno) {
+				if((errno = sem_generate_mov(precedence_result, (op_t)tmp_dst)))
+					return errno;
+			}
+			return errno;
+		} else {
+			do{
+				next_token();
+			} while(!is(token_semicolon));
+		}
 		return 0;
 	}
 	else if(is(token_semicolon)){

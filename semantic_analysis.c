@@ -89,9 +89,13 @@ void sem_search() {
     _print_demand();
     void *symbol = NULL;
     if (sem_id_decoded.class_id == NULL) {
-        symbol = st_get_loc_var(active_function, sem_id_decoded.memb_id);
-        if(!symbol)
+        if(!outside_func) { // local scope has more priority inside function
+            symbol = st_get_loc_var(active_function, sem_id_decoded.memb_id);
+            if(!symbol)
+                symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+        } else { // outside function, we search only for global identifiers
             symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+        }
     } else {
         class_t class = st_getclass(sem_id_decoded.class_id);
         if (class) {
