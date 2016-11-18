@@ -89,6 +89,7 @@ int inter(instr_t I){
                 break;
             case jmpif:
             case jmpifn:
+                break;
             case label:
                 break;
 
@@ -142,6 +143,7 @@ int inter(instr_t I){
             case idiv:
             case conc:
             case eql:
+                break;
             case neq:
             case gre:
             case less:
@@ -153,6 +155,7 @@ int inter(instr_t I){
             case not:
 
             case mov:
+
                 break;
             case r_str:
             case r_int:

@@ -568,7 +568,7 @@ int as_ca(){
 				sem_rst_argcount();	
 				op_t arg = precedence_result;
 				if(precedence_result->dtype != dt_String) {
-					arg = sem_generate_conv_to_str(precedence_result);
+					arg = sem_generate_conv_to_str(precedence_result); // possible internal err
 				}
 				sem_generate_push(calling_function, arg); // push result of concatenation
 
