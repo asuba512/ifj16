@@ -173,14 +173,22 @@ int inter(instr_t I){
             case mov:
 
                 break;
-            case r_str:
-            case r_int:
-            case r_dbl:
+            case r_str://not implemeted yet
+                (inter_stack.top)->vars[0].val.s_val=ifj16_readString();
+            case r_int://not implemeted yet
+                (inter_stack.top)->vars[0].val.i_val=ifj16_readInt();
+            case r_dbl://not implemeted yet
+                (inter_stack.top)->vars[0].val.d_val=ifj16_readDouble();
             case len:
-            case subs:
+                (inter_stack.top)->vars[1].val.i_val=ifj16_length((inter_stack.top)->vars[0].val.s_val);
+            case subs://not implemeted yet
+                (inter_stack.top)->vars[3].val.s_val=ifj16_substr((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.i_val,(inter_stack.top)->vars[2].val.i_val);
             case cmp:
+                (inter_stack.top)->vars[2].val.i_val=ifj16_compare((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.s_val);
             case findstr:
+                (inter_stack.top)->vars[2].val.i_val=ifj16_search((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.s_val);
             case sortstr:
+                (inter_stack.top)->vars[1].val.s_val=ifj16_sort((inter_stack.top)->vars[0].val.s_val);
                 break;
             case prnt:
                 ifj16_print((inter_stack.top->vars)[0].val.s_val);
