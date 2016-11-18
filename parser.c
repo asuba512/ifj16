@@ -556,17 +556,21 @@ int as_ca(){
 					next_token();
 					counter++;
 				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition));
-				if(!is_string){
-					printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
-					return errno = 3; //TODO !!!IDK corrent return value.
-				}
+				// if(!is_string){
+				// 	printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
+				// 	return errno = 3; //TODO !!!IDK corrent return value.
+				// }
 				tmp.type = token_eof;
 				tok_enqueue(expr_queue, tmp);
 				err = precedence(expr_queue, &precedence_result);
 				if(err)
 					return errno = err;
 				sem_rst_argcount();	
-				sem_generate_push(calling_function, precedence_result); // push result of concatenation
+				op_t arg = precedence_result;
+				if(precedence_result->dtype != dt_String) {
+					arg = sem_generate_conv_to_str(precedence_result);
+				}
+				sem_generate_push(calling_function, arg); // push result of concatenation
 
 				if(is(token_rbracket))
 					next_token();

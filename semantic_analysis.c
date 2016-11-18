@@ -488,3 +488,26 @@ int sem_generate_halt() {
     if (st_add_fn_instr(active_function, i)) INTERNAL_ERR
     return 0;
 }
+
+// returns op_t because we want to use the result of conversion immediately
+op_t sem_generate_conv_to_str(op_t op) {
+    struct instr i;
+    int err; // catching errors
+    i.src1 = op;
+    i.src2 = NULL;
+    i.dst = (op_t)sem_new_tmp_var(dt_String);
+    if (!i.dst) return NULL;
+    switch(op->dtype) {
+        case dt_int:
+            i.type = int_to_str; break;
+        case dt_boolean:
+            i.type = bool_to_str; break;
+        case dt_double:
+            i.type = dbl_to_str; break;
+        default:
+            break;
+    }
+    INSTR(i)
+    if(err) return NULL;
+    return i.dst;
+}
