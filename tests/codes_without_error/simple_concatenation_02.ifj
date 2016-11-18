@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		double pi = 3.141592653589793;
+		ifj16.print("Double pi = " + pi);
+	}	
+}
