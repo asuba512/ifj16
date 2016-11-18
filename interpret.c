@@ -81,7 +81,7 @@ while(1) {
             I=(instr_t)I->dst;
             break;
         case jmpif:
-            if()
+    
         case jmpifn:
         case label:
             break;
