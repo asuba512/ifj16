@@ -11,6 +11,7 @@
 #include "sym_table.h"
 #include "ial.h"
 #include "ifj16_class.h"
+#include "interpret.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -60,13 +61,14 @@ int main(int argc, char **argv){
 	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
 		printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
 	}
-	// printf("\nMain.run(): \n");
-	// i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
-	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
-	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
-	// }
+	printf("\nMain.run(): \n");
+	i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+		printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+	}
 
 	/// START INTERPRETATION HERE
+	inter(glob_instr_list.head);
 
 	fclose(fd);
     return 0;
@@ -82,4 +84,7 @@ void add_head() {
 	i.src1 = NULL;
 	i.type = call;
 	st_add_glob_instr(i);	
+	i.type = label;
+	i.dst = i.src1 = i.src2 = NULL;
+	st_add_glob_instr(i);
 }
