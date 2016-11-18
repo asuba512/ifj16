@@ -13,12 +13,13 @@ extern struct fq sem_id_decoded;
 extern class_memb_t calling_function;
 extern class_memb_t print_fn;
 extern op_t precedence_result;
+extern bool outside_func;
 
 #define next_token() do{ if(FIRST_PASS){ if((errno = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
 
-
 int c_list(){
+	outside_func = true;
 	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
 	calling_function = NULL;
 	next_token();
@@ -110,6 +111,7 @@ int c_memb_func(){
 		if(!fn_def_plist() && is(token_rbracket)){
 			next_token();
 			if(is(token_lbrace)){
+				outside_func = false;
 				if(!fn_body() && is(token_rbrace)){
 					return 0;
 				}
@@ -205,8 +207,9 @@ int fn_body(){
 			if(active_function->dtype == t_void)
 				sem_generate_ret(NULL); // append ret instruction at the end of void function
 			else
-				sem_generate_halt(); // append halt instruction at the end of non-void function. correct funcion should not reach this instruction
+				sem_generate_halt(); // append halt instruction at the end of non-void function. proper funcion should not reach this instruction
 		}
+		outside_func = true;
 		active_function = NULL;
 		return 0;
 	}
@@ -334,7 +337,7 @@ int val_id(){
 
 int id(){
 	if(is(token_id)){
-		if(SECOND_PASS) {
+		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
 			sem_id_decoded.memb_id = t.attr.s;
 			sem_id_decoded.class_id = NULL;
 			sem_search();
@@ -347,7 +350,7 @@ int id(){
 		return 0;
 	}
 	else if(is(token_fqid)){
-		if(SECOND_PASS) {
+		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
 			char *ptr = strchr(t.attr.s->data, '.');
 			*ptr = 0;
 			sem_id_decoded.class_id = str_init(t.attr.s->data);
@@ -362,7 +365,7 @@ int id(){
 		}
 		return 0;
 	}
-	if(SECOND_PASS)
+	if(SECOND_PASS || (FIRST_PASS && outside_func))
 		sem_id_decoded.ptr = NULL;
 	return 2;
 }

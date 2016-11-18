@@ -60,10 +60,10 @@ typedef struct class_table {
 
 typedef struct global_helper_var {
 	scope sc; ///< for interpreter
-	datatype dtype; ///< datatype of literal
+	datatype dtype; ///< datatype
 	bool initialized;
-	var_value val; ///< value of literal
-} *glob_helper_var_t;
+	var_value val; ///< value
+} *glob_helper_var_t; // literals and global tmp variables are stored in this struct (created during generation of global var initialization code)
 
 struct global_helper_var_arr {
 	int length, max_length;
@@ -133,12 +133,12 @@ typedef struct local_var_inst {
  * 
  * A new context is created and pushed to the context stack whenever a function is called. Once completed, context is popped from the stack.
  */
-typedef struct fn_context {
-	struct fn_context *next; ///< pointer to next function context on the stack
+typedef struct stackframe {
+	struct stackframe *next; ///< pointer to next function context on the stack
 	local_var_inst_t *vars; ///< array of variable instances in current context
 	instr_t ret_addr; ///< store next instruction here before calling function
 	var_value eax; // "register", where return value is stored after returning from function
-} *fn_context_t;
+} *stackframe_t;
 
 typedef struct instr_list {
 	instr_t head;
@@ -156,9 +156,9 @@ struct class_table ctable;
 class_table_t classes;
 
 /**
- * Global variable - top of function context stack.
+ * Global variable - top of function call stack.
  */
-fn_context_t context_stack_top;
+stackframe_t call_stack_top;
 
 
 void init_class_table();

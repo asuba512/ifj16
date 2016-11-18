@@ -41,7 +41,11 @@ typedef enum instruction_type {
 	ret, //return from function (will assign entire union to special place)
 	movr, // move from register to dst 
 	i_d_r, // convert register i_val to d_val
-	prnt // print string stored in variable index 0 on stackframe
+	prnt, // print string stored in variable index 0 on stackframe
+	r_dbl,
+	r_str,
+	r_int,
+	len
 } instr_type_t;
 
 #endif

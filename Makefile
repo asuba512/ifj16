@@ -23,7 +23,7 @@ prec_test: prec_test.o infinite_string.o token.o precedence.o
 	make clean-obj
 
 clean: clean-obj
-	$(RM) $(BIN) sc_test sem_test prec_test
+	$(RM) $(BIN) sc_test sem_test prec_test .fuse*
 
 clean-obj:
 	$(RM) *.o

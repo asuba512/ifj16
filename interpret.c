@@ -8,7 +8,7 @@
 bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initialized) {
     class_memb_t glob;
     local_var_t loc;
-    glob_helper_var_t helper;
+    glob_helper_var_t hlpr;
     if(op->sc == global) {
         glob = (class_memb_t)op;
         *dtype = glob->dtype;
@@ -16,17 +16,17 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
         *initialized = &(glob->initialized);
         return glob->initialized;
     } else if(op->sc == helper) {
-        helper = (glob_helper_var_t)op;
-        *dtype = helper->dtype;
-        *target = &(helper->val);
-        *initialized = &(helper->initialized);
-        return helper->initialized; // this ain't just literal anymore ...
+        hlpr = (glob_helper_var_t)op;
+        *dtype = hlpr->dtype;
+        *target = &(hlpr->val);
+        *initialized = &(hlpr->initialized);
+        return hlpr->initialized; // this ain't just literal anymore ...
     } else if(op->sc == local) {
         loc = (local_var_t)op;
         *dtype = loc->dtype;
-        *target = &(((context_stack_top->vars)[loc->index]).val);
-        *initialized = &(((context_stack_top->vars)[loc->index]).initialized);
-        return ((context_stack_top->vars)[loc->index]).initialized;
+        *target = &(((call_stack_top->vars)[loc->index]).val);
+        *initialized = &(((call_stack_top->vars)[loc->index]).initialized);
+        return ((call_stack_top->vars)[loc->index]).initialized;
     }
     return false;
 }
