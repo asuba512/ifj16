@@ -92,7 +92,13 @@ int inter(instr_t I){
             
             case jmpif:
             case jmpifn:
-
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
+                if((*value1).b_val){
+                    I=(instr_t)I->dst;
+                }
                 break;
             case label:
                 break;
