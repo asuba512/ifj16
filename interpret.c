@@ -100,7 +100,8 @@ int inter(instr_t I){
 
             case add:
             case sub:
-                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+            case imul:
+                   init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                     if(init!=true) {
                         return -1;
                     }
@@ -138,7 +139,6 @@ int inter(instr_t I){
                     }
                 (*init_dest)=true;
                 break;
-            case imul:
             case idiv:
             case conc:
             case eql:
