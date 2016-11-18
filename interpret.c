@@ -96,17 +96,60 @@ int inter(instr_t I){
                 break;
 
             case int_to_dbl:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                if(init != true){
+                        return -1;
+                }
+                (*init_dest)=true;
+                (*dest).d_val=(double)(*value1).i_val;
+                break;                
             case int_to_str:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
                 sprintf(arr, "%d", value1->i_val);
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                if(init != true){
+                        return -1;
+                }
                 (*init_dest)=true;
                 dest->s_val = str_init(arr);
                 break;
             case bool_to_str:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                if(init != true){
+                        return -1;
+                }
+                (*init_dest)=true;
+                if((*value1).b_val) {
+                    sprintf(arr, "%s", "true");
+                }
+                else {
+                    sprintf(arr, "%s", "false");
+                }
+                dest->s_val = str_init(arr);
             case dbl_to_str:
-
-
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
+                sprintf(arr, "%g", value1->d_val);
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                if(init != true){
+                        return -1;
+                }
+                (*init_dest)=true;
+                dest->s_val = str_init(arr);
+                break;
             case add:
             case sub:
                 break;
