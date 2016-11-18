@@ -50,3 +50,4 @@ int sem_generate_halt();
 #define NEW_DOUBLE(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_double); else {t.type = token_double; d = (op_t)add_global_helper_var(t, false);}
 #define NEW_BOOLEAN(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_boolean); else {t.type = token_boolean; d = (op_t)add_global_helper_var(t, false);}
 #define NEW_INT(d) if (outside_func) d = (op_t)sem_new_tmp_var(dt_int); else {t.type = token_int; d = (op_t)add_global_helper_var(t, false);}
+#define INSTR(i) if(outside_func) { err = st_add_glob_instr( i ); } else { err = st_add_fn_instr(active_function, i ); }

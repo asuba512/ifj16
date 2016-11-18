@@ -153,6 +153,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     op_t new_var, new_dst;
     token_t t;  // for generating conversion tmp var
     struct instr i, conv; // i - main instruction, conv - helper conversion instruction
+    int err = 0; // catches error codes
     // just default values
     i.type = type;
     i.src1 = src1;
@@ -196,7 +197,8 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                     i.src2 = new_var;
                 }  
                 conv.dst = new_var;
-                if(st_add_fn_instr(active_function, conv) != 0) INTERNAL_ERR
+                INSTR(conv)
+                if(err) INTERNAL_ERR
             }
             
         } else {
@@ -231,7 +233,8 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                         conv.src1 = src1;
                         i.src1 = new_var;
                     }
-                    if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
+                    INSTR(conv)
+                    if(err) INTERNAL_ERR
                 }
             } else if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) {
                 // OK
@@ -256,7 +259,8 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                         conv.src1 = src1;
                         i.src1 = new_var;
                     }
-                    if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
+                    INSTR(conv)
+                    if(err) INTERNAL_ERR
                 }
             } else { // booleans cannot be compared this way
                 fprintf(stderr, "ERR: Incompatible types of operands.\n");
@@ -284,13 +288,15 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         }
     }
     *dst = i.dst = new_dst;
-    if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
+    INSTR(i)
+    if(err) INTERNAL_ERR
     return 0;
 }
 
 int sem_generate_mov(op_t src, op_t dst) {
     struct instr i;
     token_t t; // for generating conversion tmp var
+    int err = 0; // catches error codes
     i.type = mov;
     if(src->sc == global && (((class_memb_t)(src))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
@@ -311,7 +317,9 @@ int sem_generate_mov(op_t src, op_t dst) {
         conv.src2 = NULL;
         if(active_function) {
             NEW_DOUBLE(conv.dst)
-            if(!conv.dst || st_add_fn_instr(active_function, conv)) INTERNAL_ERR
+            if(!conv.dst) INTERNAL_ERR
+            INSTR(conv)
+            if(err) INTERNAL_ERR
         }
         i.src1 = conv.dst;
     } else {
@@ -320,8 +328,8 @@ int sem_generate_mov(op_t src, op_t dst) {
     }
     i.dst = dst;
     i.src2 = NULL;
-    if(active_function)
-        if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
+    INSTR(i)
+    if(err) INTERNAL_ERR
     return 0;
 }
 

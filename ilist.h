@@ -45,7 +45,11 @@ typedef enum instruction_type {
 	r_dbl,
 	r_str,
 	r_int,
-	len
+	len,
+	subs,
+	cmp,
+	findstr,
+	sortstr
 } instr_type_t;
 
 #endif
