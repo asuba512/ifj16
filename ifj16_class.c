@@ -1,6 +1,7 @@
 #include "sym_table.h"
 #include "ifj16_class.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int populate_sym_table() {
     struct instr i;
@@ -120,7 +121,7 @@ int populate_sym_table() {
 }
 
 void ifj16_print(string_t s) {
-    (void)s;
+    printf("%s", s->data);
 }
 
 int ifj16_readInt() {
