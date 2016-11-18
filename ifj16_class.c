@@ -1,5 +1,6 @@
 #include "sym_table.h"
 #include "ifj16_class.h"
+#include "ial.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -137,8 +138,7 @@ string_t ifj16_readString() {
 }
 
 int ifj16_length(string_t s) {
-    (void)s;
-    return 42;
+    return s->length;
 }
 
 string_t ifj16_substr(string_t s, int i, int n) {
@@ -149,18 +149,14 @@ string_t ifj16_substr(string_t s, int i, int n) {
 }
 
 int ifj16_compare(string_t s1, string_t s2) {
-    (void)s1;
-    (void)s2;
-    return 42;
+    return str_compare(s1,s2);
 }
 
 int ifj16_search(string_t s, string_t search) {
-    (void)s;
-    (void)search;
-    return 42;
+    return BMA_index(s,search);
 }
 
 string_t ifj16_sort(string_t s) {
-    (void)s;
-    return NULL;
+    shell_sort(s);
+    return s;
 }

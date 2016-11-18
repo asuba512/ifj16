@@ -84,12 +84,12 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
         index = j+1;
     }
     else {
-        index = str->length; //from algorithm,maybe will use -1?
+        index = -1; 
     }       
     return index;
 }
 
-unsigned BMA_index(string_t str,string_t substr) {
+int BMA_index(string_t str,string_t substr) {
 	int index;
 	unsigned compute_jumps_array[255];//in compute jumps for from 0 to 254(255 items)
     unsigned match_jumps_array[substr->length+1];//in compute match jumps indexed with q(q=substr->length+1)

@@ -16,7 +16,7 @@ typedef struct bst_node {
 void BMA_compute_jumps(string_t substr, unsigned *char_jump);
 void BMA_compute_match_jumps(string_t substr,unsigned *match_jump);
 int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump);
-unsigned BMA_index(string_t str,string_t substr);
+int BMA_index(string_t str,string_t substr);
 
 void shell_sort(string_t s);
 

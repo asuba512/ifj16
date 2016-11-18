@@ -16,7 +16,11 @@ int inter(instr_t I){
     local_var_inst_t new_arg;//novy argument
     bool init;//pre testovanie inicializacie premennych
     datatype dtype;//pre zistenie datoveho typu
-    bool *init_2;//pre nastavenie incializacie
+    bool *init_src1;//pre nastavenie incializacie
+    bool *init_src2;
+    bool *init_dest;
+    int src1_value;
+    int src2_value;
     var_value *value1;//pre src1
     var_value *value2;//pre src2
     var_value *dest;//pre dst
@@ -44,7 +48,7 @@ int inter(instr_t I){
                 break;
 
             case push:
-                init=decode_address(I->src1,&(value1),&(dtype),&(init_2));
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true) {
                     return -1; //error
                 }
@@ -68,7 +72,7 @@ int inter(instr_t I){
                     break;
                 }
                 else {
-                    init=decode_address(I->src1,&(value1),&(dtype),&(init_2));//vo value1 navratova hodnota
+                    init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));//vo value1 navratova hodnota
                     if(init != true) {
                         return -1;
                     }
@@ -97,6 +101,44 @@ int inter(instr_t I){
             case add:
             case sub:
             case imul:
+                   init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                switch(dtype)
+                    {
+                        case dt_double:
+                            (*dest).d_val=src1_value*src2_value;
+                            break;
+                        case dt_int:
+                            (*dest).i_val=src1_value*src2_value;
+                            break;
+                    }
+                (*init_dest)=true;
+                break;
             case idiv:
             case conc:
             case eql:
@@ -184,5 +226,3 @@ void inter_stack_pop(){
         free(tmp);
     }
 }
-
-
