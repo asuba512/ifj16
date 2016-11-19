@@ -39,8 +39,8 @@ int main(int argc, char **argv){
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	printf("retval: %d\n", errno == 0 ? retval : errno);
-	printf("current token: %d\n", t.type);
+	// printf("retval: %d\n", errno == 0 ? retval : errno);
+	// printf("current token: %d\n", t.type);
 	if(retval != 0){	
 		int c;
 		while((c = getc(fd)) != EOF){
@@ -51,21 +51,21 @@ int main(int argc, char **argv){
 	}
 	pass_number = 2;
 	retval = c_list();
-	printf("retval: %d\n", errno == 0 ? retval : errno);
-	printf("current token: %d\n", t.type);
+	// printf("retval: %d\n", errno == 0 ? retval : errno);
+	// printf("current token: %d\n", t.type);
 	
 	str_destroy(buff);
 	add_head();
-	printf("Global instruction tape:\n");
-	instr_t i = glob_instr_list.head;
-	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
-		printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
-	}
-	printf("\nMain.run(): \n");
-	i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
-	for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
-		printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
-	}
+	// printf("Global instruction tape:\n");
+	// instr_t i = glob_instr_list.head;
+	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+	// }
+	// printf("\nMain.run(): \n");
+	// i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+	// }
 
 	/// START INTERPRETATION HERE
 	int a = inter(glob_instr_list.head);
