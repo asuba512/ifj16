@@ -90,7 +90,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_integer;
 				}
 				else if(c == '"'){
-					str_addchar(buff, c);	
+//					str_addchar(buff, c);	
 					state = state_string;
 				}
 				else if(isspace(c));
@@ -396,7 +396,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = _state_string_escape;
 				}
 				else if(c == '"'){
-					str_addchar(buff, c);	
+//					str_addchar(buff, c);	
 					t->type = token_string;
 					t->attr.s = str_init(buff->data);
 					return 0;
