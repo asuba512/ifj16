@@ -88,13 +88,25 @@ int inter(instr_t I){
                 *dest = (inter_stack.top)->eax;
                 *init_dest = true;
                 break;
+
             case i_d_r:
+                inter_stack.top->eax.d_val=(double)inter_stack.top->eax.i_val;
+                break;
 
             case jmp:
                 I=(instr_t)I->dst;
                 break;
             
-            case jmpif:
+            case jmpif://generuje sa???
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init != true){
+                        return -1;
+                }
+                if(value1->b_val){
+                    I=(instr_t)I->dst;
+                }
+                break;
+
             case jmpifn:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
@@ -104,6 +116,7 @@ int inter(instr_t I){
                     I=(instr_t)I->dst;
                 }
                 break;
+                
             case label:
                 break;
 
@@ -164,6 +177,44 @@ int inter(instr_t I){
                 break;
             
             case add:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                switch(dtype)
+                    {
+                        case dt_double:
+                            (*dest).d_val=src1_value+src2_value;
+                            break;
+                        case dt_int:
+                            (*dest).i_val=src1_value+src2_value;
+                            break;
+                    }
+                (*init_dest)=true;
+                break;
             
             case sub:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
@@ -244,11 +295,56 @@ int inter(instr_t I){
                     }
                 (*init_dest)=true;
                 break;
+
             case idiv:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                switch(dtype)
+                    {
+                        case dt_double:
+                            (*dest).d_val=src1_value/src2_value; //osetrit delenie 0
+                            break;
+                        case dt_int:
+                            (*dest).i_val=src1_value/src2_value;
+                            break;
+                    }
+                (*init_dest)=true;
+                break;
             
             case conc:
-                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1)); // need to check if initialized
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                        return -1;
+                    } 
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2)); // need to check if initialized
+                    if(init!=true) {
+                        return -1;
+                    }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 dest->s_val = str_init(value1->s_val->data);
                 str_cat(dest->s_val, value2->s_val);
@@ -256,9 +352,101 @@ int inter(instr_t I){
                 break;
             
             case eql:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value == src2_value;
+                (*init_dest)=true;
                 break;
+
             case neq:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value != src2_value;
+                (*init_dest)=true;
+                break;
+
             case gre:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value > src2_value;
+                (*init_dest)=true;
+                break;
+
             case less:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
@@ -290,12 +478,117 @@ int inter(instr_t I){
                 dest->b_val = src1_value < src2_value;
                 (*init_dest)=true;
                 break;
+
             case geq:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value >= src2_value;
+                (*init_dest)=true;
+                break;
+
             case leq:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value <= src2_value;
+                (*init_dest)=true;
+                break;
 
             case or:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                src1_value=(*value1).b_val;//todo
+                
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                src1_value=(*value2).b_val;
+
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value || src2_value;
+                (*init_dest)=true;
+                break;
+
             case and:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                src1_value=(*value1).b_val;//todo
+                
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                src1_value=(*value2).b_val;
+
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value && src2_value;
+                (*init_dest)=true;
+                break;
             case not:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                src1_value=(*value1).b_val;//todo
+
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = !src1_value;
+                (*init_dest)=true;
+                break;
 
             case mov:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
