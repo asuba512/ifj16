@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-
+// src1_value and src2_value ARE INTEGERS, DOUBLES ARE NOT SUPPORTED!
 
 int inter(instr_t I){
 
@@ -84,6 +84,10 @@ int inter(instr_t I){
                 }
 
             case movr:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                *dest = (inter_stack.top)->eax;
+                *init_dest = true;
+                break;
             case i_d_r:
 
             case jmp:
@@ -96,7 +100,7 @@ int inter(instr_t I){
                 if(init != true){
                         return -1;
                 }
-                if((*value1).b_val){
+                if(!(value1->b_val)){
                     I=(instr_t)I->dst;
                 }
                 break;
@@ -123,9 +127,6 @@ int inter(instr_t I){
                 }
                 sprintf(arr, "%d", value1->i_val);
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                if(init != true){
-                        return -1;
-                }
                 (*init_dest)=true;
                 dest->s_val = str_init(arr);
                 break;
@@ -259,6 +260,36 @@ int inter(instr_t I){
             case neq:
             case gre:
             case less:
+                init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
+                if(init!=true) {
+                       return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src1_value=(*value1).d_val;
+                            break;
+                        case dt_int:
+                            src1_value=(*value1).i_val;
+                            break;
+                    }
+                init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
+                    if(init!=true) {
+                        return -1;
+                    }
+                switch(dtype)
+                    {
+                        case dt_double:
+                            src2_value=(*value2).d_val;
+                            break;
+                        case dt_int:
+                            src2_value=(*value2).i_val;
+                            break;
+                    }
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
+                dest->b_val = src1_value < src2_value;
+                (*init_dest)=true;
+                break;
             case geq:
             case leq:
 
@@ -272,36 +303,48 @@ int inter(instr_t I){
                         return -1;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                if(init != true){
-                        return -1;
-                }
-                dest=value1;
+                *dest=*value1;
                 *init_dest=true;
                 break;
 
             case r_str://not implemeted yet
                 (inter_stack.top)->vars[0].val.s_val=ifj16_readString();
+                (inter_stack.top)->vars[0].initialized = true;
+                break;
             
             case r_int://not implemeted yet
                 (inter_stack.top)->vars[0].val.i_val=ifj16_readInt();
+                (inter_stack.top)->vars[0].initialized = true;
+                break;
             
             case r_dbl://not implemeted yet
                 (inter_stack.top)->vars[0].val.d_val=ifj16_readDouble();
+                (inter_stack.top)->vars[0].initialized = true;
+                break;
             
             case len:
                 (inter_stack.top)->vars[1].val.i_val=ifj16_length((inter_stack.top)->vars[0].val.s_val);
+                (inter_stack.top)->vars[1].initialized = true;
+                break;
             
             case subs://not implemeted yet
                 (inter_stack.top)->vars[3].val.s_val=ifj16_substr((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.i_val,(inter_stack.top)->vars[2].val.i_val);
+                (inter_stack.top)->vars[3].initialized = true;
+                break;
             
             case cmp:
                 (inter_stack.top)->vars[2].val.i_val=ifj16_compare((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.s_val);
+                (inter_stack.top)->vars[2].initialized = true;
+                break;
             
             case findstr:
                 (inter_stack.top)->vars[2].val.i_val=ifj16_search((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.s_val);
+                (inter_stack.top)->vars[2].initialized = true;
+                break;
             
             case sortstr:
                 (inter_stack.top)->vars[1].val.s_val=ifj16_sort((inter_stack.top)->vars[0].val.s_val);
+                (inter_stack.top)->vars[1].initialized = true;
                 break;
             
             case prnt:

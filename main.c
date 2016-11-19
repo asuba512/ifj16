@@ -68,8 +68,8 @@ int main(int argc, char **argv){
 	}
 
 	/// START INTERPRETATION HERE
-	inter(glob_instr_list.head);
-
+	int a = inter(glob_instr_list.head);
+	printf("\nInterpret ret val: %d\n", a);
 	fclose(fd);
     return 0;
 }

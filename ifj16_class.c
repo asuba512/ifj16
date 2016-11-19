@@ -126,11 +126,15 @@ void ifj16_print(string_t s) {
 }
 
 int ifj16_readInt() {
-    return 42;
+    int c;
+    scanf("%d", &c);
+    return c;
 }
 
 double ifj16_readDouble() {
-    return 41.999;
+    double c;
+    scanf("%g", &c);
+    return c;
 }
 
 string_t ifj16_readString() {
@@ -157,6 +161,7 @@ int ifj16_search(string_t s, string_t search) {
 }
 
 string_t ifj16_sort(string_t s) {
-    shell_sort(s);
-    return s;
+    string_t s2 = str_init(s->data);
+    shell_sort(s2);
+    return s2;
 }
