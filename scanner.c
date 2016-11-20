@@ -434,7 +434,7 @@ int get_token(FILE *fd, token_t *t) {
 					octal[o++] = c;
 					state = _state_string_octalxx;
 				}
-				else{ error
+				else{ //error
 					ungetc(c, fd);
 					return 1;
 				}
