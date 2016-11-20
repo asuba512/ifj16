@@ -39,7 +39,7 @@ typedef enum {
 	_state_string_escape,
 	_state_string_octalx,
 	_state_string_octalxx
-} t_state;
+} t_state; // enumeration of states
 
 int get_token(FILE *, token_t *t);
 

@@ -13,8 +13,8 @@
 
 int get_token(FILE *fd, token_t *t) {
 	int c; // var for storing input characters
-	int o = 0; // for indexing c-string | storing octal number
-	char octal[4]; //			    <---'
+	int o = 0; // for indexing string | storing octal number
+	char octal[4]; //			  <---'
 	char *endptr; // for string-to-number conversions
 	t_state state = state_init;
 	
@@ -24,139 +24,138 @@ int get_token(FILE *fd, token_t *t) {
 		str_empty(buff); // if it is a consecutive call of get_token, empty buffer
 	
 	while(1){
-		c = getc(fd);
+			c = getc(fd);
         	switch(state){
-	            case state_init:
-        	        if(c == '/')
+	            case state_init: // initial state
+        	        if(c == '/') // division, comments
 					state = _state_division;
-				else if(c == '*'){
+				else if(c == '*'){ // multiplication
 					t->type = token_multiplication;
 					return 0;
 				}
-				else if(c == '+'){
+				else if(c == '+'){ // addition
 					t->type = token_addition;
 					return 0;
 				}
-				else if(c == '-'){
+				else if(c == '-'){ // substraction
 					t->type = token_substraction;
 					return 0;
 				}
-				else if(c == '<')
+				else if(c == '<') // less, less equal
 					state = state_less;
-				else if(c == '>')
+				else if(c == '>') // more, more equal
 					state = state_more;
-				else if(c == '=')
+				else if(c == '=') // equal, assign
 					state = state_eq;
-				else if(c == '!')
+				else if(c == '!') // negation, not equal
 					state = state_neq;
-				else if(c == ';'){
+				else if(c == ';'){ // semicolon
 					t->type = token_semicolon;
 					return 0;
 				}
-				else if(c == '('){
+				else if(c == '('){ // left bracket
 					t->type = token_lbracket;
 					return 0;
 				}
-				else if(c == ')'){
+				else if(c == ')'){ // right bracket
 					t->type = token_rbracket;
 					return 0;
 				}
-				else if(c == '{'){
+				else if(c == '{'){ // left brace
 					t->type = token_lbrace;
 					return 0;
 				}
-				else if(c == '}'){
+				else if(c == '}'){ // right brace
 					t->type = token_rbrace;
 					return 0;
 				}
-				else if(c == ','){
+				else if(c == ','){ // comma
 					t->type = token_comma;
 					return 0;
 				}
-				else if(c == '&')
+				else if(c == '&') // and
 					state = state_and;
-				else if(c == '|')
+				else if(c == '|') // or
 					state = state_or;
-                else if(c == '_'){
+                else if(c == '_'){ // identifier, after '_' at least one more character must follow
 					str_addchar(buff, c);
 					state = _state_identifier;
 				}
-				else if(isalpha(c) || c == '$'){
+				else if(isalpha(c) || c == '$'){ // identifier
 					str_addchar(buff, c);	
                     state = state_identifier;
                 }
-				else if(isdigit(c)){
+				else if(isdigit(c)){ // integer, double
 					str_addchar(buff, c);	
 					state = state_integer;
 				}
-				else if(c == '"'){
-//					str_addchar(buff, c);	
+				else if(c == '"') // string
 					state = state_string;
-				}
-				else if(isspace(c));
-				else if(c == EOF){
+				else if(c == EOF){ // EOF
 					t->type = token_eof;
 					return 0;
 				}
-				else
+				else if(isspace(c)); // ignoring spaces
+				else // anything else
 					return 1;
                 break;
 			case _state_division:
-				if(c == '/')
+				if(c == '/') // line comment
 					state  = state_linecomment;
-				else if(c == '*')
+				else if(c == '*') // block comment
 					state = _state_blockcomment;
-				else{
+				else{ // division
 					ungetc(c, fd);
 					t->type = token_division;
 					return 0;
 				}
 				break;
 			case state_linecomment:
-				if(c == '\n' || c == EOF) // EOF in case of file without newline before EOF
+				if(c == '\n' || c == EOF) // EOF - in case of file without newline before EOF
 					state = state_init;
 				break;
 			case _state_blockcomment:
-				if(c == '*')
+				if(c == '*') // potential end of block comment
 					state = state_blockcomment;
-				else if(c == EOF){
+				else if(c == EOF){ // EOF without ending block comment properly
 					return 1;
 				}
 				break;
 			case state_blockcomment:
-				if(c == '/')
+				if(c == '/') // end of block comment
 					state = state_init;
-				else if(c == '*');
-				else if(c == EOF){
+				else if(c == '*'); // still potential end of block comment
+				else if(c == EOF){ // EOF without ending block comment properly
 					ungetc(c, fd);
 					return 1;
 				}
-				else
+				else // no longer potential end of block comment
 					state = _state_blockcomment;
 				break;
 			case _state_identifier:
-					if(c == '_' || c == '$' || isalnum(c)){
+					if(c == '_' || c == '$' || isalnum(c)){ // after '_' there must be at least one more supported character
 						str_addchar(buff, c);
 						state = state_identifier;
 					}
-					else{
+					else{ // '_' can't be an identifier
 						ungetc(c, fd);
 						return 1;
 					}
 				break;
             case state_identifier:
-                if(isalnum(c) || c == '$' || c == '_')
+                if(isalnum(c) || c == '$' || c == '_') // supported characters
 					str_addchar(buff, c);	
-		else if(c == '.'){
+				else if(c == '.'){ // fully qualified identifier
 					str_addchar(buff, c);
 					state = _state_dot_fqidentifier;
-		}
+				}
                 else{
-					if(c == '"'){ // characters that can't follow right after identifier
+					if(c == '"'){ // there can't be '"' right after identifier (e.g. id"), it doens't make much sense
 						ungetc(c, fd);
 						return 1;
 					}
-					ungetc(c, fd);
+					ungetc(c, fd); // other character are tolerated right after identifier, if they are not supported in ifj16, scanner will fail in next token
+					// checking if identifier is not a keyword: 
 					if(!strcmp(buff->data, "boolean")){
 						t->type = token_k_boolean;
 					}
@@ -198,7 +197,7 @@ int get_token(FILE *fd, token_t *t) {
 					}
 					else if(!strcmp(buff->data, "true") || !strcmp(buff->data, "false")){
 						t->type = token_boolean;
-						t->attr.b = !strcmp(buff->data, "true") ? 1 : 0;
+						t->attr.b = !strcmp(buff->data, "true") ? 1 : 0; // converting true/false to 1/0
 					}
 					else if(!strcmp(buff->data, "void")){
 						t->type = token_k_void;
@@ -206,44 +205,44 @@ int get_token(FILE *fd, token_t *t) {
 					else if(!strcmp(buff->data, "while")){
 						t->type = token_k_while;
 					}
-					else{
+					else{ // idenfitier
 						t->type = token_id;
-						t->attr.s = str_init(buff->data);
+						t->attr.s = str_init(buff->data); // storing a copy of string contaiting the name
 						return 0;
 					}
 					return 0;
-		                }
-		                break;
+		        }
+				break;
 			case _state_dot_fqidentifier:
-				if(c == '_'){
+				if(c == '_'){ // after '_' in FQID second part, must be at least one more supported character
 					str_addchar(buff, c);
 					state = _state_fqidentifier;
 				}
-				else if(isalpha(c) || c == '$'){
+				else if(isalpha(c) || c == '$'){ // fully qualified idenfier, second part
 					str_addchar(buff, c);
 					state = state_fqidentifier;
 				}
-				else{
+				else{ // anything else is an error
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
 			case _state_fqidentifier:
-				if(c == '_' || c == '$' || isalnum(c)){
+				if(c == '_' || c == '$' || isalnum(c)){ // after '_' must be at least one more supported character
 					str_addchar(buff, c);
 					state = state_fqidentifier;
 				}
-				else{
+				else{ // '_' can't be an identifier
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
 			case state_fqidentifier:
-				if(isalnum(c) || c == '$' || c == '_')
+				if(isalnum(c) || c == '$' || c == '_') // supported characters
 					str_addchar(buff, c);
-				else{
+				else{ // FQID
 					ungetc(c, fd);
-					if(c == '"' || c == '.') // characters that cannot follow right after identifier						
+					if(c == '"' || c == '.') // right after FQID can't follow '"' or '.'
 						return 1;
 					t->type = token_fqid;
 					t->attr.s = str_init(buff->data);
@@ -251,85 +250,85 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				break;
 			case state_less:
-				if(c == '=')
+				if(c == '=') // less equal
 					t->type = token_lesseq;
-				else{
+				else{ // less
 					t->type = token_less;
 					ungetc(c, fd);
 				}
 				return 0;
 				break;
 			case state_more:
-				if(c == '=')
+				if(c == '=') // more equal
 					t->type = token_moreeq;
-				else{
+				else{ // more
 					t->type = token_more;
 					ungetc(c, fd);
 				}
 				return 0;
 				break;
-			case state_eq:
+			case state_eq: // equal
 				if(c == '=')
 					t->type = token_equal;
-				else{
+				else{ // assign
 					t->type = token_assign;
 					ungetc(c, fd);
 				}
 				return 0;
 				break;
 			case state_neq:
-				if(c == '='){
+				if(c == '='){ // not equal
 					t->type = token_nequal;
 					return 0;
 				}
 				else{
-					ungetc(c, fd);
+					ungetc(c, fd); // negate
 					t->type = token_not;
 					return 0;
 				}
 			case state_and:
-				if(c == '&'){
+				if(c == '&'){ // and
 					t->type = token_and;
 					return 0;
 				}
-				else{
+				else{ // there can't be only &
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
 			case state_or:
-				if(c == '|'){
+				if(c == '|'){ // or
 					t->type = token_or;
 					return 0;
 				}
-				else{
+				else{ // there can't be only |
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
 			case state_integer:
-				if(isdigit(c))
+				if(isdigit(c)) // integer
 					str_addchar(buff, c);	
-				else if(c == '.'){
+				else if(c == '.'){ // double in form: X.X???
 					str_addchar(buff, c);	
 					state = _state_double_point;
 				}
-				else if(c == 'e' || c == 'E'){
+				else if(c == 'e' || c == 'E'){ // double in form: Xe??
 					str_addchar(buff, c);	
 					state = _state_double_e;
 				}
-				else{
+				else{ // end of integer
 					ungetc(c, fd);
-					if(isalpha(c))
+					if(isalpha(c)) // there can't be a letter right after integer
 						return 1;
 					t->type = token_int;
-					t->attr.i = strtol(buff->data, &endptr, 10);
+					t->attr.i = strtol(buff->data, &endptr, 10); // convert string to integer
 					return 0;
 				}
 				break;
 			
 			case _state_double_point:
-				if(isdigit(c)){
+				if(isdigit(c)){ // there must be a digit after decimal point
 					str_addchar(buff, c);	
 					state = state_double;
 				}
@@ -340,27 +339,27 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			
 			case state_double:
-				if(isdigit(c))
+				if(isdigit(c)) // more digits
 					str_addchar(buff, c);	
-				else if(c == 'e' || c == 'E'){
+				else if(c == 'e' || c == 'E'){ // double in form: X.Xe??
 					str_addchar(buff, c);	
 					state = _state_double_e;
 				}
-				else{
+				else{ // double in form: X.X
 					ungetc(c, fd);
-					if(isalpha(c) || c == '.')
+					if(isalpha(c) || c == '.') // there can't be a letter or '.' right after double
 						return 1;
 					t->type = token_double;
-					t->attr.d = strtod(buff->data, &endptr);
+					t->attr.d = strtod(buff->data, &endptr); // convert string to double
 					return 0;
 				}
 				break;
 			case _state_double_e:
-				if(isdigit(c)){
+				if(isdigit(c)){ // double in form: X.Xe? or Xe?
 					str_addchar(buff, c);	
 					state = state_double_e;
 				}
-				else if(c == '+' || c == '-'){
+				else if(c == '+' || c == '-'){ // double in form: X.Xe+/-? or Xe+/-?
 					str_addchar(buff, c);	
 					state = _state_double_e_sign;
 				}
@@ -370,7 +369,7 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				break;
 			case _state_double_e_sign:
-				if(isdigit(c)){
+				if(isdigit(c)){ // there must be at least one digit after sign in double
 					str_addchar(buff, c);	
 					state = state_double_e;
 				}
@@ -380,11 +379,11 @@ int get_token(FILE *fd, token_t *t) {
 				}
 				break;
 			case state_double_e:
-				if(isdigit(c))
+				if(isdigit(c)) // more digits
 					str_addchar(buff, c);	
-				else{
+				else{ // double in form: X.XeX or XeX or X.Xe+/-X or Xe+/-X
 					ungetc(c, fd);
-					if(isalpha(c) || c == '.')
+					if(isalpha(c) || c == '.') // there can't be a letter or '.' right after double
 						return 1;
 					t->type = token_double;
 					t->attr.d = strtod(buff->data, &endptr);
@@ -392,24 +391,24 @@ int get_token(FILE *fd, token_t *t) {
 				}				
 				break;
 			case state_string:
-				if(c == '\\'){
+				if(c == '\\'){ // escape sequence in string
 					state = _state_string_escape;
 				}
-				else if(c == '"'){
+				else if(c == '"'){ // end of string
 //					str_addchar(buff, c);	
 					t->type = token_string;
 					t->attr.s = str_init(buff->data);
 					return 0;
 				}
-				else if(c == '\n' || c == EOF){
+				else if(c == '\n' || c == EOF){ // unfinished string
 					return 1;
 				}
 				else
-					str_addchar(buff, c);	
+					str_addchar(buff, c); // adding characters to string
 				break;
 			case _state_string_escape:
-				if(c == 't' || c == 'n' || c == '"' || c == '\\'){
-					switch(c){
+				if(c == 't' || c == 'n' || c == '"' || c == '\\'){ // supported escape sequences
+					switch(c){ // converting to actual character
 						case 't':
 							str_addchar(buff, '\t'); break;	
 						case 'n':
@@ -419,38 +418,38 @@ int get_token(FILE *fd, token_t *t) {
 						case '\\':
 							str_addchar(buff, '\\'); break;	
 					}
-					state = state_string;
+					state = state_string; // continue in string
 				}
-				else if(c >= '0' && c <= '3'){
+				else if(c >= '0' && c <= '3'){ // octal escape sequences, \001 - \337
 					octal[o++] = c;
 					state = _state_string_octalx;
 				}
-				else{
+				else{ // error
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
 			case _state_string_octalx:
-				if(c >= '0' && c <= '7'){
+				if(c >= '0' && c <= '7'){ // octal escape sequence, \001 - \337
 					octal[o++] = c;
 					state = _state_string_octalxx;
 				}
-				else{
+				else{ error
 					ungetc(c, fd);
 					return 1;
 				}
 				break;
-			case _state_string_octalxx:
-				if(c >= '0' && c <= '7'){
+			case _state_string_octalxx: 
+				if(c >= '0' && c <= '7'){ // octal escape sequence, \001 - \337
 					octal[o++] = c;
 					octal[o] = 0;
-					if((c = strtol(octal, &endptr, 8)) == 0)
+					if((c = strtol(octal, &endptr, 8)) == 0) // converting to integer, unsupported character \000 is an error
 						return 1;
 					str_addchar(buff, c);
-					o = 0;
+					o = 0; // resetting counter for storing octal digits
 					state = state_string;
 				}
-				else{
+				else{ // error
 					ungetc(c, fd);
 					return 1;
 				}
