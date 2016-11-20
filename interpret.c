@@ -126,9 +126,7 @@ int inter(instr_t I){
                         return -1;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                if(init != true){
-                        return -1;
-                }
+                
                 (*init_dest)=true;
                 (*dest).d_val=(double)(*value1).i_val;
                 break;                
@@ -169,9 +167,6 @@ int inter(instr_t I){
                 }
                 sprintf(arr, "%g", value1->d_val);
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                if(init != true){
-                        return -1;
-                }
                 (*init_dest)=true;
                 dest->s_val = str_init(arr);
                 break;
