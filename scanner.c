@@ -145,72 +145,30 @@ int get_token(FILE *fd, token_t *t) {
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_') // supported characters
 					str_addchar(buff, c);	
-				else if(c == '.'){ // fully qualified identifier
-					str_addchar(buff, c);
-					state = _state_dot_fqidentifier;
-				}
                 else{
-					if(c == '"'){ // there can't be '"' right after identifier (e.g. id"), it doens't make much sense
-						ungetc(c, fd);
+					if(c == '"') // there can't be '"' right after identifier (e.g. id"), it doens't make much sense
 						return 1;
-					}
-					ungetc(c, fd); // other character are tolerated right after identifier, if they are not supported in ifj16, scanner will fail in next token
 					// checking if identifier is not a keyword: 
-					if(!strcmp(buff->data, "boolean")){
-						t->type = token_k_boolean;
+					if(!check_keyword(t)){
+						if(c == '.') // '.' can't follow after keyword
+							return 1;
+						ungetc(c,fd);
+						return 0;
 					}
-					else if(!strcmp(buff->data, "break")){
-						t->type = token_k_break;
-					}
-					else if(!strcmp(buff->data, "class")){
-						t->type = token_k_class;
-					}
-					else if(!strcmp(buff->data, "continue")){
-						t->type = token_k_continue;
-					}
-					else if(!strcmp(buff->data, "do")){
-						t->type = token_k_do;
-					}
-					else if(!strcmp(buff->data, "double")){
-						t->type = token_k_double;
-					}
-					else if(!strcmp(buff->data, "else")){
-						t->type = token_k_else;
-					}
-					else if(!strcmp(buff->data, "for")){
-						t->type = token_k_for;
-					}
-					else if(!strcmp(buff->data, "if")){
-						t->type = token_k_if;
-					}
-					else if(!strcmp(buff->data, "int")){
-						t->type = token_k_int;
-					}
-					else if(!strcmp(buff->data, "return")){
-						t->type = token_k_return;
-					}
-					else if(!strcmp(buff->data, "String")){
-						t->type = token_k_string;
-					}
-					else if(!strcmp(buff->data, "static")){
-						t->type = token_k_static;
-					}
-					else if(!strcmp(buff->data, "true") || !strcmp(buff->data, "false")){
-						t->type = token_boolean;
-						t->attr.b = !strcmp(buff->data, "true") ? 1 : 0; // converting true/false to 1/0
-					}
-					else if(!strcmp(buff->data, "void")){
-						t->type = token_k_void;
-					}
-					else if(!strcmp(buff->data, "while")){
-						t->type = token_k_while;
+					else if(c == '.'){ // fully qualified identifier
+						str_addchar(buff, c);
+						t->attr.s = str_init(buff->data);
+						str_empty(buff);
+						state = _state_dot_fqidentifier;
 					}
 					else{ // idenfitier
 						t->type = token_id;
 						t->attr.s = str_init(buff->data); // storing a copy of string contaiting the name
+						ungetc(c, fd);
 						return 0;
 					}
-					return 0;
+					// this is return with keyword token:
+					//return 0;
 		        }
 				break;
 			case _state_dot_fqidentifier:
@@ -223,6 +181,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_fqidentifier;
 				}
 				else{ // anything else is an error
+					str_destroy(t->attr.s);
 					ungetc(c, fd);
 					return 1;
 				}
@@ -233,6 +192,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_fqidentifier;
 				}
 				else{ // '_' can't be an identifier
+					str_destroy(t->attr.s);
 					ungetc(c, fd);
 					return 1;
 				}
@@ -241,11 +201,12 @@ int get_token(FILE *fd, token_t *t) {
 				if(isalnum(c) || c == '$' || c == '_') // supported characters
 					str_addchar(buff, c);
 				else{ // FQID
-					ungetc(c, fd);
 					if(c == '"' || c == '.') // right after FQID can't follow '"' or '.'
 						return 1;
+					if(!check_keyword(t)) // if second part is a keyword, it is an error
+						return 1;
 					t->type = token_fqid;
-					t->attr.s = str_init(buff->data);
+					str_cat(t->attr.s, buff); // add the second part of id
 					return 0;
 				}
 				break;
@@ -457,5 +418,60 @@ int get_token(FILE *fd, token_t *t) {
         }
 
     }
+	return 0;
+}
+
+int check_keyword(token_t *t){
+	if(!strcmp(buff->data, "boolean")){
+		t->type = token_k_boolean;
+	}
+	else if(!strcmp(buff->data, "break")){
+		t->type = token_k_break;
+	}
+	else if(!strcmp(buff->data, "class")){
+		t->type = token_k_class;
+	}
+	else if(!strcmp(buff->data, "continue")){
+		t->type = token_k_continue;
+	}
+	else if(!strcmp(buff->data, "do")){
+		t->type = token_k_do;
+	}
+	else if(!strcmp(buff->data, "double")){
+		t->type = token_k_double;
+	}
+	else if(!strcmp(buff->data, "else")){
+		t->type = token_k_else;
+	}
+	else if(!strcmp(buff->data, "for")){
+		t->type = token_k_for;
+	}
+	else if(!strcmp(buff->data, "if")){
+		t->type = token_k_if;
+	}
+	else if(!strcmp(buff->data, "int")){
+			t->type = token_k_int;
+	}
+	else if(!strcmp(buff->data, "return")){
+			t->type = token_k_return;
+	}
+	else if(!strcmp(buff->data, "String")){
+		t->type = token_k_string;
+	}
+	else if(!strcmp(buff->data, "static")){
+		t->type = token_k_static;
+	}
+	else if(!strcmp(buff->data, "true") || !strcmp(buff->data, "false")){
+		t->type = token_boolean;
+		t->attr.b = !strcmp(buff->data, "true") ? 1 : 0; // converting true/false to 1/0
+	}
+	else if(!strcmp(buff->data, "void")){
+		t->type = token_k_void;
+	}
+	else if(!strcmp(buff->data, "while")){
+		t->type = token_k_while;
+	}
+	else
+		return 1;
 	return 0;
 }
