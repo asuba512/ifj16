@@ -1,0 +1,22 @@
+identificator;
+;identificator
+identificator;identificator
+
+identificator ;
+; identificator
+identificator ; identificator
+
+(identificator)
+{identificator}
+
+{identificator.}
+{.identificator}
+
+{identificator..}
+{..identificator}
+
+{identificator...}
+{...identificator}
+
+{identificator.i.}
+{.i.identificator}

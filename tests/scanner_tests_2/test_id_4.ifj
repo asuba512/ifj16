@@ -1,0 +1,19 @@
+identificator && identificator
+identificator&&identificator
+identificator &&identificator
+identificator&& identificator
+
+identificator * identificator
+identificator*identificator
+identificator *identificator
+identificator* identificator
+
+identificator > identificator
+identificator>identificator
+identificator >identificator
+identificator> identificator
+
+identificator / identificator
+identificator/identificator
+identificator/ identificator
+identificator /identificator
