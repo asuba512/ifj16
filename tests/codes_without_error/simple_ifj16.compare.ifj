@@ -1,0 +1,16 @@
+class Main
+{
+	static void run()
+	{
+		String str1 = "Tralala";
+		String str2 = "Tralala";
+		int i = ifj16.compare(str1, str2);
+		if ( i == 0)
+		{
+			ifj16.print("ifj16.compare\n");
+		}
+		else
+		{
+		}
+	}
+}

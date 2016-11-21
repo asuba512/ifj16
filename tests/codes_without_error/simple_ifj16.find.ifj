@@ -1,0 +1,16 @@
+class Main
+{
+	static void run()
+	{
+		String str 	  = "ASDFGHaljksdfhalGDoiasASDuqerJKLQWEPIOZERWR";
+		String substr = "asAS";
+		int index = ifj16.find(str, substr);
+		if (index == 20)
+		{
+			ifj16.print("ifj16.find!\n");
+		}
+		else
+		{
+		}
+	}
+}

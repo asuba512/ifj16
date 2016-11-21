@@ -1,0 +1,15 @@
+class Main
+{
+	static void run()
+	{
+		String str 	  = "123456789";
+		String substr = ifj16.substr(str, 3, 3);
+		if ( substr == "456")
+		{
+			ifj16.print("ifj16.substr\n");
+		}
+		else
+		{
+		}
+	}
+}

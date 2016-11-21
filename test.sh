@@ -5,7 +5,7 @@ ifj16_dir=pwd
 # ON  switch == 0 
 # OFF swtich != 0
 
-switch_GOOD_dir_1=1
+switch_GOOD_dir_1=0
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
 switch_BAD_dir_1=1
@@ -15,7 +15,7 @@ switch_BAD_dir_2=1
 BAD_dir_2="`pwd`/tests/parser_tests"
 
 # SCANNER TESTS - the new folder
-switch_SCANNER_DIR_2=0
+switch_SCANNER_DIR_2=1
 SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
 
 # SCANNER TESTS are for nothing because the behaviour was changed with FQID
@@ -52,7 +52,7 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 		printf "= $counter.) $i \n"
 	    ./ifj $GOOD_dir_1/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^ERR.* | wc -l)
+	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
 	    if [ $exitvalue -ne 0 ] && [ $error -ne 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
 	        printf "\tERROR = %s\n" "$error"
@@ -77,7 +77,7 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 		printf "= $counter.) $i \n"
 	    ./ifj $BAD_dir_1/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^ERR.* | wc -l)
+	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
 	    if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
 	        printf "\tERROR = %s\n" "$error"
@@ -108,7 +108,7 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	    printf "= $counter.) $i \n"
 	    ./ifj $BAD_dir_2/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^ERR.* | wc -l)
+	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
 	    if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
 	        printf "\tERROR = %s\n" "$error"
@@ -242,17 +242,17 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 	    ok=$(cat $SYMBOLIC_TABLE/$i.output | head -1)
 	    if [ $ok = "=ERROR=" ]; then
 	   		number_of_errors_file=$(cat $SYMBOLIC_TABLE/$i.output | head -2 | tail -1 | awk '{print $3}')
-	   		number_of_errors_stderr=$(cat stderr_subor | grep ^ERR.*$ | wc -l)
+	   		number_of_errors_stderr=$(cat stderr_subor | grep ^.*ERR.*$ | wc -l)
 	   		if [ $number_of_errors_file -ne $number_of_errors_stderr ]; then
-				printf "Number of stderr errors  = $number_of_errors_stderr\n"
-				printf "Expected count of errors = $number_of_errors_file\n"	   		
+				printf "\tNumber of stderr errors  = $number_of_errors_stderr\n"
+				printf "\tExpected count of errors = $number_of_errors_file\n"	   		
 	   		fi
 	    fi
 	    if [ $ok = "=OK=" ]; then
-	    	number_of_errors_stderr=$(cat stderr_subor | grep ^ERR.*$ | wc -l)
+	    	number_of_errors_stderr=$(cat stderr_subor | grep ^.*ERR.*$ | wc -l)
 	    	if [ $number_of_errors_stderr -ne 0 ]; then
-				printf "Number of stderr errors  = $number_of_errors_stderr\n"
-				printf "Expected count of errors = 0\n"		    		
+				printf "\tNumber of stderr errors  = $number_of_errors_stderr\n"
+				printf "\tExpected count of errors = 0\n"		    		
 	    	fi
 	    fi
 	    rm stderr_subor
