@@ -39,19 +39,24 @@ int main(int argc, char **argv){
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
-	// printf("retval: %d\n", errno == 0 ? retval : errno);
+	printf("1st pass retval: %d (parser) %d (errno)\n", retval, errno);
+	if(errno) return errno;
+	if(retval) return retval;
 	// printf("current token: %d\n", t.type);
-	if(retval != 0){	
-		int c;
-		while((c = getc(fd)) != EOF){
-			putchar(c);
-		}
-		printf("ERR: First pass failed.\n");
-		return 9999999;
-	}
+	// if(retval != 0){	
+	// 	int c;
+	// 	while((c = getc(fd)) != EOF){
+	// 		putchar(c);
+	// 	}
+	// 	printf("ERR: First pass failed.\n");
+	// 	return 9999999;
+	// }
 	pass_number = 2;
 	retval = c_list();
-	// printf("retval: %d\n", errno == 0 ? retval : errno);
+	printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
+	if(errno != 0 || retval != 0) return errno;
+	if(errno) return errno;
+	if(retval) return retval;
 	// printf("current token: %d\n", t.type);
 	
 	str_destroy(buff);
@@ -71,7 +76,7 @@ int main(int argc, char **argv){
 	int a = inter(glob_instr_list.head);
 	printf("\nInterpret ret val: %d\n", a);
 	fclose(fd);
-    return 0;
+    return a;
 }
 
 void add_head() {

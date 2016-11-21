@@ -108,7 +108,7 @@ int populate_sym_table() {
 
     // ifj16.sort
     class_memb_t sort;
-    st_insert_class_memb(ifj16, &sort, str_init("sort"), func, dt_int);
+    st_insert_class_memb(ifj16, &sort, str_init("sort"), func, dt_String);
     st_add_fn_arg(sort, dt_String, str_init("s")); // arg (index 0)
     i.type = sortstr;
     i.dst = i.src1 = i.src2 = NULL;

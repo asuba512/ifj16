@@ -131,7 +131,7 @@ int c_memb2(){
 	next_token();
 	if(is(token_assign)){
 		if (FIRST_PASS) {
-			sem_add_member_active_class(var);
+			if((errno = sem_add_member_active_class(var))) return errno;
 			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
 			next_token();
 			token_t tmp;
@@ -162,7 +162,7 @@ int c_memb2(){
 	}
 	else if(is(token_semicolon)){
 		if (FIRST_PASS)
-			sem_add_member_active_class(var);
+			if ((errno = sem_add_member_active_class(var))) return errno;
 		return 0;
 	}
 	else if(is(token_lbracket)){
@@ -237,10 +237,13 @@ int fn_body(){
 	}
 	else if(is(token_rbrace)) {
 		if(SECOND_PASS) {
-			if(active_function->dtype == t_void)
-				sem_generate_ret(NULL); // append ret instruction at the end of void function
-			else
-				sem_generate_halt(); // append halt instruction at the end of non-void function. proper funcion should not reach this instruction
+			if(active_function->dtype == t_void) {
+				if ((errno = sem_generate_ret(NULL))) return errno; // append ret instruction at the end of void function
+			}
+			else {
+				if ((errno = sem_generate_halt())) return errno; // append halt instruction at the end of non-void function. proper funcion should not reach this instruction
+			}
+				
 		}
 		outside_func = true;
 		active_function = NULL;
@@ -286,7 +289,7 @@ int assign(){
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
-			sem_generate_prepare((class_memb_t)sem_id_decoded.ptr);
+			if((errno = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return errno;
 			next_token();
 			if(is(token_lbracket)){
 				if(!fn_plist())
@@ -294,7 +297,7 @@ int assign(){
 						if(!sem_args_ok(calling_function)) {
 							return 4;
 						}
-						sem_generate_call(calling_function);
+						if((errno = sem_generate_call(calling_function))) return errno;
 						return 0;
 					}
 			}
@@ -353,7 +356,7 @@ int val_id(){
 	if(!id()){
 		if(SECOND_PASS) {
 			if(calling_function) {
-				sem_generate_push(calling_function, (op_t)sem_id_decoded.ptr);
+				if ((errno = sem_generate_push(calling_function, (op_t)sem_id_decoded.ptr))) return errno;
 			}
 		}
 		return 0;
@@ -363,7 +366,7 @@ int val_id(){
 			if(calling_function) {
 				op_t literal = (op_t)add_global_helper_var(t, true);
 				//printf("Literal: %d (%p)\n", ((literal_t)literal)->i_val, (void*)literal);
-				sem_generate_push(calling_function, literal);
+				if ((errno = sem_generate_push(calling_function, literal))) return errno;
 			}
 		}
 		return 0;
@@ -427,7 +430,7 @@ int stat(){
 					return 2;
 				if((errno = precedence(expr_queue, &precedence_result)))
 					return 2;
-				sem_generate_jmpifn(precedence_result);
+				if((errno = sem_generate_jmpifn(precedence_result))) return errno;
 				if_jmp_instr = active_function->instr_list_end; // we'll add jump target later
 			}
 			else{
@@ -441,15 +444,15 @@ int stat(){
 				next_token();
 				if(is(token_k_else)) {
 					if(SECOND_PASS) {
-						sem_generate_jmp(NULL);
+						if ((errno = sem_generate_jmp(NULL))) return errno;
 						pre_else_jmp = active_function->instr_list_end; // another jump we will correct later
-						sem_generate_label();
+						if ((errno = sem_generate_label())) return errno;
 						sem_set_jmp_dst(if_jmp_instr, (op_t)(active_function->instr_list_end)); //set label we just created as a jump target
 					}					
 					next_token();
 					if(!stat_com()){
 						if(SECOND_PASS) {
-							sem_generate_label();
+							if ((errno = sem_generate_label())) return errno;
 							sem_set_jmp_dst(pre_else_jmp, (op_t)(active_function->instr_list_end));
 						}
 						
@@ -462,7 +465,7 @@ int stat(){
 	else if(is(token_k_while)){
 		instr_t while_label, while_jmp;
 		if(SECOND_PASS) {
-			sem_generate_label();
+			if ((errno = sem_generate_label())) return errno;
 			while_label = active_function->instr_list_end;
 		}
 		next_token();
@@ -472,8 +475,8 @@ int stat(){
 				if(_cond_fill_que(expr_queue, true)) // fill queue, counting brackets is on
 					return 2;
 				if((errno = precedence(expr_queue, &precedence_result)))
-					return 2;
-				sem_generate_jmpifn(precedence_result);
+					return errno;
+				if ((errno = sem_generate_jmpifn(precedence_result))) return errno;
 				while_jmp = active_function->instr_list_end;
 			}
 			else{
@@ -485,8 +488,8 @@ int stat(){
 			}
 			if(!stat_com()){
 				if(SECOND_PASS) {
-					sem_generate_jmp((op_t)while_label);
-					sem_generate_label();
+					if ((errno = sem_generate_jmp((op_t)while_label))) return errno;
+					if ((errno = sem_generate_label())) return errno;
 					sem_set_jmp_dst(while_jmp, (op_t)(active_function->instr_list_end));
 				}
 				return 0;
@@ -497,7 +500,7 @@ int stat(){
 		if(!ret_val() && is(token_semicolon)){
 			if(SECOND_PASS) {
 				if((errno = sem_generate_ret(precedence_result))) {
-					return 4;
+					return errno;
 				}
 			}
 			return 0;
@@ -532,7 +535,7 @@ int as_ca(){
 	if(is(token_lbracket)){
 		int err = 0;
 		if(SECOND_PASS) {
-			sem_generate_prepare((class_memb_t)sem_id_decoded.ptr);
+			if ((errno = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return errno;
 			
 			if(sem_id_decoded.ptr == print_fn){ // in case of ifj16.print()
 				int counter = 1;
@@ -561,6 +564,7 @@ int as_ca(){
 							is_string = true;
 						tmp.type = token_id;
 						tmp.attr.p = add_global_helper_var(t, true); // insert as variable into TS
+						if (!tmp.attr.p) return 99;
 						tok_enqueue(expr_queue, tmp);
 					}
 
@@ -580,8 +584,9 @@ int as_ca(){
 				op_t arg = precedence_result;
 				if(precedence_result->dtype != dt_String) {
 					arg = sem_generate_conv_to_str(precedence_result); // possible internal err
+					if(!arg) return 99;
 				}
-				sem_generate_push(calling_function, arg); // push result of concatenation
+				if ((errno = sem_generate_push(calling_function, arg))) return errno; // push result of concatenation
 
 				if(is(token_rbracket))
 					next_token();
@@ -595,11 +600,11 @@ int as_ca(){
 				if(!sem_args_ok(calling_function)) {
 					return errno = 4;
 				}
-				sem_generate_call(calling_function);
+				if ((errno = sem_generate_call(calling_function))) return errno;
 				calling_function = NULL;
 				return 0;
 			}
-			return errno = err;			
+			return err;			
 		}
 		else{ // FIRST_PASS
 			do{
@@ -623,10 +628,10 @@ int as_ca(){
 		if(err == 0 && SECOND_PASS) {
 			if(!calling_function) {
 				if((err = sem_generate_mov(precedence_result, tmp_dst)))
-					return err;
+					return errno = err;
 			} else {
 				if((err = sem_generate_movr(calling_function, tmp_dst)))
-					return err;
+					return errno = err;
 				calling_function = NULL;
 			}
 		}
@@ -645,7 +650,7 @@ int ret_val(){
 		if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 			return 2;
 		if((errno = precedence(expr_queue, &precedence_result)))
-			return 2;
+			return errno;
 		//semantic actions
 	}
 	else{
@@ -682,6 +687,7 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 		else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
 			tmp.type = token_id;
 			tmp.attr.p = add_global_helper_var(t, true); // insert as variable into TS
+			if(!tmp.attr.p) return 99;
 			tok_enqueue(expr_queue, tmp);
 			next_token();	
 		}

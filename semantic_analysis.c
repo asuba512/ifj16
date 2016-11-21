@@ -152,7 +152,7 @@ local_var_t sem_new_tmp_var(datatype dt) {
 } // OK -> only causes internal err
 
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
-    op_t new_var, new_dst;
+    op_t new_var, new_dst; // new_var = result of conversion, new_dst destination of effective instruction
     token_t t;  // for generating conversion tmp var
     struct instr i, conv; // i - main instruction, conv - helper conversion instruction
     int err = 0; // catches error codes
@@ -174,7 +174,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             i.type = conc; // concatenation of strings and addicion are different instructions
             NEW_STRING(new_dst) // result of concatenation
             if(!new_dst) INTERNAL_ERR
-            // conversion and further modifications are needed, when one of operands is not a string  
+            // conversion and further modifications in instruction are needed, when one of operands is not a string  
             if(src1->dtype != dt_String || src2->dtype != dt_String) {   
                 NEW_STRING(new_var) // converted operand   
                 if(!new_var) INTERNAL_ERR
@@ -309,7 +309,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     INSTR(i)
     if(err) INTERNAL_ERR
     return 0;
-}
+} // OK, trivial, evident
 
 int sem_generate_mov(op_t src, op_t dst) {
     struct instr i;
@@ -319,13 +319,13 @@ int sem_generate_mov(op_t src, op_t dst) {
     if(src->sc == global && (((class_memb_t)(src))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
         return 4;
-    } else if (!dst) { // undefined dst
-        fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
-        return 3;
     } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
         return 4;
-    }
+    } else if (!dst) { // undefined dst
+        fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
+        return 3;
+    } 
     if(src->dtype == dst->dtype) {
         i.src1 = src;
     } else if(src->dtype == dt_int && dst->dtype == dt_double) {
@@ -349,8 +349,9 @@ int sem_generate_mov(op_t src, op_t dst) {
     INSTR(i)
     if(err) INTERNAL_ERR
     return 0;
-}
+} // OK
 
+// generates 'sframe' instruction
 int sem_generate_prepare(class_memb_t fn) {
     struct instr i;
     i.type = sframe;
@@ -359,7 +360,7 @@ int sem_generate_prepare(class_memb_t fn) {
     if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
     calling_function = fn;
     return 0;
-}
+} // OK
 
 int sem_generate_push(class_memb_t called_fn, op_t arg) {
     if(arg_counter == called_fn->arg_count) {
