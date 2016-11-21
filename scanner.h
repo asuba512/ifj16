@@ -42,5 +42,6 @@ typedef enum {
 } t_state; // enumeration of states
 
 int get_token(FILE *, token_t *t);
+int check_keyword(token_t *t);
 
 #endif
