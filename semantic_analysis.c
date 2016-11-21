@@ -212,8 +212,24 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             if(isNum(src1) && isNum(src2)) {
                 if(src1->dtype == dt_int && src2->dtype == dt_int)
                     NEW_INT(new_dst)
-                else
+                else {
                     NEW_DOUBLE(new_dst)
+                    if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
+                        NEW_DOUBLE(new_var) // converted operand
+                        conv.type = int_to_dbl;
+                        conv.src2 = NULL;
+                        conv.dst = new_var; 
+                        if(src1->dtype == dt_double && src2->dtype == dt_int) {
+                            conv.src1 = src2;
+                            i.src2 = new_var;
+                        } else /* (src1->dtype == dt_int && src2->dtype == dt_double) */ {
+                            conv.src1 = src1;
+                            i.src1 = new_var;
+                        }
+                        INSTR(conv)
+                        if(err) INTERNAL_ERR
+                    }
+                }
                 if(!new_dst) INTERNAL_ERR
             } else {
                 fprintf(stderr, "ERR: Incompatible types of operands.\n");
