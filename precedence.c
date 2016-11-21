@@ -6,12 +6,15 @@
 #include <stdio.h>
 
 #define try(x) if((err = x)) return err
+
+extern int errno;
 /*
 TODO & explanations:
 	- there should be some tmp_var, which will be pointer into table of symbols,
 		the purpose is storing nonterminal attribute, which would be already lost, when you generate instruction
 	- there are only two stacks with different methods, I made them global and methods are called without name of stack
 	- debugging
+	- all mallocs must have option to return 99
 */
 
 int precedence(tok_que_t queue, op_t *result){
@@ -42,19 +45,19 @@ int precedence(tok_que_t queue, op_t *result){
 	token_t qtoken, stoken;
 	prec_st_element tmp;
 	
-	prec_stack_push(eof); 
+	if(prec_stack_push(eof)) return 99; 
 
 	qtoken = tok_remove_head(queue);
 	stoken = (*prec_stack_top())->data;
 	do{
 		switch(prec_table[stoken.type][qtoken.type]){
 			case '=':
-				prec_stack_push(qtoken);
+				if(prec_stack_push(qtoken)) return 99;
 				qtoken = tok_remove_head(queue);
 				break;
 			case '<': // insert <
-				prec_auxstack_push(prec_stack_top());
-				prec_stack_push(qtoken);
+				if(prec_auxstack_push(prec_stack_top())) return 99;
+				if(prec_stack_push(qtoken)) return 99;
 				qtoken = tok_remove_head(queue);
 				break;
 			case '>': // reduce
@@ -63,7 +66,7 @@ int precedence(tok_que_t queue, op_t *result){
 					if(tmp && tmp->data.type == token_id && prec_auxstack_top() == tmp){ // E -> id
 						nonterminal.attr.p = tmp->data.attr.p; // kinda semantic action, it's probably what you wanna do
 						prec_stack_pop();
-						prec_stack_push(nonterminal);
+						if(prec_stack_push(nonterminal)) return 99;
 						prec_auxstack_pop(); 
 					}
 					else if(tmp && tmp->data.type == token_rbracket){ // E -> (E)
@@ -78,7 +81,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf(")\n");
 								prec_stack_pop();
 								//nonterminal.attr.p =tmp_var // no instruction needed, just transfer nonterminal
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop();
 							}
 						}

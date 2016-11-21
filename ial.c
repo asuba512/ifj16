@@ -181,7 +181,7 @@ int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
             return BST_NODE_ALREADY_EXISTS;
         }
     }
-}
+} // OK
 
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     *node_ptr = malloc(sizeof(struct bst_node));
@@ -190,7 +190,7 @@ int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     (*node_ptr)->key = key;
     (*node_ptr)->data = data;
     return 0;
-}
+} // OK
 
 void bst_delete(bst_node_t *root, string_t key) {
     if(*root != NULL) {

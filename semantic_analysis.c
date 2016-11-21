@@ -11,15 +11,15 @@ int sem_new_class(string_t id) {
     int err = insert_class(id, &c);
     if (err == 0) {
         active_class = c;
-        //printf("Class: %s added.\n", id->data);
         return 0;
     } else if(err == 3) {
         fprintf(stderr, "ERR: Can't redefine class \"%s\".\n", id->data);
     } else if(err == 99) {
         fprintf(stderr, "ERR: Internal error.\n");
     }
+    active_class = NULL; // causes segfault (intentionally) if program continues  ilegally
     return err;
-}
+} // OK
 
 int sem_add_member_active_class(var_func member_type) {
     class_memb_t new_memb;
@@ -28,20 +28,19 @@ int sem_add_member_active_class(var_func member_type) {
         if(member_type == func) {
             active_function = new_memb;
         }
-        //printf("Member: %s added - %s, %d.\n", sem_tmp_data.id->data, new_memb->type == var ? "var" : "func", new_memb->dtype);
         return 0;
     } else if(err == 3) {
         fprintf(stderr, "ERR: Class member redefinition.\n");
     } else if(err == 99) {
         fprintf(stderr, "ERR: Internal error.\n");
     }
+    active_function = NULL; // causes segfault (intentionally) if program continues ilegally
     return err;
-}
+} // OK
 
 int sem_add_arg_active_fn() {
     int err = st_add_fn_arg(active_function, sem_tmp_data.dt, sem_tmp_data.id);
     if (err == 0) {
-        //printf("Function argument: %s added, %d.\n", sem_tmp_data.id->data, sem_tmp_data.dt);
         return 0;
     } else if(err == 3) {
         fprintf(stderr, "ERR: Function argument with same identifier already exists.\n");
@@ -49,19 +48,19 @@ int sem_add_arg_active_fn() {
         fprintf(stderr, "ERR: Internal error.\n");
     }
     return err;
-}
+} // OK
 
 void sem_set_active_class(string_t id) {
-    active_class = st_getclass(id);
-}
+    active_class = st_getclass(id); // cant cause err (I think)
+} // OK
 
 void sem_set_active_fn(string_t id) {
-    active_function = st_getmemb(active_class, id);
-}
+    active_function = st_getmemb(active_class, id); // cant cause err (I think)
+} // OK
 
 int sem_prec_reduction() {
     return 42;
-}
+} // LOL ???
 
 static void _print_decoded_id(void *symbol) {
     if(!print_bullshit) return;
@@ -85,8 +84,8 @@ static void _print_demand() {
 }
 
 void sem_search() {
-    print_bullshit = false;
-    _print_demand();
+    //print_bullshit = false;
+    //_print_demand();
     void *symbol = NULL;
     if (sem_id_decoded.class_id == NULL) {
         if(!outside_func) { // local scope has more priority inside function
@@ -104,8 +103,8 @@ void sem_search() {
     }
     sem_id_decoded.ptr = symbol;
     setIsFunFlag(symbol);
-    _print_decoded_id(symbol);
-}
+    //_print_decoded_id(symbol);
+} // OK -> never causes error by itself
 
 void setIsFunFlag(void *symbol) {
     if(symbol != NULL) {
@@ -119,12 +118,11 @@ void setIsFunFlag(void *symbol) {
             sem_id_decoded.isFun = false;
     } else
         sem_id_decoded.isFun = false;
-}
+} // OK
 
 int sem_new_loc_var(datatype dt, string_t id) {
     int err = st_add_fn_locvar(active_function, dt, id);
     if (err == 0) {
-        //printf("Function local var: %s added, %d.\n", id->data, dt);
         return 0;
     } else if(err == 3) {
         fprintf(stderr, "ERR: Function local variable with same identifier already exists.\n");
@@ -132,7 +130,7 @@ int sem_new_loc_var(datatype dt, string_t id) {
         fprintf(stderr, "ERR: Internal error.\n");
     }
     return err;
-}
+} // OK
 
 local_var_t sem_new_tmp_var(datatype dt) {
     static int id = 0;
@@ -151,7 +149,7 @@ local_var_t sem_new_tmp_var(datatype dt) {
     }
     id++;
     return tmpvar;
-}
+} // OK -> only causes internal err
 
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     op_t new_var, new_dst;

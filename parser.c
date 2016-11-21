@@ -8,6 +8,8 @@
 #include "ifj16_class.h"
 #include <string.h>
 
+// OPTIMALIZATION FLAG = marks places that can be optimized
+
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
 extern class_memb_t calling_function;
@@ -27,9 +29,11 @@ int c_list(){
 		next_token();
 		if(is(token_id)){
 			sem_tmp_data.id = t.attr.s;
-			if (FIRST_PASS)
-				sem_new_class(t.attr.s); // first pass adds this class into symbols table
-			else if(SECOND_PASS)
+			if (FIRST_PASS) {
+				errno = sem_new_class(t.attr.s); // first pass adds this class into symbols table
+				if (errno) return errno;
+			}
+			else if(SECOND_PASS) // OPTIMALIZATION FLAG = redundant search
 				sem_set_active_class(t.attr.s); // second pass marks this class as active scope for searching members
 			next_token();
 			if(is(token_lbrace)){
@@ -104,8 +108,10 @@ int type(){
 
 int c_memb_func(){
 	if(is(token_lbracket)){
-		if (FIRST_PASS)
-			sem_add_member_active_class(func); // first pass adds function to symbol table
+		if (FIRST_PASS) {
+			errno = sem_add_member_active_class(func); // first pass adds function to symbol table
+			if (errno) return errno;
+		}
 		else if (SECOND_PASS)
 			sem_set_active_fn(t.attr.s); // second pass marks this function as active local scope
 		if(!fn_def_plist() && is(token_rbracket)){
@@ -196,8 +202,10 @@ int par_def(){
 		next_token();
 		if(is(token_id)){
 			sem_tmp_data.id = t.attr.s;
-			if (FIRST_PASS)
-				sem_add_arg_active_fn();		
+			if (FIRST_PASS) {
+				errno = sem_add_arg_active_fn();
+				if(errno) return errno;
+			}
 			return 0;
 		}
 	}
@@ -215,10 +223,12 @@ int fn_body(){
 		next_token();
 		if(is(token_id)){
 			if(SECOND_PASS) {
-				sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
+				errno = sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
+				if(errno) return errno;
+				// OPTIMALIZATION FLAG - redundant search
 				sem_id_decoded.memb_id = t.attr.s;
 				sem_id_decoded.class_id = NULL;
-				sem_search();
+				sem_search(); // never causes error
 			}
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
@@ -249,11 +259,11 @@ int opt_assign(){
 		int err = assign();
 		if(err == 0 && SECOND_PASS) {
 			if(!calling_function) {
-				if((err = sem_generate_mov(precedence_result, tmp_dst)))
-					return err;
+				if((errno = sem_generate_mov(precedence_result, tmp_dst)))
+					return errno;
 			} else {
-				if((err = sem_generate_movr(calling_function, tmp_dst)))
-					return err;
+				if((errno = sem_generate_movr(calling_function, tmp_dst)))
+					return errno;
 				calling_function = NULL;
 			}
 		}
@@ -288,6 +298,9 @@ int assign(){
 						return 0;
 					}
 			}
+		}
+		else if(errno) {
+			return errno;
 		}
 		else{ // expression
 			token_t tmp;
@@ -366,8 +379,7 @@ int id(){
 			sem_search();
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
-				errno = 3;
-				return 3;
+				return errno = 3;
 			}
 		}
 		return 0;
@@ -382,8 +394,7 @@ int id(){
 			sem_search();
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
-				errno = 3;
-				return 3;
+				return errno = 3;
 			}
 		}
 		return 0;
