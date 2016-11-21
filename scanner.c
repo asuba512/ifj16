@@ -207,6 +207,7 @@ int get_token(FILE *fd, token_t *t) {
 						return 1;
 					t->type = token_fqid;
 					str_cat(t->attr.s, buff); // add the second part of id
+					ungetc(c, fd);
 					return 0;
 				}
 				break;
