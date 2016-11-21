@@ -8,6 +8,9 @@ class Main
 		if (index == 20)
 		{
 			ifj16.print("ifj16.find!\n");
-		} 
+		}
+		else
+		{
+		}
 	}
 }

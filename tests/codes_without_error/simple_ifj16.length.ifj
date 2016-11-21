@@ -8,5 +8,8 @@ class Main
 		{
 			ifj16.print("ifj16.length\n");
 		}
+		else
+		{
+		}
 	}
 }

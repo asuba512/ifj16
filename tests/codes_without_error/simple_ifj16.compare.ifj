@@ -9,5 +9,8 @@ class Main
 		{
 			ifj16.print("ifj16.compare\n");
 		}
+		else
+		{
+		}
 	}
 }
