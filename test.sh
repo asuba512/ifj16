@@ -5,16 +5,21 @@ ifj16_dir=pwd
 # ON  switch == 0 
 # OFF swtich != 0
 
-switch_GOOD_dir_1=0
+switch_GOOD_dir_1=1
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
-switch_BAD_dir_1=0
+switch_BAD_dir_1=1
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
 switch_BAD_dir_2=1
 BAD_dir_2="`pwd`/tests/parser_tests"
 
-switch_SCANNER_DIR=1
+# SCANNER TESTS - the new folder
+switch_SCANNER_DIR_2=0
+SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
+
+# SCANNER TESTS are for nothing because the behaviour was changed with FQID
+switch_SCANNER_DIR=1 # keep it OFF!
 SCANNER_DIR="`pwd`/tests/scanner_tests"
 
 switch_SYMBOLIC_TABLE=1
@@ -166,6 +171,40 @@ if [ $switch_SCANNER_DIR -eq 0 ]; then
 	    printf "= $counter.) $i \n"
 	    ./sc_test "$SCANNER_DIR/$i" >subor
 	 	diff subor "$SCANNER_DIR/$i.output" > /dev/null
+	    exitvalue=$?
+	    if [ $exitvalue -ne 0 ]; then
+	        printf "\tDIFF "$""?" = 1 (different output)\n"
+	    fi
+	    rm subor
+	done
+fi
+
+############################################################
+if [ $switch_SCANNER_DIR_2 -eq 0 ]; then
+	
+	dir=$(echo $SCANNER_DIR_2 | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS DIFF ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF stdout == .output THEN TEST PASSED ===\n"
+	printf "=== make clean ===\n"
+	make clean
+	printf "=== make test ===\n"
+	make test
+	printf "\n"
+
+	counter=0
+	for i in `ls $SCANNER_DIR_2`
+	do
+		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+
+	    counter=$(expr $counter + 1)
+	    printf "= $counter.) $i \n"
+	    ./sc_test "$SCANNER_DIR_2/$i" >subor
+	 	diff subor "$SCANNER_DIR_2/$i.output" > /dev/null
 	    exitvalue=$?
 	    if [ $exitvalue -ne 0 ]; then
 	        printf "\tDIFF "$""?" = 1 (different output)\n"
