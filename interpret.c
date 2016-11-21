@@ -19,8 +19,12 @@ int inter(instr_t I){
     bool *init_src1;//pre nastavenie incializacie
     bool *init_src2;
     bool *init_dest;
-    int src1_value;
-    int src2_value;
+    int src1_i_value;
+    int src2_i_value;
+    double src1_d_value;
+    double src2_d_value;
+    bool src1_b_value;
+    bool src2_b_value;
     var_value *value1;//pre src1
     var_value *value2;//pre src2
     var_value *dest;//pre dst
@@ -32,18 +36,21 @@ int inter(instr_t I){
         {
 
             case halt:
-                return 0;
+                fprintf(stderr,"Error! Missing return in non-void function.\n");
+                return 10;
                 break;
 
             case sframe:
                 arg_counter=0;
                 new_frame=malloc(sizeof(struct stackframe));
                 if(new_frame==NULL) { 
+                    fprintf(stderr,"Error at memory allocation!\n");
                     return 10;
                 }
                 new_frame->vars=malloc(sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)); 
                 if(new_frame->vars==NULL) {
                     free(new_frame);
+                    fprintf(stderr,"Error at memory allocation!\n");
                     return 10;
                 }
                 break;
@@ -51,6 +58,7 @@ int inter(instr_t I){
             case push:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true) {
+                    fprintf(stderr,"Error! Working with non-initialized variable.\n");
                     return 8; 
                 }
                 new_arg.initialized=init;  
@@ -97,9 +105,10 @@ int inter(instr_t I){
                 I=(instr_t)I->dst;
                 break;
             
-            case jmpif://generuje sa???
+            case jmpif:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 if(value1->b_val){
@@ -110,6 +119,7 @@ int inter(instr_t I){
             case jmpifn:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 if(!(value1->b_val)){
@@ -123,10 +133,10 @@ int inter(instr_t I){
             case int_to_dbl:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                
                 (*init_dest)=true;
                 (*dest).d_val=(double)(*value1).i_val;
                 break;                
@@ -134,6 +144,7 @@ int inter(instr_t I){
             case int_to_str:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 sprintf(arr, "%d", value1->i_val);
@@ -145,6 +156,7 @@ int inter(instr_t I){
             case bool_to_str:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
@@ -160,6 +172,7 @@ int inter(instr_t I){
             case dbl_to_str:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 sprintf(arr, "%g", value1->d_val);
@@ -171,38 +184,38 @@ int inter(instr_t I){
             case add:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
                             break;
+                        default: 
+                            break;
+
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 switch(dtype)
                     {
                         case dt_double:
-                            (*dest).d_val=src1_value+src2_value;
+                            (*dest).d_val=src1_d_value+src2_d_value;
                             break;
                         case dt_int:
-                            (*dest).i_val=src1_value+src2_value;
+                            (*dest).i_val=src1_i_value+src2_i_value;
+                            break;
+                        default:
                             break;
                     }
                 (*init_dest)=true;
@@ -211,124 +224,126 @@ int inter(instr_t I){
             case sub:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
                             break;
+                        default: 
+                            break;
+
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 switch(dtype)
                     {
                         case dt_double:
-                            (*dest).d_val=src1_value-src2_value;
+                            (*dest).d_val=src1_d_value-src2_d_value;
                             break;
                         case dt_int:
-                            (*dest).i_val=src1_value-src2_value;
+                            (*dest).i_val=src1_i_value-src2_i_value;
+                            break;
+                        default:
                             break;
                     }
                 (*init_dest)=true;
                 break;
-
+            
             case imul:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
                             break;
+                        default: 
+                            break;
+
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 switch(dtype)
                     {
                         case dt_double:
-                            (*dest).d_val=src1_value*src2_value;
+                            (*dest).d_val=src1_d_value*src2_d_value;
                             break;
                         case dt_int:
-                            (*dest).i_val=src1_value*src2_value;
+                            (*dest).i_val=src1_i_value*src2_i_value;
+                            break;
+                        default:
                             break;
                     }
                 (*init_dest)=true;
                 break;
-
+            
             case idiv:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
-                if(init!=true) {
+                    if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
-                            if(src2_value==0.0){
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            if(src2_d_value==0.0) {
+                                fprintf(stderr,"Error! Dividing by 0.\n");
                                 return 9;
                             }
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
-                            if(src2_value==0){
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            if(src2_i_value==0) {
+                                fprintf(stderr,"Error! Dividing by 0.\n");
                                 return 9;
                             }
                             break;
+                        default: 
+                            break;
+
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 switch(dtype)
                     {
                         case dt_double:
-                            (*dest).d_val=src1_value/src2_value; 
+                            (*dest).d_val=src1_d_value/src2_d_value;
                             break;
                         case dt_int:
-                            (*dest).i_val=src1_value/src2_value;
+                            (*dest).i_val=src1_i_value/src2_i_value;
+                            break;
+                        default:
                             break;
                     }
                 (*init_dest)=true;
@@ -337,10 +352,12 @@ int inter(instr_t I){
             case conc:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     } 
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2)); 
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
@@ -350,247 +367,243 @@ int inter(instr_t I){
                 break;
             
             case eql:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value == src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value == src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value == src2_value;
                 (*init_dest)=true;
                 break;
 
             case neq:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value != src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value != src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value != src2_value;
                 (*init_dest)=true;
                 break;
 
+
             case gre:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value == src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value > src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value > src2_value;
                 (*init_dest)=true;
                 break;
 
             case less:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value < src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value < src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value < src2_value;
                 (*init_dest)=true;
                 break;
 
             case geq:
+                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value >= src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value >= src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value >= src2_value;
                 (*init_dest)=true;
                 break;
 
             case leq:
+               init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
-                    }
-                switch(dtype)
-                    {
-                        case dt_double:
-                            src1_value=(*value1).d_val;
-                            break;
-                        case dt_int:
-                            src1_value=(*value1).i_val;
-                            break;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
                 switch(dtype)
                     {
                         case dt_double:
-                            src2_value=(*value2).d_val;
+                            src1_d_value=(*value1).d_val;
+                            src2_d_value=(*value2).d_val;
+                            dest->b_val = src1_d_value <= src2_d_value;
                             break;
                         case dt_int:
-                            src2_value=(*value2).i_val;
+                            src1_i_value=(*value1).i_val;
+                            src2_i_value=(*value2).i_val;
+                            dest->b_val = src1_i_value <= src2_i_value;
+                            break;
+                        default:
                             break;
                     }
-                init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value <= src2_value;
                 (*init_dest)=true;
                 break;
+
 
             case or:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
-                src1_value=(*value1).b_val;
+                src1_b_value=(*value1).b_val;
                 
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
-                src1_value=(*value2).b_val;
+                src2_b_value=(*value2).b_val;
 
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value || src2_value;
+                dest->b_val = src1_b_value || src2_b_value;
                 (*init_dest)=true;
                 break;
 
             case and:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
-                src1_value=(*value1).b_val;
+                src1_b_value=(*value1).b_val;
                 
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2));
                     if(init!=true) {
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                     }
-                src1_value=(*value2).b_val;
+                src2_b_value=(*value2).b_val;
 
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = src1_value && src2_value;
+                dest->b_val = src1_b_value && src2_b_value;
                 (*init_dest)=true;
                 break;
             case not:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
-                       return 8;
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        return 8;
                     }
-                src1_value=(*value1).b_val;
+                src1_b_value=(*value1).b_val;
 
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
-                dest->b_val = !src1_value;
+                dest->b_val = !src1_b_value;
                 (*init_dest)=true;
                 break;
 
             case mov:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                        fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         return 8;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
@@ -680,12 +693,6 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
 void inter_stack_init(){
     inter_stack.top=NULL;
 }
-//kontrolovat ci neni NULL pri volani
-/*stackframe_t inter_stack_top(){
-    stackframe_t top;
-    top=inter_stack.top;
-    return top;
-}*/
 
 void inter_stack_push(stackframe_t context){
     context->next=inter_stack.top;

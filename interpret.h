@@ -11,6 +11,5 @@ inter_stack_t inter_stack;//stack for function frames
 int inter(instr_t I);
 bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initialized); // returns whether variable was initialized or not
 void inter_stack_init();
-//stackframe_t inter_stack_top();
 void inter_stack_push();
 void inter_stack_pop();
