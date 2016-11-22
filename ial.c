@@ -185,7 +185,7 @@ int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
 } // OK
 
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
-    *node_ptr = gc_malloc(sizeof(struct bst_node));
+    *node_ptr = malloc(sizeof(struct bst_node));
     if(*node_ptr == NULL) return BST_MEM_ERR;
     (*node_ptr)->left_p = (*node_ptr)->right_p = NULL;
     (*node_ptr)->key = key;
@@ -226,11 +226,19 @@ void _bst_del(bst_node_t *node) {
     }
 }
 
-void bst_inorder(bst_node_t root, void (*do_work)(void *)) {
-    if(root != NULL) {
-        bst_inorder(root->left_p, do_work);
-        do_work(root->data);
-        bst_inorder(root->right_p, do_work);
+// void bst_inorder(bst_node_t root, void (*do_work)(void *)) {
+//     if(root != NULL) {
+//         bst_inorder(root->left_p, do_work);
+//         do_work(root->data);
+//         bst_inorder(root->right_p, do_work);
         
+//     }
+// }
+
+void bst_postorder(bst_node_t root, void (*do_work)(bst_node_t)) {
+    if(root != NULL) {
+        bst_postorder(root->left_p, do_work);        
+        bst_postorder(root->right_p, do_work);
+        do_work(root);
     }
 }

@@ -62,26 +62,26 @@ int sem_prec_reduction() {
     return 42;
 } // LOL ???
 
-static void _print_decoded_id(void *symbol) {
-    if(!print_bullshit) return;
-    if(symbol == NULL) {
-        printf("Nothing decoded.. \n");
-        return;
-    }
-    local_var_t elem = (local_var_t) symbol;
-    if(elem->sc != helper) {
-        printf("Decoded %s (%d): %s (%p)\n", sem_id_decoded.isFun ? "fun" : "var", elem->sc, elem->id->data, symbol);
-    }
-}
+// static void _print_decoded_id(void *symbol) {
+//     if(!print_bullshit) return;
+//     if(symbol == NULL) {
+//         printf("Nothing decoded.. \n");
+//         return;
+//     }
+//     local_var_t elem = (local_var_t) symbol;
+//     if(elem->sc != helper) {
+//         printf("Decoded %s (%d): %s (%p)\n", sem_id_decoded.isFun ? "fun" : "var", elem->sc, elem->id->data, symbol);
+//     }
+// }
 
-static void _print_demand() {
-    if(!print_bullshit) return;
-    if(sem_id_decoded.class_id != NULL) {
-        printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
-    } else  {
-        printf("Demanded: %s\n", sem_id_decoded.memb_id->data);
-    }
-}
+// static void _print_demand() {
+//     if(!print_bullshit) return;
+//     if(sem_id_decoded.class_id != NULL) {
+//         printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+//     } else  {
+//         printf("Demanded: %s\n", sem_id_decoded.memb_id->data);
+//     }
+// }
 
 void sem_search() {
     //print_bullshit = false;

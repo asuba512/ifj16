@@ -40,9 +40,18 @@ int main(int argc, char **argv){
 	tok_q = tok_que_init();
 	pass_number = 1;
 	int retval = c_list();
+	fclose(fd);
 	printf("1st pass retval: %d (parser) %d (errno)\n", retval, errno);
-	if(errno) return errno;
-	if(retval) return retval;
+	if(errno) {
+		free_all();
+		st_destroy_all();
+		return errno;
+	}
+	if(retval) {
+		free_all();
+		st_destroy_all();
+		return retval;
+	}
 	// printf("current token: %d\n", t.type);
 	// if(retval != 0){	
 	// 	int c;
@@ -55,8 +64,16 @@ int main(int argc, char **argv){
 	pass_number = 2;
 	retval = c_list();
 	printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
-	if(errno) return errno;
-	if(retval) return retval;
+	if(errno) {
+		free_all();
+		st_destroy_all();
+		return errno;
+	}
+	if(retval) {
+		free_all();
+		st_destroy_all();
+		return retval;
+	}
 	// printf("current token: %d\n", t.type);
 	
 	str_destroy(buff);
@@ -75,8 +92,8 @@ int main(int argc, char **argv){
 	/// START INTERPRETATION HERE
 	int a = inter(glob_instr_list.head);
 	printf("\nInterpret ret val: %d\n", a);
-	fclose(fd);
 	free_all();
+	st_destroy_all();
     return a;
 }
 

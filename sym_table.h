@@ -174,4 +174,9 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id);
 int st_add_fn_instr(class_memb_t fn, struct instr i);
 int st_add_glob_instr(struct instr i);
 
+void st_destroy_all();
+void destroy_class(bst_node_t c);
+void destroy_class_memb(bst_node_t m);
+void destroy_loc_var(bst_node_t v);
+
 #endif
