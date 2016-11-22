@@ -204,7 +204,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             }
             
         } else {
-            fprintf(stderr, "ERR: Strings can only be concatenated with '+'.\n");
+            fprintf(stderr, "ERR: Invalid operation with strings.\n");
             return 4;
         }
     } else {

@@ -289,6 +289,10 @@ int assign(){
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
+			if(((class_memb_t)sem_id_decoded.ptr)->dtype == t_void) {
+				fprintf(stderr, "ERR: Cannot assign return value of void-function.\n");
+				return errno = 8;
+			}
 			if((errno = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return errno;
 			next_token();
 			if(is(token_lbracket)){
