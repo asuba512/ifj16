@@ -5,7 +5,7 @@ codes_without_error
 	STDERR is empty
 
 semantic_tests
-	$? =
+	$? = file.ifj.output_VALUE
 	STDERR is NOT empty
 
 parser_tests
