@@ -5,7 +5,7 @@ class Main
 		String str;
 		String str_sorted;
 
-		str = "qpwoeirutzlaskdjfhgmynxbcv"
+		str = "qpwoeirutzlaskdjfhgmynxbcv";
 		str_sorted = ifj16.sort(str);
 	}	
 }

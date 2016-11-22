@@ -1,0 +1,40 @@
+EXPECTATIONS (conditions to pass):
+
+codes_without_error
+	$? = 0
+	STDERR is empty
+
+semantic_tests
+	$? = file.ifj.output_VALUE
+	STDERR is NOT empty
+
+parser_tests
+	$? = 2
+	STDERR is NOT empty
+
+codes_from_manual
+	$? = 0
+	STDERR is empty
+
+scanner_tests_3
+	$? = 1
+	STDERR is NOT empty
+
+scanner_tests_2
+	./sc_test file.ifj >output
+	diff output file.ifj.output
+
+scanner_tests_1
+	./sc_test file.ifj >output
+	diff output file.ifj.output
+	diff $? = 0
+
+symbol_table_tests
+	./sc_test file.ifj STDERR>file
+
+	does meet criteria of:
+	file.ifj.output +-- OK
+					 \
+					  + ERROR +
+						       \
+							    + NOE

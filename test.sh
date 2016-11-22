@@ -9,11 +9,15 @@ switch_GOOD_dir_1=1
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
 # TODO file.exitstatus
-switch_BAD_dir_1=1
+switch_BAD_dir_1=0
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
 switch_BAD_dir_2=1
 BAD_dir_2="`pwd`/tests/parser_tests"
+
+# SCANNER TESTS - testing $?==1, folder include source codes instead of expected output
+switch_SCANNER_DIR_3=1
+SCANNER_DIR_3="`pwd`/tests/scanner_tests_3"
 
 # SCANNER TESTS - the new folder
 switch_SCANNER_DIR_2=1
@@ -31,7 +35,8 @@ switch_MANUAL_CODES=1
 MANUAL_CODES="`pwd`/tests/codes_from_manual"
 
 ############################################################
-if [ $switch_GOOD_dir_1 -eq 0 ] || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ]; then 
+if [ $switch_GOOD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ] ||
+   [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0]; then 
 	printf "\n\n=== IFJ BUILD ===\n"
 	printf "=== make clean ===\n"
 	make clean
@@ -89,6 +94,12 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 	counter=0
 	for i in `ls $BAD_dir_1`
 	do
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+
 		counter=$(expr $counter + 1)
 		printf "= $counter.)\t$i \n"
 
@@ -101,8 +112,10 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 	    #printf "\t$exitvalue "$""?"\n"
 	    #printf "\t$stderr_check stderr\n"
 
-	    if [ $exitvalue -eq 0 ]; then
-	    	printf "\t\t"$""?" = $exitvalue\n"
+	    file_value=$(cat "$BAD_dir_1/$i.output")
+
+	    if [ $exitvalue -ne $file_value ]; then
+	    	printf "\t\t"$""?" = $exitvalue, expecting $file_value\n"
 	    fi
 	    if [ $stderr_check -eq 0 ]; then
 	        printf "\t\tSTDERR is empty\n"
@@ -120,7 +133,7 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" != 0) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" != 2) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
 	printf "==\n"
 
 
@@ -147,7 +160,53 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	    #printf "\t$exitvalue "$""?"\n"
 	    #printf "\t$stderr_check stderr\n"
 
-	    if [ $exitvalue -eq 0 ]; then
+	    if [ $exitvalue -ne 2 ]; then
+	    	printf "\t\t"$""?" = $exitvalue\n"
+	    fi
+	    if [ $stderr_check -eq 0 ]; then
+	        printf "\t\tSTDERR is empty\n"
+	    fi
+
+	done
+
+    rm stderr_file
+fi
+
+############################################################
+if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
+
+	dir=$(echo $SCANNER_DIR_3 | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS WITH ERROR ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF ("$""?" != 1) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
+
+
+	counter=0
+	for i in `ls $SCANNER_DIR_3`
+	do
+
+		# TODO check THE EXITVALUE WITH SAVED VALUE IN FILE WITH .exitvalue
+		# THIS WILL IGNORE .exitvalue files TODO write the files !
+		#i_cond=$(echo $i | grep ^.*exitvalue$ | wc -l) # file name ends with "...exitvalue" then skip this file
+		#if [ $i_cond -eq 1 ]; then
+		#	continue
+		#fi
+
+	    counter=$(expr $counter + 1)
+	    printf "= $counter.)\t$i \n"
+
+	    ./ifj $SCANNER_DIR_3/$i >/dev/null 2>stderr_file
+
+	    exitvalue=$?
+	    stderr_check=$(cat stderr_file | wc -l)
+
+	    #DEBUG
+	    #printf "\t$exitvalue "$""?"\n"
+	    #printf "\t$stderr_check stderr\n"
+
+	    if [ $exitvalue -ne 1 ]; then
 	    	printf "\t\t"$""?" = $exitvalue\n"
 	    fi
 	    if [ $stderr_check -eq 0 ]; then
@@ -336,9 +395,9 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 fi
 
 ############################################################
-if [ $switch_GOOD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_2 -eq 0 ]     ||
-   [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ||
-   [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
+if [ $switch_GOOD_dir_1 -eq 0 ]     || [ $switch_BAD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_2 -eq 0 ]     ||
+   [ $switch_MANUAL_CODES -eq 0 ]   || [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ||
+   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0]; then
 	printf "\n\n=== MAKE CLEAN ===\n"
 	make clean
 	printf "\n\n=== FINISH ===\n"

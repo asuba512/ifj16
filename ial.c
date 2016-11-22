@@ -10,11 +10,11 @@ static bst_node_t _bst_helper_ptr;
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
-    for(int i=0; i<255; i++){ //the interval is from algorithm
+    for(int i=0; i<256; i++){ //the interval is from algorithm
         char_jump[i] =substr->length;
     } 
-    for(int k=0; k<substr->length; k++){
-        char_jump[(int)substr->data[k]] = substr->length-k-1;
+    for(int k=1; k<=substr->length; k++){
+        char_jump[(int)substr->data[k-1]] = substr->length-k;
     }
     return;
 }
@@ -24,15 +24,15 @@ void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
     int m=substr->length;
     unsigned backup[m+1];
 
-    for (int k=0;k<m;k++){
+    for (int k=1;k<+m;k++){
         match_jump[k]=2*m-k;
     }
-    k=m-1;
-    q=m;
+    k=m;
+    q=m+1;
 
-    while(k>=0) {
+    while(k>0) {
         backup[k]=q;
-        while((q<m) && (substr->data[k] != substr->data[q])) {
+        while((q<=m) && (substr->data[k-1] != substr->data[q-1])) {
             if ((int)match_jump[q] > m-k) {
                 match_jump[q] = m-k;
             }
@@ -42,7 +42,7 @@ void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
         q=q-1;
     }
 
-    for(int k=0;k<q;k++) {
+    for(int k=1;k<=q;k++) {
         if ((int)match_jump[k] > m+q-k) {
             match_jump[k]=m+q-k;
         }
@@ -64,25 +64,25 @@ void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump) {
     int index;
-    int j = substr->length-1;
-    int k = substr->length-1;
-    while( j<str->length && k>=0 ){
-        if (str->data[j] == substr->data[k]) {
+    int j = substr->length;
+    int k = substr->length;
+    while( j<=str->length && k>0 ){
+        if (str->data[j-1] == substr->data[k-1]) {
             j = j-1;
             k = k-1;
         }//from here
         else {
-			if(char_jump[(int)str->data[j]] > match_jump[k]) {
-				j = j+char_jump[(int)str->data[j]];
+			if(char_jump[(int)str->data[j-1]] > match_jump[k]) {
+				j = j+char_jump[(int)str->data[j-1]];
 			}
 			else {
 				j = j+match_jump[k];
 			}
-		    k = substr->length-1;
+		    k = substr->length;
         }
     }
-    if (k == -1) {
-        index = j+1;
+    if (k == 0) {
+        index = j;
     }
     else {
         index = -1; 
@@ -92,11 +92,11 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
 
 int BMA_index(string_t str,string_t substr) {
 	int index;
-	unsigned compute_jumps_array[255];//in compute jumps for from 0 to 254(255 items)
-    unsigned match_jumps_array[substr->length+1];//in compute match jumps indexed with q(q=substr->length+1)
+	unsigned compute_jumps_array[256];//in compute jumps for from 0 to 254(255 items)
+    unsigned match_jumps_array[substr->length+2];//in compute match jumps indexed with q(q=substr->length+1)
     BMA_compute_jumps(substr,compute_jumps_array);
     BMA_compute_match_jumps(substr,match_jumps_array);
-    index=BMA(substr,str,compute_jumps_array,match_jumps_array);
+    index=BMA(str,substr,compute_jumps_array,match_jumps_array);
     return index;
 }
 
