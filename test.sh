@@ -2,10 +2,10 @@
 ifj16_dir=pwd
 
 ############################################################
-# ON  switch == 0 
+# ON  switch == 0
 # OFF swtich != 0
 
-switch_GOOD_dir_1=0
+switch_GOOD_dir_1=1
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
 # TODO file.exitstatus
@@ -20,7 +20,7 @@ switch_SCANNER_DIR_2=1
 SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
 
 	# SCANNER TESTS (the first one) are for nothing because the behaviour was changed with FQID
-	switch_SCANNER_DIR=1 # keep it OFF!
+	switch_SCANNER_DIR=1 # keep your dirty hands off
 	SCANNER_DIR="`pwd`/tests/scanner_tests"
 
 switch_SYMBOLIC_TABLE=1
@@ -31,11 +31,13 @@ switch_MANUAL_CODES=1
 MANUAL_CODES="`pwd`/tests/codes_from_manual"
 
 ############################################################
-printf "\n\n=== IFJ BUILD ===\n"
-printf "=== make clean ===\n"
-make clean
-printf "=== make ===\n"
-make
+if [ $switch_GOOD_dir_1 -eq 0 ] || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ]; then 
+	printf "\n\n=== IFJ BUILD ===\n"
+	printf "=== make clean ===\n"
+	make clean
+	printf "=== make ===\n"
+	make
+fi
 
 ############################################################
 if [ $switch_GOOD_dir_1 -eq 0 ]; then
@@ -44,240 +46,302 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITHOUT ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	#printf "=== IF ("$""?" == 0) AND (ERROR == 0) THEN TEST PASSED ===\n"
-	printf "=== IF ("$""?" == 0) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
 
 	counter=0
 	for i in `ls $GOOD_dir_1`
 	do
 		counter=$(expr $counter + 1)
-		printf "= $counter.) $i \n"
-	    ./ifj $GOOD_dir_1/$i >>subor 2>&1
+		printf "= $counter.)\t$i \n"
+
+	    ./ifj $GOOD_dir_1/$i >/dev/null 2>stderr_file
+
 	    exitvalue=$?
-	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    #if [ $exitvalue -ne 0 ] && [ $error -ne 0 ]; then
+	    stderr_check=$(cat stderr_file | wc -l)
+
+	    #DEBUG
+	    #printf "\t$exitvalue "$""?"\n"
+	    #printf "\t$stderr_check stderr\n"
+
 	    if [ $exitvalue -ne 0 ]; then
-	        printf "\t"$""?"    = $exitvalue\n"
-	        #printf "\tERROR = %s\n" "$error"
+	    	printf "\t\t"$""?" = $exitvalue\n"
 	    fi
-	    rm subor
+	    if [ $stderr_check -ne 0 ]; then
+	        printf "\t\tSTDERR is NOT empty\n"
+	    fi
+
 	done
+
+    rm stderr_file
 fi
 
 ############################################################
 if [ $switch_BAD_dir_1 -eq 0 ]; then
-	
+
 	dir=$(echo $BAD_dir_1 | sed "s/^.*\///")
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	#printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
-	printf "=== IF ("$""?" != 0) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" != 0) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
 
 	counter=0
 	for i in `ls $BAD_dir_1`
 	do
 		counter=$(expr $counter + 1)
-		printf "= $counter.) $i \n"
-	    ./ifj $BAD_dir_1/$i >>subor 2>&1
+		printf "= $counter.)\t$i \n"
+
+		./ifj $BAD_dir_1/$i >/dev/null 2>stderr_file
+
 	    exitvalue=$?
-	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    #if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    stderr_check=$(cat stderr_file | wc -l)
+
+	    #DEBUG
+	    #printf "\t$exitvalue "$""?"\n"
+	    #printf "\t$stderr_check stderr\n"
+
 	    if [ $exitvalue -eq 0 ]; then
-	        printf "\t"$""?"    = $exitvalue\n"
-	        #printf "\tERROR = %s\n" "$error"
+	    	printf "\t\t"$""?" = $exitvalue\n"
 	    fi
-	    rm subor
+	    if [ $stderr_check -eq 0 ]; then
+	        printf "\t\tSTDERR is empty\n"
+	    fi
+
 	done
+
+    rm stderr_file
 fi
 
 ############################################################
 if [ $switch_BAD_dir_2 -eq 0 ]; then
-	
+
 	dir=$(echo $BAD_dir_2 | sed "s/^.*\///")
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	#printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
-	printf "=== IF ("$""?" != 0) THEN TEST PASSED ===\n"
-	#printf "=== IGNORUJE TO ^zdroj.*$ subory ===\n"
+	printf "=== IF ("$""?" != 0) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
+
 
 	counter=0
 	for i in `ls $BAD_dir_2`
 	do
-#	    i_cond=$(echo $i | grep ^zdroj.*$ | wc -l) # file name starts with "zdroj..." then skip this file
-#	    if [ $i_cond -eq 1 ]; then
-#	        continue
-#	    fi
 
-# THIS WILL IGNORE .exitvalue files TODO write the files !
-#		i_cond=$(echo $i | grep ^.*exitvalue$ | wc -l) # file name ends with "...exitvalue" then skip this file
-#		if [ $i_cond -eq 1 ]; then
-#			continue
-#		fi
+		# TODO check THE EXITVALUE WITH SAVED VALUE IN FILE WITH .exitvalue
+		# THIS WILL IGNORE .exitvalue files TODO write the files !
+		#i_cond=$(echo $i | grep ^.*exitvalue$ | wc -l) # file name ends with "...exitvalue" then skip this file
+		#if [ $i_cond -eq 1 ]; then
+		#	continue
+		#fi
 
 	    counter=$(expr $counter + 1)
-	    printf "= $counter.) $i \n"
-	    ./ifj $BAD_dir_2/$i >>subor 2>&1
+	    printf "= $counter.)\t$i \n"
+
+	    ./ifj $BAD_dir_2/$i >/dev/null 2>stderr_file
+
 	    exitvalue=$?
-	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    #if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    stderr_check=$(cat stderr_file | wc -l)
+
+	    #DEBUG
+	    #printf "\t$exitvalue "$""?"\n"
+	    #printf "\t$stderr_check stderr\n"
+
 	    if [ $exitvalue -eq 0 ]; then
-	        printf "\t"$""?"    = $exitvalue\n"
-	        #printf "\tERROR = %s\n" "$error"
-#		else
-#
-#	    	printf "\t"$""?"    = $exitvalue\n"
-#	    	printf "\tExpected  = $exitvalue_in_file\n"
+	    	printf "\t\t"$""?" = $exitvalue\n"
 	    fi
-	    rm subor
+	    if [ $stderr_check -eq 0 ]; then
+	        printf "\t\tSTDERR is empty\n"
+	    fi
+
 	done
+
+    rm stderr_file
 fi
 
 ############################################################
 if [ $switch_MANUAL_CODES -eq 0 ]; then
-	
+
 	dir=$(echo $MANUAL_CODES | sed "s/^.*\///")
 	printf "\n\n"
 	printf "=== TESTS MANUAL CODES ===\n"
 	printf "=== Directory: $dir ===\n"
 	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
+
+	> empty_file
 
 	counter=0
-	> empty_file
 	for i in `ls $MANUAL_CODES`
 	do
 	    counter=$(expr $counter + 1)
-	    printf "= $counter.) $i \n"
-	    ./ifj $MANUAL_CODES/$i 2>stderr_subor
+	    printf "= $counter.)\t$i \n"
+
+	    ./ifj $MANUAL_CODES/$i 2>stderr_file
+
 	    exitvalue=$?
-	    diff stderr_subor empty_file > /dev/null
+
+	    diff stderr_file empty_file > /dev/null
 	    exitvalue_diff=$?
-	    if [ $exitvalue -ne 0 ] || [ $exitvalue_diff -ne 0 ]; then
-	        printf "\t"$""?" = $exitvalue\n"
-	        printf "\tSTDERR include errors\n"
+
+		if [ $exitvalue -ne 0 ]; then
+	        printf "\t\t"$""?" = $exitvalue\n"
 	    fi
-	    rm stderr_subor
+	    if [ $exitvalue_diff -ne 0 ]; then
+			printf "\t\tSTDERR is NOT empty\n"
+	    fi
+	    
 	done
+
+	rm stderr_file
 	rm empty_file
 fi
 
 ############################################################
+if [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ; then
+	printf "\n\n=== IFJ SCANNER BUILD ===\n"
+	printf "=== make clean ===\n"
+	make clean
+	printf "=== make test ===\n"
+	make test
+fi
+
+############################################################
+# SCANNER TESTS (the first one) are for nothing because the behaviour was changed with FQID
 if [ $switch_SCANNER_DIR -eq 0 ]; then
-	
+
 	dir=$(echo $SCANNER_DIR | sed "s/^.*\///")
 	printf "\n\n"
 	printf "=== TESTS DIFF ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF stdout == .output THEN TEST PASSED ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make test ===\n"
-	make test
-	printf "\n"
+	printf "=== IF (stdout == responding file.output) THEN TEST PASSED ===\n"
+	printf "==\n"
 
 	counter=0
 	for i in `ls $SCANNER_DIR`
 	do
-		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
 		if [ $i_cond -eq 1 ]; then
 			continue
 		fi
 
 	    counter=$(expr $counter + 1)
-	    printf "= $counter.) $i \n"
-	    ./sc_test "$SCANNER_DIR/$i" >subor
-	 	diff subor "$SCANNER_DIR/$i.output" > /dev/null
+	    printf "= $counter.)\t$i \n"
+
+	    ./sc_test "$SCANNER_DIR/$i" >output_file
+	 	
+	 	diff output_file "$SCANNER_DIR/$i.output" >/dev/null
 	    exitvalue=$?
+	    
 	    if [ $exitvalue -ne 0 ]; then
 	        printf "\tDIFF "$""?" = 1 (different output)\n"
 	    fi
-	    rm subor
+	    
 	done
+
+	rm output_file
 fi
 
 ############################################################
 if [ $switch_SCANNER_DIR_2 -eq 0 ]; then
-	
+
 	dir=$(echo $SCANNER_DIR_2 | sed "s/^.*\///")
 	printf "\n\n"
 	printf "=== TESTS DIFF ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF stdout == .output THEN TEST PASSED ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make test ===\n"
-	make test
-	printf "\n"
+	printf "=== IF (stdout == responding file.output) THEN TEST PASSED ===\n"
+	printf "==\n"
 
 	counter=0
 	for i in `ls $SCANNER_DIR_2`
 	do
-		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
 		if [ $i_cond -eq 1 ]; then
 			continue
 		fi
 
 	    counter=$(expr $counter + 1)
 	    printf "= $counter.) $i \n"
-	    ./sc_test "$SCANNER_DIR_2/$i" >subor
-	 	diff subor "$SCANNER_DIR_2/$i.output" > /dev/null
+
+	    ./sc_test "$SCANNER_DIR_2/$i" >output_file
+
+	 	diff output_file "$SCANNER_DIR_2/$i.output" >/dev/null
 	    exitvalue=$?
+
 	    if [ $exitvalue -ne 0 ]; then
 	        printf "\tDIFF "$""?" = 1 (different output)\n"
 	    fi
-	    rm subor
+
 	done
+
+	rm output_file
 fi
 
 ############################################################
 if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
-	
-	dir=$(echo $SYMBOLIC_TABLE | sed "s/^.*\///")
-	printf "\n\n"
-	printf "=== TESTS SYMBOLIC TABLE ===\n"
-	printf "=== Directory: $dir ===\n"
-	printf "=== IF stdout == .output THEN TEST PASSED ===\n"
+	printf "\n\n=== IFJ SYMBOLIC_TABLE BUILD ===\n"
 	printf "=== make clean ===\n"
 	make clean
 	printf "=== make sem_test ===\n"
 	make sem_test
-	printf "=== make done ===\n"
+fi
+
+############################################################
+if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
+
+	dir=$(echo $SYMBOLIC_TABLE | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS SYMBOLIC TABLE ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF (stdout == responding file.output) THEN TEST PASSED ===\n"
 
 	counter=0
 	for i in `ls $SYMBOLIC_TABLE`
 	do
-		i_cond=$(echo $i | grep ^.*output$ | wc -l) # file name ends with "...output" then skip this file
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
 		if [ $i_cond -eq 1 ]; then
 			continue
 		fi
-	    
+
 	    counter=$(expr $counter + 1)
-	    printf "= $counter.) $i \n"
-	    ./sem_test "$SYMBOLIC_TABLE/$i" >subor 2>stderr_subor
+	    printf "= $counter.)\t$i \n"
+
+	    ./sem_test "$SYMBOLIC_TABLE/$i" >/dev/null 2>stderr_file
 
 	    ok=$(cat $SYMBOLIC_TABLE/$i.output | head -1)
+	    
 	    if [ $ok = "=ERROR=" ]; then
 	   		number_of_errors_file=$(cat $SYMBOLIC_TABLE/$i.output | head -2 | tail -1 | awk '{print $3}')
-	   		number_of_errors_stderr=$(cat stderr_subor | grep ^.*ERR.*$ | wc -l)
+	   		number_of_errors_stderr=$(cat stderr_file | grep ^.*ERR.*$ | wc -l)
 	   		if [ $number_of_errors_file -ne $number_of_errors_stderr ]; then
-				printf "\tNumber of stderr errors  = $number_of_errors_stderr\n"
-				printf "\tExpected count of errors = $number_of_errors_file\n"	   		
+				printf "\t\tNumber of stderr errors  = $number_of_errors_stderr\n"
+				printf "\t\tExpected count of errors = $number_of_errors_file\n"
 	   		fi
 	    fi
+	    
 	    if [ $ok = "=OK=" ]; then
-	    	number_of_errors_stderr=$(cat stderr_subor | grep ^.*ERR.*$ | wc -l)
+	    	number_of_errors_stderr=$(cat stderr_file | grep ^.*ERR.*$ | wc -l)
 	    	if [ $number_of_errors_stderr -ne 0 ]; then
-				printf "\tNumber of stderr errors  = $number_of_errors_stderr\n"
-				printf "\tExpected count of errors = 0\n"		    		
+				printf "\t\tNumber of stderr errors  = $number_of_errors_stderr\n"
+				printf "\t\tExpected count of errors = 0\n"
 	    	fi
 	    fi
-	    rm stderr_subor
-	    rm subor
+	    
 	done
+
+	rm stderr_file
 fi
 
 ############################################################
-printf "\n\n=== MAKE CLEAN ===\n"
-make clean
-printf "\n\n=== FINISH ===\n"
+if [ $switch_GOOD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_2 -eq 0 ]     ||
+   [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ||
+   [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
+	printf "\n\n=== MAKE CLEAN ===\n"
+	make clean
+	printf "\n\n=== FINISH ===\n"
+else
+	printf "=== TESTS ARE SWITCHED OFF ===\n=== FINISH ====\n"
+fi
