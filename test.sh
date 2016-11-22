@@ -8,6 +8,7 @@ ifj16_dir=pwd
 switch_GOOD_dir_1=0
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
+# TODO file.exitstatus
 switch_BAD_dir_1=1
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
@@ -18,9 +19,9 @@ BAD_dir_2="`pwd`/tests/parser_tests"
 switch_SCANNER_DIR_2=1
 SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
 
-# SCANNER TESTS are for nothing because the behaviour was changed with FQID
-switch_SCANNER_DIR=1 # keep it OFF!
-SCANNER_DIR="`pwd`/tests/scanner_tests"
+	# SCANNER TESTS (the first one) are for nothing because the behaviour was changed with FQID
+	switch_SCANNER_DIR=1 # keep it OFF!
+	SCANNER_DIR="`pwd`/tests/scanner_tests"
 
 switch_SYMBOLIC_TABLE=1
 SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
@@ -43,7 +44,8 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITHOUT ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" == 0) AND (ERROR == 0) THEN TEST PASSED ===\n"
+	#printf "=== IF ("$""?" == 0) AND (ERROR == 0) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" == 0) THEN TEST PASSED ===\n"
 
 	counter=0
 	for i in `ls $GOOD_dir_1`
@@ -52,10 +54,11 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 		printf "= $counter.) $i \n"
 	    ./ifj $GOOD_dir_1/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    if [ $exitvalue -ne 0 ] && [ $error -ne 0 ]; then
+	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
+	    #if [ $exitvalue -ne 0 ] && [ $error -ne 0 ]; then
+	    if [ $exitvalue -ne 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
-	        printf "\tERROR = %s\n" "$error"
+	        #printf "\tERROR = %s\n" "$error"
 	    fi
 	    rm subor
 	done
@@ -68,7 +71,8 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
+	#printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" != 0) THEN TEST PASSED ===\n"
 
 	counter=0
 	for i in `ls $BAD_dir_1`
@@ -77,10 +81,11 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 		printf "= $counter.) $i \n"
 	    ./ifj $BAD_dir_1/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
+	    #if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    if [ $exitvalue -eq 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
-	        printf "\tERROR = %s\n" "$error"
+	        #printf "\tERROR = %s\n" "$error"
 	    fi
 	    rm subor
 	done
@@ -93,25 +98,37 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
-	printf "=== IGNORUJE TO ^zdroj.*$ subory ===\n"
+	#printf "=== IF ("$""?" != 0) AND (ERROR != 0) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" != 0) THEN TEST PASSED ===\n"
+	#printf "=== IGNORUJE TO ^zdroj.*$ subory ===\n"
 
 	counter=0
 	for i in `ls $BAD_dir_2`
 	do
-	    i_cond=$(echo $i | grep ^zdroj.*$ | wc -l) # file name starts with "zdroj..." then skip this file
-	    if [ $i_cond -eq 1 ]; then
-	        continue
-	    fi
+#	    i_cond=$(echo $i | grep ^zdroj.*$ | wc -l) # file name starts with "zdroj..." then skip this file
+#	    if [ $i_cond -eq 1 ]; then
+#	        continue
+#	    fi
+
+# THIS WILL IGNORE .exitvalue files TODO write the files !
+#		i_cond=$(echo $i | grep ^.*exitvalue$ | wc -l) # file name ends with "...exitvalue" then skip this file
+#		if [ $i_cond -eq 1 ]; then
+#			continue
+#		fi
 
 	    counter=$(expr $counter + 1)
 	    printf "= $counter.) $i \n"
 	    ./ifj $BAD_dir_2/$i >>subor 2>&1
 	    exitvalue=$?
-	    error=$(cat subor | grep ^.*ERR.*$ | wc -l)
-	    if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    #error=$(cat subor | grep ^.*ERR.*$ | wc -l)
+	    #if [ $exitvalue -eq 0 ] || [ $error -eq 0 ]; then
+	    if [ $exitvalue -eq 0 ]; then
 	        printf "\t"$""?"    = $exitvalue\n"
-	        printf "\tERROR = %s\n" "$error"
+	        #printf "\tERROR = %s\n" "$error"
+#		else
+#
+#	    	printf "\t"$""?"    = $exitvalue\n"
+#	    	printf "\tExpected  = $exitvalue_in_file\n"
 	    fi
 	    rm subor
 	done
