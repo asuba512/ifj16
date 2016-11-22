@@ -138,7 +138,14 @@ double ifj16_readDouble() {
 }
 
 string_t ifj16_readString() {
-    return NULL;
+    string_t s=str_init("");
+    int c;
+    while((c=getchar()) != EOF){
+    	if(c=='\n') break;
+    	//check error
+    	}
+    str_addchar(s,'\0');
+    return s;
 }
 
 int ifj16_length(string_t s) {
@@ -146,10 +153,14 @@ int ifj16_length(string_t s) {
 }
 
 string_t ifj16_substr(string_t s, int i, int n) {
-    (void)s;
-    (void)i;
-    (void)n;
-    return NULL;
+    //osetrit pristup mimo hranic
+    string_t s2=str_init("");
+    for(int j=0;j<n;j++){
+        str_addchar(s2,s->data[i+j]);
+    	//check error
+ 	}
+ 	str_addchar(s2,'\0');
+ 	return s2;
 }
 
 int ifj16_compare(string_t s1, string_t s2) {
