@@ -3,6 +3,7 @@
 #include "precedence.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "gc.h"
 
 int main(){
 	

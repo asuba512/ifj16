@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "gc.h"
 
 // src1_value and src2_value ARE INTEGERS, DOUBLES ARE NOT SUPPORTED!
 
@@ -42,14 +43,14 @@ int inter(instr_t I){
 
             case sframe:
                 arg_counter=0;
-                new_frame=malloc(sizeof(struct stackframe));
+                new_frame=gc_malloc(sizeof(struct stackframe));
                 if(new_frame==NULL) { 
                     fprintf(stderr,"Error at memory allocation!\n");
                     return 10;
                 }
-                new_frame->vars=malloc(sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)); 
+                new_frame->vars=gc_malloc(sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)); 
                 if(new_frame->vars==NULL) {
-                    free(new_frame);
+                    //free(new_frame);
                     fprintf(stderr,"Error at memory allocation!\n");
                     return 10;
                 }
@@ -704,7 +705,7 @@ void inter_stack_pop(){
         stackframe_t tmp;
         tmp=inter_stack.top;
         inter_stack.top=inter_stack.top->next;
-        free(tmp->vars);
-        free(tmp);
+        //free(tmp->vars);
+        //free(tmp);
     }
 }

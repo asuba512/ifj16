@@ -6,17 +6,18 @@
 #include "infinite_string.h"
 #include <stdlib.h>
 #include <string.h>
+#include "gc.h"
 
 string_t str_init(const char *str) {
 	string_t s;
-	if((s = malloc(sizeof(struct string))) == NULL)
+	if((s = gc_malloc(sizeof(struct string))) == NULL)
 		return NULL;
 	int str_l = strlen(str);
 	int k = (str_l / STRING_CHUNK) + 1;
 	s->length = str_l;
 	s->max_length = STRING_CHUNK * k;
-	if((s->data = malloc(sizeof(char) * (STRING_CHUNK * k + 1))) == NULL){
-		free(s);
+	if((s->data = gc_malloc(sizeof(char) * (STRING_CHUNK * k + 1))) == NULL){
+		//free(s);
 		return NULL;
 	}
 	strcpy(s->data, str);
@@ -24,8 +25,8 @@ string_t str_init(const char *str) {
 }
 
 void str_destroy(string_t s) {
-	free(s->data);
-	free(s);
+	//free(s->data);
+	//free(s);
 }
 
 int str_addchar(string_t s, char c) {
@@ -75,5 +76,5 @@ void str_empty(string_t s){
 
 char *_str_add_chunk(string_t s, int chunk_count) {
 	s->max_length += chunk_count*STRING_CHUNK;
-	return realloc(s->data, s->max_length + 1);
+	return gc_realloc(s->data, s->max_length + 1);
 }
