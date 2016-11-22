@@ -1,27 +1,28 @@
 #include <stdlib.h>
 #include "gc.h"
 
-void *mmaloc(size_t s){
+
+void *gc_malloc(size_t s){
 
 	void *ptr;
 
 	ptr = malloc(s);
 
 	
-	gc_push(((((long)ptr>>5))%769), ptr);	
+	gc_push(hash(ptr), ptr);	
 
 	return ptr;
 
 }
 
-void *rrealloc(void *old, size_t s){
+void *gc_realloc(void *old, size_t s){
 	void *new;
 
 	new = realloc(old, s);
 
 	if(new != old){
-		gc_remove((((long)old)>>5)%769, old);
-		gc_push((((long)new)>>5)%769, new);
+		gc_remove(hash(old), old);
+		gc_push(hash(new), new);
 	}
 
 	return new;

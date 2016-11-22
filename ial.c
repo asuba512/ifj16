@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ial.h"
+#include "gc.h"
 
 static bst_node_t _bst_helper_ptr;
 
@@ -184,7 +185,7 @@ int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
 } // OK
 
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
-    *node_ptr = malloc(sizeof(struct bst_node));
+    *node_ptr = gc_malloc(sizeof(struct bst_node));
     if(*node_ptr == NULL) return BST_MEM_ERR;
     (*node_ptr)->left_p = (*node_ptr)->right_p = NULL;
     (*node_ptr)->key = key;
@@ -208,7 +209,7 @@ void bst_delete(bst_node_t *root, string_t key) {
                 _bst_del(&(_bst_helper_ptr->left_p));
             }
             str_destroy(_bst_helper_ptr->key);
-            free(_bst_helper_ptr);
+            //free(_bst_helper_ptr);
             _bst_helper_ptr = NULL;
         }
     }

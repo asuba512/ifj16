@@ -12,6 +12,7 @@
 #include "ial.h"
 #include "ifj16_class.h"
 #include "interpret.h"
+#include "gc.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -76,6 +77,7 @@ int main(int argc, char **argv){
 	int a = inter(glob_instr_list.head);
 	printf("\nInterpret ret val: %d\n", a);
 	fclose(fd);
+	free_all();
     return a;
 }
 

@@ -5,6 +5,7 @@
 #include "ial.h"
 #include "sym_table.h"
 #include "ilist.h"
+#include "gc.h"
 
 void init_class_table() {
 	classes = &ctable; // yep that's all
@@ -14,7 +15,7 @@ void init_class_table() {
 
 int insert_class(string_t id, class_t *target) {
 	class_t new_class;
-	if ((new_class = malloc(sizeof(struct class))) == NULL)
+	if ((new_class = gc_malloc(sizeof(struct class))) == NULL)
 		return 99;
 	// initialization
 	new_class->root = NULL;
@@ -24,13 +25,13 @@ int insert_class(string_t id, class_t *target) {
 		*target = new_class;
 		return 0; // OK
 	}
-	free(new_class);
+	////free(new_class);
 	return err;
 } // OK
 
 int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func type, datatype dt) {
 	class_memb_t m;
-	if ((m = malloc(sizeof(struct class_memb))) == NULL)
+	if ((m = gc_malloc(sizeof(struct class_memb))) == NULL)
 		return 99;
 	// initialization
 	m->type = type; // variable or func?
@@ -47,13 +48,13 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 		*target = m;
 		return 0; // OK
 	}
-	free(m);
+	////free(m);
 	*target = NULL; // causes segfault (intentionally) when program continues ilegally
 	return err;
 } // OK
 
 static int _add_fn_arg_space(class_memb_t fn) {
-	local_var_t *new_space = realloc(fn->arg_list, (fn->_max_arg_count + 5) * sizeof(local_var_t));
+	local_var_t *new_space = gc_realloc(fn->arg_list, (fn->_max_arg_count + 5) * sizeof(local_var_t));
 	if(new_space == NULL)
 		return 99;
 	fn->arg_list = new_space;
@@ -63,12 +64,12 @@ static int _add_fn_arg_space(class_memb_t fn) {
 
 int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t lv;
-	if ((lv = malloc(sizeof(struct local_var))) == NULL)
+	if ((lv = gc_malloc(sizeof(struct local_var))) == NULL)
 		return 99;
 	// this shat allows us to search for function arguments by their indexes
 	if(fn->arg_count == fn->_max_arg_count) {
 		if(_add_fn_arg_space(fn) == 99) {
-			free(lv);
+			////free(lv);
 			return 99;
 		}
 	}
@@ -87,13 +88,13 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 		(fn->arg_count)--; // doesn't matter anyways, if there's an error
 		(fn->var_count)--;
 	}
-	free(lv);
+	////free(lv);
 	return err;
 } // OK
 
 int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t lv;
-	if ((lv = malloc(sizeof(struct local_var))) == NULL)
+	if ((lv = gc_malloc(sizeof(struct local_var))) == NULL)
 		return 99;
 	lv->dtype = dt;
 	lv->index = (fn->var_count)++;
@@ -104,7 +105,7 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 		return 0; // OK
 	}
 	if(err == 3) (fn->var_count)--; // doesn't matter anyways, if there's an error
-	free(lv);
+	////free(lv);
 	return err;
 } // OK
 
@@ -124,7 +125,7 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id) {
 } // OK
 
 static int _add_global_helper_var_space() {
-	glob_helper_var_t new_space = realloc(glob_helper_vars.arr, (glob_helper_vars.length + 100) * sizeof(struct global_helper_var));
+	glob_helper_var_t new_space = gc_realloc(glob_helper_vars.arr, (glob_helper_vars.length + 100) * sizeof(struct global_helper_var));
 	if(new_space == NULL)
 		return 99;
 	glob_helper_vars.arr = new_space;
@@ -163,7 +164,7 @@ glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
 } // OK
 
 int st_add_fn_instr(class_memb_t fn, struct instr i) {
-	instr_t new_instr = malloc(sizeof(struct instr));
+	instr_t new_instr = gc_malloc(sizeof(struct instr));
     if(new_instr == NULL)
         return 99;
 	*new_instr = i;
@@ -178,7 +179,7 @@ int st_add_fn_instr(class_memb_t fn, struct instr i) {
 
 local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t tmp;
-	if ((tmp = malloc(sizeof(struct local_var))) == NULL)
+	if ((tmp = gc_malloc(sizeof(struct local_var))) == NULL)
 		return NULL;
 	tmp->dtype = dt;
 	tmp->index = (fn->var_count)++;
@@ -188,7 +189,7 @@ local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {
 		return tmp; // OK
 	}
-	free(tmp);
+	////free(tmp);
 	return NULL;
 } // OK
 
@@ -197,7 +198,7 @@ void st_init_glob_instr_list() {
 } // OK
 
 int st_add_glob_instr(struct instr i) {
-	instr_t new_instr = malloc(sizeof(struct instr));
+	instr_t new_instr = gc_malloc(sizeof(struct instr));
     if(new_instr == NULL)
         return 99;
 	*new_instr = i;

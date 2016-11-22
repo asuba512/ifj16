@@ -4,6 +4,7 @@
 #include "semantic_analysis.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "gc.h"
 
 #define try(x) if((err = x)) return err
 
@@ -14,7 +15,7 @@ TODO & explanations:
 		the purpose is storing nonterminal attribute, which would be already lost, when you generate instruction
 	- there are only two stacks with different methods, I made them global and methods are called without name of stack
 	- debugging
-	- all mallocs must have option to return 99
+	- all gc_mallocs must have option to return 99
 */
 
 int precedence(tok_que_t queue, op_t *result){
@@ -290,7 +291,7 @@ void prec_auxstack_init(){
 */
 int prec_stack_push(token_t t){
 	prec_st_element tmp;
-	if((tmp = malloc(sizeof(struct prec_stack_element)))){
+	if((tmp = gc_malloc(sizeof(struct prec_stack_element)))){
 		tmp->data = t;
 		tmp->next = stack.top;
 		if(stack.top != NULL)
@@ -304,7 +305,7 @@ int prec_stack_push(token_t t){
 
 int prec_auxstack_push(prec_st_element *e){
 	prec_auxst_element tmp;
-	if((tmp = malloc(sizeof(struct prec_auxstack_element)))){
+	if((tmp = gc_malloc(sizeof(struct prec_auxstack_element)))){
 		tmp->ptr = e;
 		tmp->next = auxstack.top;
 		auxstack.top = tmp;
@@ -319,7 +320,7 @@ int prec_auxstack_push(prec_st_element *e){
 void prec_stack_pop(){
 	if(stack.top){
 		prec_st_element tmp = stack.top->next;
-		free(stack.top);
+		//free(stack.top);
 		stack.top = tmp;
 		stack.top->prev = NULL;
 	}
@@ -328,7 +329,7 @@ void prec_stack_pop(){
 void prec_auxstack_pop(){
 	if(auxstack.top){
 		prec_auxst_element tmp = auxstack.top->next;
-		free(auxstack.top);
+		//free(auxstack.top);
 		auxstack.top = tmp;
 	}
 }
