@@ -54,7 +54,6 @@ int main(int argc, char **argv){
 	pass_number = 2;
 	retval = c_list();
 	printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
-	if(errno != 0 || retval != 0) return errno;
 	if(errno) return errno;
 	if(retval) return retval;
 	// printf("current token: %d\n", t.type);
