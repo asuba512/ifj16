@@ -87,16 +87,16 @@ int main(int argc, char **argv){
 		return errno;
 	}
 	// printf("Global instruction tape:\n");
- instr_t i = glob_instr_list.head;
+ //instr_t i = glob_instr_list.head;
 	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
 	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
 	// }
-	printf("\nMain.run(): \n");
- i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
- for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+	//printf("\nMain.run(): \n");
+ //i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+ /*for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
  	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
  }
-
+*/
 	/// START INTERPRETATION HERE
 	int a = inter(glob_instr_list.head);
 	//printf("\nInterpret ret val: %d\n", a);
