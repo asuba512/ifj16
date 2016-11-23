@@ -1,8 +1,11 @@
 #include "sym_table.h"
 #include "ifj16_class.h"
 #include "ial.h"
+#include "parser.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+extern int errno;
 
 int populate_sym_table() {
     struct instr i;
@@ -126,14 +129,16 @@ void ifj16_print(string_t s) {
 }
 
 int ifj16_readInt() {
-    int c;
-    scanf("%d", &c);
+    int c = 0;
+    if(scanf("%d", &c) != 1)
+        errno = 7;
     return c;
 }
 
 double ifj16_readDouble() {
-    double c;
-    scanf("%lg", &c);
+    double c = 0.0;
+    if(scanf("%lg", &c) != 1)
+        errno = 7;
     return c;
 }
 

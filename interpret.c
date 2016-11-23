@@ -2,6 +2,7 @@
 #include "sym_table.h"
 #include "ilist.h"
 #include "ifj16_class.h"
+#include "parser.h" // errno
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,8 +12,8 @@
 
 int inter(instr_t I){
 
-    int arg_counter;//pocitadlo argumentov v poli premennych
-    stackframe_t new_frame;//novy frame
+    int arg_counter = 0;//pocitadlo argumentov v poli premennych
+    stackframe_t new_frame = NULL;//novy frame
     //stackframe_t old_frame;//frame na odstranenie
     local_var_inst_t new_arg;//novy argument
     bool init;//pre testovanie inicializacie premennych
@@ -20,12 +21,12 @@ int inter(instr_t I){
     bool *init_src1;//pre nastavenie incializacie
     bool *init_src2;
     bool *init_dest;
-    int src1_i_value;
-    int src2_i_value;
-    double src1_d_value;
-    double src2_d_value;
-    bool src1_b_value;
-    bool src2_b_value;
+    int src1_i_value = 0;
+    int src2_i_value = 0;
+    double src1_d_value = 0.0;
+    double src2_d_value = 0.0;
+    bool src1_b_value = false;
+    bool src2_b_value = false;
     var_value *value1;//pre src1
     var_value *value2;//pre src2
     var_value *dest;//pre dst
@@ -659,11 +660,21 @@ int inter(instr_t I){
             
             case r_int:
                 (inter_stack.top)->vars[0].val.i_val=ifj16_readInt();
+                if(errno) {
+                    fprintf(stderr, "ERR: Given input is not valid integer.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
             case r_dbl:
                 (inter_stack.top)->vars[0].val.d_val=ifj16_readDouble();
+                if(errno) {
+                    fprintf(stderr, "ERR: Given input is not valid floating point number.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
@@ -727,6 +738,9 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
         *target = &(((inter_stack.top->vars)[loc->index]).val);
         *initialized = &(((inter_stack.top->vars)[loc->index]).initialized);
         return ((inter_stack.top->vars)[loc->index]).initialized;
+    } else {
+        *target = NULL;
+        *initialized = NULL;
     }
     return false;
 }
@@ -751,8 +765,8 @@ void inter_stack_pop(){
 }
 
 void clear_frames() {
-    stackframe_t previous = inter_stack.top;
     // desiaty krat kopirujem z IAL DU1, nech zije IAL
+    stackframe_t previous = inter_stack.top;
     for(stackframe_t item = previous->next; item != NULL; item = item->next) {
         free(previous->vars);
         free(previous);

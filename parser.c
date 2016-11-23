@@ -23,6 +23,7 @@ extern bool outside_func;
 int c_list(){
 	outside_func = true;
 	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
+	sem_id_decoded.ptr = NULL;
 	calling_function = NULL;
 	next_token();
 	if(is(token_k_class)){
@@ -255,7 +256,7 @@ int fn_body(){
 int opt_assign(){
 	next_token();
 	if(is(token_assign)){
-		op_t tmp_dst;
+		op_t tmp_dst = NULL;
 		if(SECOND_PASS) {
 			tmp_dst = (op_t)(sem_id_decoded.ptr);
 		}
@@ -424,8 +425,8 @@ int stat(){
 		return stat_com();
 	}
 	else if(is(token_k_if)){
-		instr_t if_jmp_instr;
-		instr_t pre_else_jmp;
+		instr_t if_jmp_instr = NULL;
+		instr_t pre_else_jmp = NULL;
 		next_token();
 		if(is(token_lbracket)){
 			tok_que_t expr_queue = tok_que_init(); // init new queue
@@ -467,7 +468,7 @@ int stat(){
 		}
 	}
 	else if(is(token_k_while)){
-		instr_t while_label, while_jmp;
+		instr_t while_label = NULL, while_jmp = NULL;
 		if(SECOND_PASS) {
 			if ((errno = sem_generate_label())) return errno;
 			while_label = active_function->instr_list_end;
@@ -624,7 +625,7 @@ int as_ca(){
 		}
 	}
 	else if(is(token_assign)) {
-		op_t tmp_dst;
+		op_t tmp_dst = NULL; // totally pointless, just to avoid optimizer warning
 		if(SECOND_PASS) {
 			tmp_dst = (op_t)(sem_id_decoded.ptr);
 		}

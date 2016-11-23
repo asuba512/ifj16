@@ -152,7 +152,7 @@ local_var_t sem_new_tmp_var(datatype dt) {
 } // OK -> only causes internal err
 
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
-    op_t new_var, new_dst; // new_var = result of conversion, new_dst destination of effective instruction
+    op_t new_var = NULL, new_dst = NULL; // new_var = result of conversion, new_dst destination of effective instruction
     token_t t;  // for generating conversion tmp var
     struct instr i, conv; // i - main instruction, conv - helper conversion instruction
     int err = 0; // catches error codes
