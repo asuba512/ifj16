@@ -41,15 +41,18 @@ int main(int argc, char **argv){
 	pass_number = 1;
 	int retval = c_list();
 	fclose(fd);
-	printf("1st pass retval: %d (parser) %d (errno)\n", retval, errno);
+	//printf("1st pass retval: %d (parser) %d (errno)\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();
+		if(errno == 1)
+			fprintf(stderr, "ERR: Lexical error.\n");
 		return errno;
 	}
 	if(retval) {
 		free_all();
 		st_destroy_all();
+		fprintf(stderr, "ERR: Syntax error.\n");
 		return retval;
 	}
 	// printf("current token: %d\n", t.type);
@@ -63,7 +66,7 @@ int main(int argc, char **argv){
 	// }
 	pass_number = 2;
 	retval = c_list();
-	printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
+	//printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();
@@ -72,6 +75,7 @@ int main(int argc, char **argv){
 	if(retval) {
 		free_all();
 		st_destroy_all();
+		fprintf(stderr, "ERR: Syntax error.\n");
 		return retval;
 	}
 	// printf("current token: %d\n", t.type);
@@ -95,7 +99,7 @@ int main(int argc, char **argv){
 
 	/// START INTERPRETATION HERE
 	int a = inter(glob_instr_list.head);
-	printf("\nInterpret ret val: %d\n", a);
+	//printf("\nInterpret ret val: %d\n", a);
 	free_all();
 	st_destroy_all();
     return a;
@@ -123,4 +127,5 @@ int add_head() {
 	i.type = label;
 	i.dst = i.src1 = i.src2 = NULL;
 	st_add_glob_instr(i);
+	return 0;
 }

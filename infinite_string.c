@@ -25,6 +25,7 @@ string_t str_init(const char *str) {
 }
 
 void str_destroy(string_t s) {
+	(void)s;
 	//free(s->data);
 	//free(s);
 }
