@@ -51,7 +51,7 @@ int inter(instr_t I){
                     clear_frames();
                     return 99;
                 }
-                new_frame->vars=malloc(sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)); 
+                new_frame->vars=calloc((sizeof(struct local_var_inst)*(((class_memb_t)I->src1)->var_count)),1); 
                 if(new_frame->vars==NULL) {
                     free(new_frame);
                     fprintf(stderr,"Error at memory allocation!\n");
@@ -102,7 +102,7 @@ int inter(instr_t I){
             case movr:
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 *dest = (inter_stack.top)->eax;
-                *init_dest = true;
+                (*init_dest) = true;
                 break;
 
             case i_d_r:
@@ -395,7 +395,7 @@ int inter(instr_t I){
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 dest->s_val = str_init(value1->s_val->data);
                 str_cat(dest->s_val, value2->s_val);
-                *init_dest = true;
+                (*init_dest) = true;
                 break;
             
             case eql:
@@ -658,7 +658,7 @@ int inter(instr_t I){
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 *dest=*value1;
-                *init_dest=true;
+                (*init_dest)=true;
                 break;
 
             case r_str://not implemeted yet
