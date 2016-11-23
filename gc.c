@@ -3,6 +3,12 @@
 
 
 void *gc_malloc(size_t s){
+	static int initialized = 0;
+	if (!initialized) {
+		for(int i = 0; i < 769; i++)
+			ht[i] = NULL;
+		initialized++;
+	}
 
 	void *ptr;
 
@@ -40,13 +46,13 @@ void gc_remove(int i, void *ptr){
 	if(tmp){
 		s_item backup;
 		if(tmp->data == ptr){
+			// toto som opravil
 			backup = tmp;
-			tmp = tmp->next;
+			ht[i] = tmp->next;
 			free(backup);
-			if(tmp == NULL)
-				ht[i] = NULL;
 		}
 		else{
+			// je to napicu, prerob si to, nechce sa mi rozmyslat
 			while(tmp->next){
 				if(tmp->next->data == ptr)
 					break;

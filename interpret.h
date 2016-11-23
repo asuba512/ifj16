@@ -13,3 +13,4 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
 void inter_stack_init();
 void inter_stack_push();
 void inter_stack_pop();
+void clear_frames();

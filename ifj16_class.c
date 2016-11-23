@@ -133,7 +133,7 @@ int ifj16_readInt() {
 
 double ifj16_readDouble() {
     double c;
-    scanf("%g", &c);
+    scanf("%lg", &c);
     return c;
 }
 
@@ -142,7 +142,7 @@ string_t ifj16_readString() {
     int c;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
-    	//check error
+    	    str_addchar(s, c);
     	}
     str_addchar(s,'\0');
     return s;

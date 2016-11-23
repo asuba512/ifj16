@@ -1,3 +1,6 @@
+#ifndef HT
+#define HT 1
+
 #include <stdlib.h>
 
 #define hash(x) (((long)x >> 5) %769)
@@ -17,3 +20,5 @@ void gc_push(int, void *);
 void gc_remove(int, void*);
 
 void free_all();
+
+#endif

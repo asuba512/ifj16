@@ -353,6 +353,13 @@ int sem_generate_mov(op_t src, op_t dst) {
 
 // generates 'sframe' instruction
 int sem_generate_prepare(class_memb_t fn) {
+    if(fn->sc == local) {
+        fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
+        return 4;
+    } else if(fn->sc == global && fn->type == var) {
+        fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
+        return 4;
+    }
     struct instr i;
     i.type = sframe;
     i.src1 = (op_t)fn;
