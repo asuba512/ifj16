@@ -87,15 +87,15 @@ int main(int argc, char **argv){
 		return errno;
 	}
 	// printf("Global instruction tape:\n");
-	// instr_t i = glob_instr_list.head;
+ instr_t i = glob_instr_list.head;
 	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
 	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
 	// }
-	// printf("\nMain.run(): \n");
-	// i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
-	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
-	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
-	// }
+	printf("\nMain.run(): \n");
+ i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+ for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+ 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+ }
 
 	/// START INTERPRETATION HERE
 	int a = inter(glob_instr_list.head);
@@ -110,22 +110,35 @@ int add_head() {
 	i.type = sframe;
 	class_t c = st_getclass(str_init("Main"));
 	if(!c) {
-		fprintf(stderr,"ERR: Class 'Main' not found.\n");
+		fprintf(stderr,"ERR: Missing 'Main' class.\n");
 		return 3;
 	}
 	i.src1 = (op_t)st_getmemb(c, str_init("run"));
 	if(!i.src1) {
-		fprintf(stderr,"ERR: Function 'Main.run()' not found.\n");
+		fprintf(stderr,"ERR: Missing 'Main.run()' function.\n");
 		return 3;
 	}
+	if(((class_memb_t)(i.src1))->dtype != t_void) {
+		fprintf(stderr,"ERR: 'Main.run()' must be a void-funcion.\n");
+		return 4;
+	}
 	i.dst = i.src2 = NULL;
-	st_add_glob_instr(i);
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}
 	i.dst = i.src1;
 	i.src1 = NULL;
 	i.type = call;
-	st_add_glob_instr(i);	
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}	
 	i.type = label;
 	i.dst = i.src1 = i.src2 = NULL;
-	st_add_glob_instr(i);
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}
 	return 0;
 }
