@@ -63,6 +63,8 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true) {
                     fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                    free(new_frame->vars);
+                    free(new_frame);
                     clear_frames();
                     return 8; 
                 }
@@ -153,6 +155,8 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
                         clear_frames();
                         return 8;
                 }
@@ -166,7 +170,9 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
-                        clear_frames();
+                        free(new_frame->vars);
+                    	free(new_frame);
+                   		clear_frames();
                         return 8;
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
@@ -183,6 +189,8 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
                         clear_frames();
                         return 8;
                 }
