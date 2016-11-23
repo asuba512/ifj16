@@ -24,7 +24,7 @@ void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
     int m=substr->length;
     unsigned backup[m+1];
 
-    for (int k=1;k<+m;k++){
+    for (int k=1;k<=m;k++){
         match_jump[k]=2*m-k;
     }
     k=m;
@@ -92,7 +92,7 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
 
 int BMA_index(string_t str,string_t substr) {
 	int index;
-	unsigned compute_jumps_array[256];//in compute jumps for from 0 to 254(255 items)
+	unsigned compute_jumps_array[257];//in compute jumps for from 0 to 255(256 items)
     unsigned match_jumps_array[substr->length+2];//in compute match jumps indexed with q(q=substr->length+1)
     BMA_compute_jumps(substr,compute_jumps_array);
     BMA_compute_match_jumps(substr,match_jumps_array);

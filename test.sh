@@ -5,34 +5,39 @@ ifj16_dir=pwd
 # ON  switch == 0
 # OFF swtich != 0
 
-switch_GOOD_dir_1=1
+# valgrind ./program file
+switch_VALGRIND=0
+
+switch_GOOD_dir_1=0
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
 # TODO file.exitstatus
 switch_BAD_dir_1=0
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
-switch_BAD_dir_2=1
+switch_BAD_dir_2=0
 BAD_dir_2="`pwd`/tests/parser_tests"
 
 # SCANNER TESTS - testing $?==1, folder include source codes instead of expected output
-switch_SCANNER_DIR_3=1
+switch_SCANNER_DIR_3=0
 SCANNER_DIR_3="`pwd`/tests/scanner_tests_3"
 
-# SCANNER TESTS - the new folder
-switch_SCANNER_DIR_2=1
-SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
+# expecting that the code is without error and the existatus of "./ifj FILE" is 0
+switch_MANUAL_CODES=1
+MANUAL_CODES="`pwd`/tests/codes_from_manual"
 
 	# SCANNER TESTS (the first one) are for nothing because the behaviour was changed with FQID
 	switch_SCANNER_DIR=1 # keep your dirty hands off
 	SCANNER_DIR="`pwd`/tests/scanner_tests"
 
+# SCANNER TESTS - the new folder
+switch_SCANNER_DIR_2=1
+SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
+
 switch_SYMBOLIC_TABLE=1
 SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
 
-# expecting that the code is without error and the existatus of "./ifj FILE" is 0
-switch_MANUAL_CODES=1
-MANUAL_CODES="`pwd`/tests/codes_from_manual"
+
 
 ############################################################
 if [ $switch_GOOD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ] ||
@@ -76,8 +81,24 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 	        printf "\t\tSTDERR is NOT empty\n"
 	    fi
 
+	    if [ $switch_VALGRIND -eq 0 ]; then
+		    valgrind ./ifj $GOOD_dir_1/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+		    memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+		    #echo $memory_leaks
+		    
+		    if [ $memory_leaks -ne 1 ]; then
+		    	printf "\t\t$summary\n"
+		    fi
+		fi
+
 	done
 
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
     rm stderr_file
 fi
 
@@ -88,7 +109,7 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WITH ERROR ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" != 0) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" == exitvalue in .output) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
 	printf "==\n"
 
 	counter=0
@@ -121,8 +142,24 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 	        printf "\t\tSTDERR is empty\n"
 	    fi
 
+	    if [ $switch_VALGRIND -eq 0 ]; then
+		    valgrind ./ifj $BAD_dir_1/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+		    memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+		    #echo $memory_leaks
+		    
+		    if [ $memory_leaks -ne 1 ]; then
+		    	printf "\t\t$summary\n"
+		    fi
+		fi
+
 	done
 
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
     rm stderr_file
 fi
 
@@ -167,8 +204,24 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 	        printf "\t\tSTDERR is empty\n"
 	    fi
 
+	    if [ $switch_VALGRIND -eq 0 ]; then
+		    valgrind ./ifj $BAD_dir_2/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+		    memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+		    #echo $memory_leaks
+		    
+		    if [ $memory_leaks -ne 1 ]; then
+		    	printf "\t\t$summary\n"
+		    fi
+		fi
+
 	done
 
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
     rm stderr_file
 fi
 
@@ -213,8 +266,24 @@ if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 	        printf "\t\tSTDERR is empty\n"
 	    fi
 
+	    if [ $switch_VALGRIND -eq 0 ]; then
+		    valgrind ./ifj $SCANNER_DIR_3/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+		    memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+		    #echo $memory_leaks
+		    
+		    if [ $memory_leaks -ne 1 ]; then
+		    	printf "\t\t$summary\n"
+		    fi
+		fi
+
 	done
 
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
     rm stderr_file
 fi
 
