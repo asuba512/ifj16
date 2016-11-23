@@ -482,7 +482,7 @@ int inter(instr_t I){
                         case dt_double:
                             src1_d_value=(*value1).d_val;
                             src2_d_value=(*value2).d_val;
-                            dest->b_val = src1_d_value == src2_d_value;
+                            dest->b_val = src1_d_value > src2_d_value;
                             break;
                         case dt_int:
                             src1_i_value=(*value1).i_val;
