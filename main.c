@@ -118,7 +118,7 @@ int add_head() {
 		fprintf(stderr,"ERR: Missing 'Main.run()' function.\n");
 		return 3;
 	}
-	if(((class_memb_t)(i.src1))->dtype != t_void) {
+	if(((class_memb_t)(i.src1))->op.dtype != t_void) {
 		fprintf(stderr,"ERR: 'Main.run()' must be a void-funcion.\n");
 		return 4;
 	}

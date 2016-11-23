@@ -238,7 +238,7 @@ int fn_body(){
 	}
 	else if(is(token_rbrace)) {
 		if(SECOND_PASS) {
-			if(active_function->dtype == t_void) {
+			if(active_function->op.dtype == t_void) {
 				if ((errno = sem_generate_ret(NULL))) return errno; // append ret instruction at the end of void function
 			}
 			else {
@@ -290,7 +290,7 @@ int assign(){
 	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
 		next_token();
 		if(!id() && sem_id_decoded.isFun){ // function
-			if(((class_memb_t)sem_id_decoded.ptr)->dtype == t_void) {
+			if(((class_memb_t)sem_id_decoded.ptr)->op.dtype == t_void) {
 				fprintf(stderr, "ERR: Cannot assign return value of void-function.\n");
 				return errno = 8;
 			}
@@ -558,7 +558,7 @@ int as_ca(){
 						tok_enqueue(expr_queue, t);
 					
 					if((is(token_id) || is(token_fqid)) && !id()){
-						if(((class_memb_t)sem_id_decoded.ptr)->dtype == dt_String)
+						if(((class_memb_t)sem_id_decoded.ptr)->op.dtype == dt_String)
 							is_string = true;
 						tmp.type = token_id;
 						tmp.attr.p = sem_id_decoded.ptr;

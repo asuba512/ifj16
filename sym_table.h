@@ -39,7 +39,7 @@ typedef union {
 	bool b_val;
 } var_value;
 
-// generic struct for global var, local var, literal, helper var - will be always casted (except jmp, jmpif)
+// generic struct for global var, local var, literal, helper var - will be always casted in interpret (except jmp, jmpif)
 typedef struct operand {
 	scope sc;
 	datatype dtype;
@@ -59,8 +59,7 @@ typedef struct class_table {
 } *class_table_t;
 
 typedef struct global_helper_var {
-	scope sc; ///< for interpreter
-	datatype dtype; ///< datatype
+	struct operand op;
 	bool initialized;
 	var_value val; ///< value
 } *glob_helper_var_t; // literals and global tmp variables are stored in this struct (created during generation of global var initialization code)
@@ -84,11 +83,8 @@ typedef struct class {
  * A new set of local variable instances is pushed to the stack whenever a function is called.
  */
 typedef struct local_var {
-	/** Common part with class_memb */
-	scope sc; ///< for interpreter
-	datatype dtype; ///< datatype of variable
+	struct operand op;
 	string_t id;
-	/** end of common part */
 	int index; ///< index in array of variable instances in function context, unique within one function
 } *local_var_t;
 
@@ -98,11 +94,8 @@ typedef struct local_var {
  * Either static function or static variable.
  */
 typedef struct class_memb {
-	/** Common part with local_var */
-	scope sc; ///< for interpreter
-	datatype dtype; ///< return value for functions, datatype for variable
+	struct operand op;
 	string_t id; // temp
-	/** end of common part */
 	var_value val; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
 	int arg_count; ///< argument count, not used by static variable

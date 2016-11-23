@@ -730,19 +730,19 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
     glob_helper_var_t hlpr;
     if(op->sc == global) {
         glob = (class_memb_t)op;
-        *dtype = glob->dtype;
+        *dtype = glob->op.dtype;
         *target = &(glob->val);
         *initialized = &(glob->initialized);
         return glob->initialized;
     } else if(op->sc == helper) {
         hlpr = (glob_helper_var_t)op;
-        *dtype = hlpr->dtype;
+        *dtype = hlpr->op.dtype;
         *target = &(hlpr->val);
         *initialized = &(hlpr->initialized);
         return hlpr->initialized; // this ain't just literal anymore ...
     } else if(op->sc == local) {
         loc = (local_var_t)op;
-        *dtype = loc->dtype;
+        *dtype = loc->op.dtype;
         *target = &(((inter_stack.top->vars)[loc->index]).val);
         *initialized = &(((inter_stack.top->vars)[loc->index]).initialized);
         return ((inter_stack.top->vars)[loc->index]).initialized;

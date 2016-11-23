@@ -109,7 +109,7 @@ void sem_search() {
 void setIsFunFlag(void *symbol) {
     if(symbol != NULL) {
         class_memb_t memb = (class_memb_t)symbol;
-        if(memb->sc == global)
+        if(memb->op.sc == global)
             if(memb->type == func)
                 sem_id_decoded.isFun = true;
             else
@@ -353,10 +353,10 @@ int sem_generate_mov(op_t src, op_t dst) {
 
 // generates 'sframe' instruction
 int sem_generate_prepare(class_memb_t fn) {
-    if(fn->sc == local) {
+    if(fn->op.sc == local) {
         fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
         return 4;
-    } else if(fn->sc == global && fn->type == var) {
+    } else if(fn->op.sc == global && fn->type == var) {
         fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
         return 4;
     }
@@ -382,7 +382,7 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
         return 4;
     }
-    if(arg->dtype == ((called_fn->arg_list)[arg_counter])->dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->dtype == dt_double)) { 
+    if(arg->dtype == ((called_fn->arg_list)[arg_counter])->op.dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double)) { 
         // OK
     } else {
         fprintf(stderr, "ERR: Incompatible type of argument.\n");
@@ -422,9 +422,9 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
         fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
         return 4;
     }
-    if(called_fn->dtype == dst->dtype) {
+    if(called_fn->op.dtype == dst->dtype) {
         // OK
-    } else if(called_fn->dtype == dt_int && dst->dtype == dt_double) {
+    } else if(called_fn->op.dtype == dt_int && dst->dtype == dt_double) {
         struct instr conv;
         conv.type = i_d_r;
         conv.dst = conv.src2 = conv.src1 = NULL;
@@ -479,15 +479,15 @@ int sem_generate_ret(op_t src) {
     struct instr i;
     i.type = ret;
     i.src2 = i.dst = NULL;
-    if(active_function->dtype != t_void && !src) {
+    if(active_function->op.dtype != t_void && !src) {
         fprintf(stderr,"ERR: Non-void-function must return a value.\n");
         return 4;
-    } else if(active_function->dtype == t_void && src) {
+    } else if(active_function->op.dtype == t_void && src) {
         fprintf(stderr,"ERR: Void-function can't return a value.\n");
         return 4;
-    } else if((active_function->dtype == t_void && !src) || active_function->dtype == src->dtype) {
+    } else if((active_function->op.dtype == t_void && !src) || active_function->op.dtype == src->dtype) {
         i.src1 = src;
-    } else if(active_function->dtype == dt_double && src->dtype == dt_int) {
+    } else if(active_function->op.dtype == dt_double && src->dtype == dt_int) {
         struct instr conv;
         conv.type = int_to_dbl;
         conv.src1 = src;

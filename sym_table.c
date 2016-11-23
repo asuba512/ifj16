@@ -35,13 +35,13 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 		return 99;
 	// initialization
 	m->type = type; // variable or func?
-	m->dtype = dt; // datatype
+	m->op.dtype = dt; // datatype
 	m->arg_count = m->var_count = m->_max_arg_count = 0;
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
 	m->id = id; // UNUSEFUL
-	m->sc = global;
+	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;
 	int err;
 	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
@@ -76,10 +76,10 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	(fn->arg_list)[fn->arg_count] = lv;
 	(fn->var_count)++;
 	// initialization
-	lv->dtype = dt;
+	lv->op.dtype = dt;
 	lv->index = (fn->arg_count)++;
 	lv->id = id;
-	lv->sc = local;
+	lv->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
@@ -96,10 +96,10 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t lv;
 	if ((lv = malloc(sizeof(struct local_var))) == NULL)
 		return 99;
-	lv->dtype = dt;
+	lv->op.dtype = dt;
 	lv->index = (fn->var_count)++;
 	lv->id = id;
-	lv->sc = local;
+	lv->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
@@ -140,24 +140,24 @@ glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
 	switch(t.type) {
 		case token_double:
 			glob_helper_vars.arr[glob_helper_vars.length].val.d_val = t.attr.d;
-			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_double;
+			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_double;
 			break;
 		case token_int:
 			glob_helper_vars.arr[glob_helper_vars.length].val.i_val = t.attr.i;
-			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_int;
+			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_int;
 			break;
 		case token_string:
 			glob_helper_vars.arr[glob_helper_vars.length].val.s_val = t.attr.s;
-			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_String;
+			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_String;
 			break;
 		case token_boolean:
 			glob_helper_vars.arr[glob_helper_vars.length].val.b_val = t.attr.b;
-			glob_helper_vars.arr[glob_helper_vars.length].dtype = dt_boolean;
+			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_boolean;
 			break;
 		default:
 			break;
 	}
-	glob_helper_vars.arr[glob_helper_vars.length].sc = helper; // just interpret things
+	glob_helper_vars.arr[glob_helper_vars.length].op.sc = helper; // just interpret things
 	glob_helper_vars.arr[glob_helper_vars.length].initialized = initialized;
 	glob_helper_vars.length++;
 	return &(glob_helper_vars.arr[glob_helper_vars.length-1]);
@@ -181,10 +181,10 @@ local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t tmp;
 	if ((tmp = malloc(sizeof(struct local_var))) == NULL)
 		return NULL;
-	tmp->dtype = dt;
+	tmp->op.dtype = dt;
 	tmp->index = (fn->var_count)++;
 	tmp->id = id;
-	tmp->sc = local;
+	tmp->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {
 		return tmp; // OK
