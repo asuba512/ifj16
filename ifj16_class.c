@@ -129,17 +129,50 @@ void ifj16_print(string_t s) {
 }
 
 int ifj16_readInt() {
-    int c = 0;
+    string_t s=str_init("");
+    int c;
+    long int num;
+    char * pEnd=NULL;
+    while((c=getchar()) != EOF){
+    	if(c=='\n') break;
+    	    str_addchar(s, c);
+    	}
+    str_addchar(s,'\0');
+    num=strtol(s->data,&pEnd,10);
+    if (*pEnd != '\0') {
+    	errno=7;
+    }
+    return (int)num;
+
+    /*int c = 0;
     if(scanf("%d", &c) != 1)
         errno = 7;
     return c;
+*/
 }
 
 double ifj16_readDouble() {
-    double c = 0.0;
+	string_t s=str_init("");
+    int c;
+    double num;
+    char * pEnd=NULL;
+    while((c=getchar()) != EOF){
+    	if(c=='\n') break;
+    	    str_addchar(s, c);
+    	}
+    str_addchar(s,'\0');
+    num=strtod(s->data,&pEnd);
+    if (*pEnd != '\0') {
+    	errno=7;
+    }
+    return num;
+
+  /*  double c = 0.0;
     if(scanf("%lg", &c) != 1)
         errno = 7;
     return c;
+*/
+
 }
 
 string_t ifj16_readString() {
