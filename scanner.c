@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+
 int get_token(FILE *fd, token_t *t) {
 	int c; // var for storing input characters
 	int o = 0; // for indexing string | storing octal number
@@ -18,8 +19,13 @@ int get_token(FILE *fd, token_t *t) {
 	char *endptr; // for string-to-number conversions
 	t_state state = state_init;
 	
-	if(buff == NULL) // buff is global variable, if it wasnt used yet, it is NULL
+	if(buff == NULL){ // buff is global variable, if it wasnt used yet, it is NULL
 		buff = str_init("");
+		if(buff == NULL){
+			fprintf(stderr, "ERR: Internal error.\n");
+			return 99;
+		}
+	}
 	else
 		str_empty(buff); // if it is a consecutive call of get_token, empty buffer
 	
@@ -158,12 +164,20 @@ int get_token(FILE *fd, token_t *t) {
 					else if(c == '.'){ // fully qualified identifier
 						str_addchar(buff, c);
 						t->attr.s = str_init(buff->data);
+						if(t->attr.s == NULL){
+							fprintf(stderr, "ERR: Internal error.\n");
+							return 99;
+						}
 						str_empty(buff);
 						state = _state_dot_fqidentifier;
 					}
 					else{ // idenfitier
 						t->type = token_id;
 						t->attr.s = str_init(buff->data); // storing a copy of string contaiting the name
+						if(t->attr.s == NULL){
+							fprintf(stderr, "ERR: Internal error.\n");
+							return 99;
+						}
 						ungetc(c, fd);
 						return 0;
 					}
@@ -360,6 +374,10 @@ int get_token(FILE *fd, token_t *t) {
 //					str_addchar(buff, c);	
 					t->type = token_string;
 					t->attr.s = str_init(buff->data);
+					if(t->attr.s == NULL){
+						fprintf(stderr, "ERR: Internal error.\n");
+						return 99;
+					}
 					return 0;
 				}
 				else if(c == '\n' || c == EOF){ // unfinished string
