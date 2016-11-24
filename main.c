@@ -70,6 +70,8 @@ int main(int argc, char **argv){
 	if(errno) {
 		free_all();
 		st_destroy_all();
+		if(errno == 2)
+			fprintf(stderr, "ERR: Syntax error.\n");
 		return errno;
 	}
 	if(retval) {

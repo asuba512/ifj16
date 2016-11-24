@@ -101,8 +101,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("+E\n");// *((int*)(tmp->data.attr.p))); // generate (+, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(add, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -114,8 +113,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("-E\n");// *((int*)(tmp->data.attr.p))); // generate (-, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(sub, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -127,8 +125,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("*E\n");// *((int*)(tmp->data.attr.p))); // generate (*, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(imul, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -140,8 +137,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("/E\n");// *((int*)(tmp->data.attr.p))); // generate (/, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(idiv, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -153,8 +149,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("<E\n");// *((int*)(tmp->data.attr.p))); // generate (<, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(less, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -166,8 +161,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf(">E\n");// *((int*)(tmp->data.attr.p))); // generate (>, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(gre, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -179,8 +173,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("<=E\n");// *((int*)(tmp->data.attr.p))); // generate (<=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(leq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -192,8 +185,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf(">=E\n");// *((int*)(tmp->data.attr.p))); // generate (>=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(geq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -205,8 +197,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("==E\n");// *((int*)(tmp->data.attr.p))); // generate (==, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(eql, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -218,8 +209,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("!=E\n");// *((int*)(tmp->data.attr.p))); // generate (!=, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(neq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -231,8 +221,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("&&E\n");// *((int*)(tmp->data.attr.p))); // generate (&&, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(and, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -244,8 +233,7 @@ int precedence(tok_que_t queue, op_t *result){
 								// printf("||E\n");// *((int*)(tmp->data.attr.p))); // generate (||, tmp_var, tmp->data.attr.p), result into new variable
 								prec_stack_pop();
 								try(sem_generate_arithm(or, op1, op2, (op_t *)&(nonterminal.attr.p)));
-
-								prec_stack_push(nonterminal);
+								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
 						}
@@ -254,20 +242,20 @@ int precedence(tok_que_t queue, op_t *result){
 							prec_stack_pop();
 							try(sem_generate_arithm(not, op2, NULL, (op_t *)&(nonterminal.attr.p)));
 							//nonterminal.attr.p = result variable from instruction above
-							prec_stack_push(nonterminal);
+							if(prec_stack_push(nonterminal)) return 99;
 							prec_auxstack_pop(); 
 						}
 						else
-							return 222;
+							return 2;
 					}
 					else
-						return 111;
+						return 2;
 				}
 				else
-					return 351;
+					return 2;
 				break;
 			default:
-				return 32453;
+				return 2;
 				break;
 		}
 		stoken = (*prec_stack_top())->data;
