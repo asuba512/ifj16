@@ -5,21 +5,24 @@ ifj16_dir=pwd
 # ON  switch == 0
 # OFF swtich != 0
 
-# valgrind ./program file
+# "valgrind ./program file"
 switch_VALGRIND=0
 
-switch_GOOD_dir_1=0
+switch_GOOD_dir_1=1
 GOOD_dir_1="`pwd`/tests/codes_without_error"
 
-switch_BAD_dir_1=0
+switch_BAD_dir_1=1
 BAD_dir_1="`pwd`/tests/semantic_tests"
 
-switch_BAD_dir_2=0
+switch_BAD_dir_2=1
 BAD_dir_2="`pwd`/tests/parser_tests"
 
 # SCANNER TESTS - testing $?==1, folder include source codes instead of expected output
 switch_SCANNER_DIR_3=1
 SCANNER_DIR_3="`pwd`/tests/scanner_tests_3"
+
+switch_EXITCODE_TESTS=0
+EXITCODE_TESTS="`pwd`/tests/exitcode_tests"
 
 # expecting that the code is without error and the existatus of "./ifj FILE" is 0
 switch_MANUAL_CODES=1
@@ -39,8 +42,8 @@ SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
 
 
 ############################################################
-if [ $switch_GOOD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_1 -eq 0 ] || [ $switch_BAD_dir_2 -eq 0 ] ||
-   [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0]; then
+if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1    -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
+   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 	printf "\n\n=== IFJ BUILD ===\n"
 	printf "=== make clean ===\n"
 	make clean
@@ -287,6 +290,67 @@ if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 fi
 
 ############################################################
+if [ $switch_EXITCODE_TESTS -eq 0 ]; then
+
+	dir=$(echo $EXITCODE_TESTS | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS WITH ERROR ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF ("$""?" == exitvalue in .output) AND (STDERR is NOT EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
+
+	counter=0
+	for i in `ls $EXITCODE_TESTS`
+	do
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+
+		counter=$(expr $counter + 1)
+		printf "= $counter.)\t$i \n"
+
+		./ifj $EXITCODE_TESTS/$i >/dev/null 2>stderr_file
+
+		exitvalue=$?
+		stderr_check=$(cat stderr_file | wc -l)
+
+		#DEBUG
+		#printf "\t$exitvalue "$""?"\n"
+		#printf "\t$stderr_check stderr\n"
+
+		file_value=$(cat "$EXITCODE_TESTS/$i.output")
+
+		if [ $exitvalue -ne $file_value ]; then
+			printf "\t\t"$""?" = $exitvalue, expecting $file_value\n"
+		fi
+		if [ $stderr_check -eq 0 ]; then
+			printf "\t\tSTDERR is empty\n"
+		fi
+
+		if [ $switch_VALGRIND -eq 0 ]; then
+			valgrind ./ifj $EXITCODE_TESTS/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+			#echo $memory_leaks
+
+			if [ $memory_leaks -ne 1 ]; then
+				printf "\t\t$summary\n"
+			fi
+		fi
+
+	done
+
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
+	rm stderr_file
+fi
+
+############################################################
 if [ $switch_MANUAL_CODES -eq 0 ]; then
 
 	dir=$(echo $MANUAL_CODES | sed "s/^.*\///")
@@ -463,9 +527,9 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 fi
 
 ############################################################
-if [ $switch_GOOD_dir_1 -eq 0 ]     || [ $switch_BAD_dir_1 -eq 0 ]   || [ $switch_BAD_dir_2 -eq 0 ]     ||
-   [ $switch_MANUAL_CODES -eq 0 ]   || [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ||
-   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0]; then
+if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2      -eq 0 ] ||
+   [ $switch_MANUAL_CODES   -eq 0 ] || [ $switch_SCANNER_DIR   -eq 0 ] || [ $switch_SCANNER_DIR_2  -eq 0 ] ||
+   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ]; then
 	printf "\n\n=== MAKE CLEAN ===\n"
 	make clean
 	printf "\n\n=== FINISH ===\n"
