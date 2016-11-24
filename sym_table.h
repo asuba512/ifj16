@@ -40,6 +40,7 @@ typedef union {
 } var_value;
 
 // generic struct for global var, local var, literal, helper var - will be always casted in interpret (except jmp, jmpif)
+// its purpose is to simplify the 3AC to work with 
 typedef struct operand {
 	scope sc;
 	datatype dtype;
@@ -73,7 +74,7 @@ struct global_helper_var_arr {
  * @brief Pointer to class entry in global class table
  */
 typedef struct class {
-	string_t id;
+	//string_t id;
 	bst_node_t root; ///< Root node
 } *class_t;
 
@@ -95,7 +96,7 @@ typedef struct local_var {
  */
 typedef struct class_memb {
 	struct operand op;
-	string_t id; // temp
+	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
 	var_value val; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
 	int arg_count; ///< argument count, not used by static variable
@@ -104,7 +105,6 @@ typedef struct class_memb {
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
-	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
 	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
 	instr_t instr_list;
 	instr_t instr_list_end;

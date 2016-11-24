@@ -83,22 +83,22 @@ int sem_prec_reduction() {
 //     }
 // }
 
-void sem_search() {
+void sem_search(string_t class_id, string_t memb_id) {
     //print_bullshit = false;
     //_print_demand();
     void *symbol = NULL;
-    if (sem_id_decoded.class_id == NULL) {
+    if (class_id == NULL) {
         if(!outside_func) { // local scope has more priority inside function
-            symbol = st_get_loc_var(active_function, sem_id_decoded.memb_id);
+            symbol = st_get_loc_var(active_function, memb_id);
             if(!symbol)
-                symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+                symbol = st_getmemb(active_class, memb_id);
         } else { // outside function, we search only for global identifiers
-            symbol = st_getmemb(active_class, sem_id_decoded.memb_id);
+            symbol = st_getmemb(active_class, memb_id);
         }
     } else {
-        class_t class = st_getclass(sem_id_decoded.class_id);
+        class_t class = st_getclass(class_id);
         if (class) {
-            symbol = st_getmemb(class, sem_id_decoded.memb_id);
+            symbol = st_getmemb(class, memb_id);
         }
     }
     sem_id_decoded.ptr = symbol;
@@ -333,12 +333,10 @@ int sem_generate_mov(op_t src, op_t dst) {
         conv.type = int_to_dbl;
         conv.src1 = src;
         conv.src2 = NULL;
-        if(active_function) {
-            NEW_DOUBLE(conv.dst)
-            if(!conv.dst) INTERNAL_ERR
-            INSTR(conv)
-            if(err) INTERNAL_ERR
-        }
+        NEW_DOUBLE(conv.dst)
+        if(!conv.dst) INTERNAL_ERR
+        INSTR(conv)
+        if(err) INTERNAL_ERR
         i.src1 = conv.dst;
     } else {
         fprintf(stderr, "ERR: Incompatible types of operands.\n");
@@ -374,7 +372,9 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
         fprintf(stderr, "ERR: Too many arguments\n");
         return 4;
     }
+    token_t t; // macro
     struct instr i;
+    struct instr conv;
     i.type = push;
     i.src2 = i.dst = NULL;
     i.src1 = arg;
@@ -385,7 +385,13 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
     if(arg->dtype == ((called_fn->arg_list)[arg_counter])->op.dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double)) { 
         // OK
 		if(arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double){
-			// generace cast ya bitch
+			NEW_DOUBLE(conv.dst)
+            if(!conv.dst) INTERNAL_ERR
+            conv.src1 = arg;
+            conv.src2 = NULL;
+            conv.type = int_to_dbl;
+            if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
+            i.src1 = conv.dst;
 		}
     } else {
         fprintf(stderr, "ERR: Incompatible type of argument.\n");

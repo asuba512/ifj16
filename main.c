@@ -82,16 +82,15 @@ int main(int argc, char **argv){
 
 	/* some random junk */
 	// printf("Global instruction tape:\n");
- //instr_t i = glob_instr_list.head;
+ 	// instr_t i = glob_instr_list.head;
 	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
 	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
 	// }
-	//printf("\nMain.run(): \n");
- //i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
- /*for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
- 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
- }
-*/
+	// printf("\nMain.run(): \n");
+ 	// i = (instr_t)(st_getmemb(st_getclass(str_init("Main")), str_init("run"))->instr_list);
+	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
+	// 	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
+	// }
 
 	/* INTERPRETATION */
 	retval = inter(glob_instr_list.head);
@@ -104,20 +103,26 @@ int main(int argc, char **argv){
 
 int add_head() {
 	struct instr i;
+	string_t str;
 	i.type = sframe;
-	class_t c = st_getclass(str_init("Main"));
+	STR("Main")
+	class_t c = st_getclass(str);
 	if(!c) {
 		fprintf(stderr,"ERR: Missing 'Main' class.\n");
 		return 3;
 	}
-	i.src1 = (op_t)st_getmemb(c, str_init("run"));
+	STR("run")
+	i.src1 = (op_t)st_getmemb(c, str);
 	if(!i.src1) {
 		fprintf(stderr,"ERR: Missing 'Main.run()' function.\n");
 		return 3;
 	}
 	if(((class_memb_t)(i.src1))->op.dtype != t_void) {
 		fprintf(stderr,"ERR: 'Main.run()' must be a void-funcion.\n");
-		return 4;
+		return 3;
+	} else if(((class_memb_t)(i.src1))->arg_count) {
+		fprintf(stderr,"ERR: 'Main.run()' must not have any arguments.\n");
+		return 3;
 	}
 	i.dst = i.src2 = NULL;
 	if(st_add_glob_instr(i)) {

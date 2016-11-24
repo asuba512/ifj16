@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -Wall -Wextra -pedantic -O3
+CFLAGS=-std=c11 -Wall -Wextra -pedantic -g
 CC=gcc
 
 BIN=ifj
