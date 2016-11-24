@@ -6,7 +6,7 @@ ifj16_dir=pwd
 # OFF swtich != 0
 
 # "valgrind ./program file"
-switch_VALGRIND=0
+switch_VALGRIND=1
 
 switch_GOOD_dir_1=1
 GOOD_dir_1="`pwd`/tests/codes_without_error"
@@ -21,7 +21,7 @@ BAD_dir_2="`pwd`/tests/parser_tests"
 switch_SCANNER_DIR_3=1
 SCANNER_DIR_3="`pwd`/tests/scanner_tests_3"
 
-switch_EXITCODE_TESTS=0
+switch_EXITCODE_TESTS=1
 EXITCODE_TESTS="`pwd`/tests/exitcode_tests"
 
 # expecting that the code is without error and the existatus of "./ifj FILE" is 0
@@ -38,8 +38,81 @@ SCANNER_DIR_2="`pwd`/tests/scanner_tests_2"
 
 switch_SYMBOLIC_TABLE=1
 SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
+############################################################
 
+if [ $# -eq 0 ]; then
+	printf "Unexpected arguments. \"$0\" aborted!\n"
+	exit
+fi
 
+if [ $# -gt 1 ]; then
+	printf "Unexpected arguments. \"$0\" aborted!\n"
+	exit
+fi
+
+if [ $# -eq 1 ]; then
+	c=$(echo $1 | cut -c1)
+	if [ $c != "-" ]; then
+		printf "Unexpected arguments. \"$0\" aborted!\n"
+		exit
+	fi
+fi
+
+while getopts "sSpPaAeE" opt; do
+    case "$opt" in
+        e)  printf "== EXITCODE ==\n"
+				switch_EXITCODE_TESTS=0
+            ;; 
+        E)  printf "== EXITCODE with VALGRIND ==\n"
+				switch_VALGRIND=0
+				switch_EXITCODE_TESTS=0
+            ;;               	
+        s)  printf "== SCANNER ==\n"
+				switch_SCANNER_DIR_3=0
+				switch_SCANNER_DIR=1
+				switch_SCANNER_DIR_2=0
+            ;;
+        S)  printf "== SCANNER with VALGRIND ==\n"
+				switch_VALGRIND=0
+     			switch_SCANNER_DIR_3=0
+				switch_SCANNER_DIR=1
+				switch_SCANNER_DIR_2=0
+            ;;        
+        p)	printf "== PARSER ==\n"
+				switch_BAD_dir_2=0
+            ;;
+        P)  printf "== PARSER with VALGRIND ==\n"
+				switch_VALGRIND=0
+				switch_BAD_dir_2=0
+            ;;
+        a)  printf "== ALL ==\n"
+     			switch_GOOD_dir_1=0
+				switch_BAD_dir_1=0
+				switch_BAD_dir_2=0
+				switch_SCANNER_DIR_3=0
+				switch_EXITCODE_TESTS=0
+				switch_MANUAL_CODES=0
+				switch_SCANNER_DIR=1
+				switch_SCANNER_DIR_2=0
+				switch_SYMBOLIC_TABLE=0
+			;;
+        A)  printf "== ALL with VALGRIND ==\n"
+				switch_VALGRIND=0
+     			switch_GOOD_dir_1=0
+				switch_BAD_dir_1=0
+				switch_BAD_dir_2=0
+				switch_SCANNER_DIR_3=0
+				switch_EXITCODE_TESTS=0
+				switch_MANUAL_CODES=0
+				switch_SCANNER_DIR=1
+				switch_SCANNER_DIR_2=0
+				switch_SYMBOLIC_TABLE=0
+			;;
+       '?') printf "Unexpected arguments. \"$0\" aborted!\n"
+            exit
+            ;;
+    esac
+done
 
 ############################################################
 if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1    -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
