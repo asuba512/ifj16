@@ -32,16 +32,16 @@ int main(int argc, char **argv){
 	(void)argc;
 	fd = fopen(argv[1],"r");
 	if(fd == NULL){
-		printf("error\n");
+		printf("ERR: Cannot open source file\n");
 		return 99;
 	}
 	init_class_table();
 	populate_sym_table();
 	tok_q = tok_que_init();
+	/* FIRST PASS */
 	pass_number = 1;
 	int retval = c_list();
 	fclose(fd);
-	//printf("1st pass retval: %d (parser) %d (errno)\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();
@@ -55,18 +55,9 @@ int main(int argc, char **argv){
 		fprintf(stderr, "ERR: Syntax error.\n");
 		return retval;
 	}
-	// printf("current token: %d\n", t.type);
-	// if(retval != 0){	
-	// 	int c;
-	// 	while((c = getc(fd)) != EOF){
-	// 		putchar(c);
-	// 	}
-	// 	printf("ERR: First pass failed.\n");
-	// 	return 9999999;
-	// }
+	/* SECOND PASS */
 	pass_number = 2;
 	retval = c_list();
-	//printf("2nd pass retval: %d (parser) %d (errno)\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();
@@ -79,9 +70,7 @@ int main(int argc, char **argv){
 		st_destroy_all();
 		fprintf(stderr, "ERR: Syntax error.\n");
 		return retval;
-	}
-	// printf("current token: %d\n", t.type);
-	
+	}	
 	str_destroy(buff);
 	if((errno = add_head())) {
 		free_all();
@@ -99,12 +88,12 @@ int main(int argc, char **argv){
  	printf("%s\t%p, %p, %p\n", op[ins->type], (void*)ins->src1, (void*)ins->src2, (void*)ins->dst);
  }
 */
-	/// START INTERPRETATION HERE
-	int a = inter(glob_instr_list.head);
+	/* INTERPRETATION */
+	retval = inter(glob_instr_list.head);
 	//printf("\nInterpret ret val: %d\n", a);
 	free_all();
 	st_destroy_all();
-    return a;
+    return retval;
 }
 
 int add_head() {

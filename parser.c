@@ -398,7 +398,6 @@ int id(){
 			*ptr = 0;
 			sem_id_decoded.class_id = str_init(t.attr.s->data);
 			sem_id_decoded.memb_id = str_init(ptr + 1);
-			str_destroy(t.attr.s);
 			sem_search();
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
