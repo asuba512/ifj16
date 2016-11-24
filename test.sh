@@ -59,34 +59,34 @@ if [ $# -eq 1 ]; then
 fi
 
 while getopts "sSpPaAeE" opt; do
-    case "$opt" in
-        e)  printf "== EXITCODE ==\n"
+	case "$opt" in
+		e)  printf "== EXITCODE ==\n"
 				switch_EXITCODE_TESTS=0
-            ;; 
-        E)  printf "== EXITCODE with VALGRIND ==\n"
+			;;
+		E)  printf "== EXITCODE with VALGRIND ==\n"
 				switch_VALGRIND=0
 				switch_EXITCODE_TESTS=0
-            ;;               	
-        s)  printf "== SCANNER ==\n"
+			;;
+		s)  printf "== SCANNER ==\n"
 				switch_SCANNER_DIR_3=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
-            ;;
-        S)  printf "== SCANNER with VALGRIND ==\n"
+			;;
+		S)  printf "== SCANNER with VALGRIND ==\n"
 				switch_VALGRIND=0
-     			switch_SCANNER_DIR_3=0
+				switch_SCANNER_DIR_3=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
-            ;;        
-        p)	printf "== PARSER ==\n"
+			;;
+		p)  printf "== PARSER ==\n"
 				switch_BAD_dir_2=0
-            ;;
-        P)  printf "== PARSER with VALGRIND ==\n"
+			;;
+		P)  printf "== PARSER with VALGRIND ==\n"
 				switch_VALGRIND=0
 				switch_BAD_dir_2=0
-            ;;
-        a)  printf "== ALL ==\n"
-     			switch_GOOD_dir_1=0
+			;;
+		a)  printf "== ALL ==\n"
+				switch_GOOD_dir_1=0
 				switch_BAD_dir_1=0
 				switch_BAD_dir_2=0
 				switch_SCANNER_DIR_3=0
@@ -94,11 +94,11 @@ while getopts "sSpPaAeE" opt; do
 				switch_MANUAL_CODES=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
-				switch_SYMBOLIC_TABLE=0
+				switch_SYMBOLIC_TABLE=1
 			;;
-        A)  printf "== ALL with VALGRIND ==\n"
+		A)  printf "== ALL with VALGRIND ==\n"
 				switch_VALGRIND=0
-     			switch_GOOD_dir_1=0
+				switch_GOOD_dir_1=0
 				switch_BAD_dir_1=0
 				switch_BAD_dir_2=0
 				switch_SCANNER_DIR_3=0
@@ -106,12 +106,12 @@ while getopts "sSpPaAeE" opt; do
 				switch_MANUAL_CODES=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
-				switch_SYMBOLIC_TABLE=0
+				switch_SYMBOLIC_TABLE=1
 			;;
-       '?') printf "Unexpected arguments. \"$0\" aborted!\n"
-            exit
-            ;;
-    esac
+	   '?') printf "Unexpected arguments. \"$0\" aborted!\n"
+			exit
+			;;
+	esac
 done
 
 ############################################################
