@@ -6,9 +6,10 @@ void *gc_malloc(size_t s){
 	void *ptr;
 	ptr = malloc(s);
 	if(ptr){ // if enough memory, push pointer to hash table
-		if(gc_push(hash(ptr), ptr)) // if cannot push new pointer 
+		if(gc_push(hash(ptr), ptr)){ // if cannot push new pointer 
 			free(ptr);
 			return NULL; // this will cause return 99 - internal error somewhere else
+		}
 	}
 	return ptr;
 
@@ -26,7 +27,7 @@ void *gc_realloc(void *old, size_t s){
 
 int gc_push(int i, void *ptr){
 	s_item tmp = malloc(sizeof(struct s_item));
-	if(tmp)
+	if(!tmp)
 		return 99;
 	tmp->next = ht[i];
 	tmp->data = ptr;
