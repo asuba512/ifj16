@@ -178,14 +178,14 @@ int inter(instr_t I){
                 }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 (*init_dest)=true;
-                if((*value1).b_val) {
-                    sprintf(arr, "%s", "true");
+                if(value1->b_val) {
+                	dest->s_val=str_init("true");
                 }
                 else {
-                    sprintf(arr, "%s", "false");
+                	dest->s_val=str_init("false");
                 }
-                dest->s_val = str_init(arr);
-            
+      			break;
+
             case dbl_to_str:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
