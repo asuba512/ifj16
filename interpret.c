@@ -165,6 +165,10 @@ int inter(instr_t I){
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 (*init_dest)=true;
                 dest->s_val = str_init(arr);
+                if(dest->s_val == NULL){
+    	        	fprintf(stderr, "ERR: Internal error.\n");
+	        		return 99;
+		        }
                 break;
             
             case bool_to_str:
@@ -180,9 +184,17 @@ int inter(instr_t I){
                 (*init_dest)=true;
                 if(value1->b_val) {
                 	dest->s_val=str_init("true");
+                    if(dest->s_val == NULL){
+        	        	fprintf(stderr, "ERR: Internal error.\n");
+    	        		return 99;
+    		        }
                 }
                 else {
                 	dest->s_val=str_init("false");
+                    if(dest->s_val == NULL){
+        	        	fprintf(stderr, "ERR: Internal error.\n");
+    	        		return 99;
+    		        }
                 }
       			break;
 
@@ -199,6 +211,10 @@ int inter(instr_t I){
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 (*init_dest)=true;
                 dest->s_val = str_init(arr);
+                if(dest->s_val == NULL){
+    	        	fprintf(stderr, "ERR: Internal error.\n");
+	        		return 99;
+		        }
                 break;
             
             case add:
@@ -394,6 +410,10 @@ int inter(instr_t I){
                     }
                 init=decode_address(I->dst,&(dest),&(dtype),&(init_dest));
                 dest->s_val = str_init(value1->s_val->data);
+                if(dest->s_val == NULL){
+    	        	fprintf(stderr, "ERR: Internal error.\n");
+	        		return 99;
+		        }
                 str_cat(dest->s_val, value2->s_val);
                 (*init_dest) = true;
                 break;

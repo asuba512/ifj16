@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#define addchar(c) do{ if(str_addchar(buff, c) == 99) { fprintf(stderr, "ERR: Internal error.\n"); return 99; }} while(0)
 
 int get_token(FILE *fd, token_t *t) {
 	int c; // var for storing input characters
@@ -84,15 +85,15 @@ int get_token(FILE *fd, token_t *t) {
 				else if(c == '|') // or
 					state = state_or;
                 else if(c == '_'){ // identifier, after '_' at least one more character must follow
-					str_addchar(buff, c);
+					addchar(c);
 					state = _state_identifier;
 				}
 				else if(isalpha(c) || c == '$'){ // identifier
-					str_addchar(buff, c);	
+					addchar(c);	
                     state = state_identifier;
                 }
 				else if(isdigit(c)){ // integer, double
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = state_integer;
 				}
 				else if(c == '"') // string
@@ -140,7 +141,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case _state_identifier:
 					if(c == '_' || c == '$' || isalnum(c)){ // after '_' there must be at least one more supported character
-						str_addchar(buff, c);
+						addchar(c);
 						state = state_identifier;
 					}
 					else{ // '_' can't be an identifier
@@ -150,7 +151,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_') // supported characters
-					str_addchar(buff, c);	
+					addchar(c);	
                 else{
 					if(c == '"') // there can't be '"' right after identifier (e.g. id"), it doens't make much sense
 						return 1;
@@ -162,7 +163,7 @@ int get_token(FILE *fd, token_t *t) {
 						return 0;
 					}
 					else if(c == '.'){ // fully qualified identifier
-						str_addchar(buff, c);
+						addchar(c);
 						t->attr.s = str_init(buff->data);
 						if(t->attr.s == NULL){
 							fprintf(stderr, "ERR: Internal error.\n");
@@ -187,11 +188,11 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case _state_dot_fqidentifier:
 				if(c == '_'){ // after '_' in FQID second part, must be at least one more supported character
-					str_addchar(buff, c);
+					addchar(c);
 					state = _state_fqidentifier;
 				}
 				else if(isalpha(c) || c == '$'){ // fully qualified idenfier, second part
-					str_addchar(buff, c);
+					addchar(c);
 					state = state_fqidentifier;
 				}
 				else{ // anything else is an error
@@ -202,7 +203,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case _state_fqidentifier:
 				if(c == '_' || c == '$' || isalnum(c)){ // after '_' must be at least one more supported character
-					str_addchar(buff, c);
+					addchar(c);
 					state = state_fqidentifier;
 				}
 				else{ // '_' can't be an identifier
@@ -213,7 +214,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case state_fqidentifier:
 				if(isalnum(c) || c == '$' || c == '_') // supported characters
-					str_addchar(buff, c);
+					addchar(c);
 				else{ // FQID
 					if(c == '"' || c == '.') // right after FQID can't follow '"' or '.'
 						return 1;
@@ -284,13 +285,13 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case state_integer:
 				if(isdigit(c)) // integer
-					str_addchar(buff, c);	
+					addchar(c);	
 				else if(c == '.'){ // double in form: X.X???
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = _state_double_point;
 				}
 				else if(c == 'e' || c == 'E'){ // double in form: Xe??
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = _state_double_e;
 				}
 				else{ // end of integer
@@ -305,7 +306,7 @@ int get_token(FILE *fd, token_t *t) {
 			
 			case _state_double_point:
 				if(isdigit(c)){ // there must be a digit after decimal point
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = state_double;
 				}
 				else{
@@ -316,9 +317,9 @@ int get_token(FILE *fd, token_t *t) {
 			
 			case state_double:
 				if(isdigit(c)) // more digits
-					str_addchar(buff, c);	
+					addchar(c);	
 				else if(c == 'e' || c == 'E'){ // double in form: X.Xe??
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = _state_double_e;
 				}
 				else{ // double in form: X.X
@@ -332,11 +333,11 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case _state_double_e:
 				if(isdigit(c)){ // double in form: X.Xe? or Xe?
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = state_double_e;
 				}
 				else if(c == '+' || c == '-'){ // double in form: X.Xe+/-? or Xe+/-?
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = _state_double_e_sign;
 				}
 				else{
@@ -346,7 +347,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case _state_double_e_sign:
 				if(isdigit(c)){ // there must be at least one digit after sign in double
-					str_addchar(buff, c);	
+					addchar(c);	
 					state = state_double_e;
 				}
 				else{
@@ -356,7 +357,7 @@ int get_token(FILE *fd, token_t *t) {
 				break;
 			case state_double_e:
 				if(isdigit(c)) // more digits
-					str_addchar(buff, c);	
+					addchar(c);	
 				else{ // double in form: X.XeX or XeX or X.Xe+/-X or Xe+/-X
 					ungetc(c, fd);
 					if(isalpha(c) || c == '.') // there can't be a letter or '.' right after double
@@ -371,7 +372,6 @@ int get_token(FILE *fd, token_t *t) {
 					state = _state_string_escape;
 				}
 				else if(c == '"'){ // end of string
-//					str_addchar(buff, c);	
 					t->type = token_string;
 					t->attr.s = str_init(buff->data);
 					if(t->attr.s == NULL){
@@ -384,19 +384,19 @@ int get_token(FILE *fd, token_t *t) {
 					return 1;
 				}
 				else
-					str_addchar(buff, c); // adding characters to string
+					addchar(c); // adding characters to string
 				break;
 			case _state_string_escape:
 				if(c == 't' || c == 'n' || c == '"' || c == '\\'){ // supported escape sequences
 					switch(c){ // converting to actual character
 						case 't':
-							str_addchar(buff, '\t'); break;	
+							addchar('\t'); break;	
 						case 'n':
-							str_addchar(buff, '\n'); break;	
+							addchar('\n'); break;	
 						case '"':
-							str_addchar(buff, '\"'); break;	
+							addchar('\"'); break;	
 						case '\\':
-							str_addchar(buff, '\\'); break;	
+							addchar('\\'); break;	
 					}
 					state = state_string; // continue in string
 				}
@@ -425,7 +425,7 @@ int get_token(FILE *fd, token_t *t) {
 					octal[o] = 0;
 					if((c = strtol(octal, &endptr, 8)) == 0) // converting to integer, unsupported character \000 is an error
 						return 1;
-					str_addchar(buff, c);
+					addchar(c);
 					o = 0; // resetting counter for storing octal digits
 					state = state_string;
 				}

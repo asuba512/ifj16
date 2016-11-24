@@ -104,6 +104,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_substraction){ // E -> E - E
 							prec_stack_pop();
@@ -116,6 +118,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_multiplication){ // E -> E * E
 							prec_stack_pop();
@@ -128,6 +132,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_division){ // E -> E / E
 							prec_stack_pop();
@@ -140,6 +146,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_less){ // E -> E < E
 							prec_stack_pop();
@@ -152,6 +160,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_more){ // E -> E > E
 							prec_stack_pop();
@@ -164,6 +174,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_lesseq){ // E -> E <= E
 							prec_stack_pop();
@@ -176,6 +188,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_moreeq){ // E -> E >= E
 							prec_stack_pop();
@@ -188,6 +202,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_equal){ // E -> E == E
 							prec_stack_pop();
@@ -200,6 +216,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_nequal){ // E -> E != E
 							prec_stack_pop();
@@ -212,6 +230,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_and){ // E -> E && E
 							prec_stack_pop();
@@ -224,6 +244,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_or){ // E -> E || E
 							prec_stack_pop();
@@ -236,6 +258,8 @@ int precedence(tok_que_t queue, op_t *result){
 								if(prec_stack_push(nonterminal)) return 99;
 								prec_auxstack_pop(); 
 							}
+							else
+								return 2;
 						}
 						else if(tmp && tmp->data.type == token_not && prec_auxstack_top() == tmp){ // E -> !E
 							// printf("!\n"); // generate (!, tmp_var), result into new variable
