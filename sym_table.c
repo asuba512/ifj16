@@ -19,7 +19,7 @@ int insert_class(string_t id, class_t *target) {
 		return 99;
 	// initialization
 	new_class->root = NULL;
-	new_class->id = id;
+	//new_class->id = id;
 	int err;
 	if((err = bst_insert_or_err(&(classes->root), id, (void *)new_class)) == 0) {
 		*target = new_class;
@@ -40,7 +40,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
-	m->id = id; // UNUSEFUL
+	//m->id = id; // UNUSEFUL
 	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;
 	int err;
@@ -78,7 +78,7 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	// initialization
 	lv->op.dtype = dt;
 	lv->index = (fn->arg_count)++;
-	lv->id = id;
+	//lv->id = id;
 	lv->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
@@ -98,7 +98,7 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 		return 99;
 	lv->op.dtype = dt;
 	lv->index = (fn->var_count)++;
-	lv->id = id;
+	//lv->id = id;
 	lv->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
@@ -183,7 +183,7 @@ local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
 		return NULL;
 	tmp->op.dtype = dt;
 	tmp->index = (fn->var_count)++;
-	tmp->id = id;
+	//tmp->id = id;
 	tmp->op.sc = local;
 	int err;
 	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {

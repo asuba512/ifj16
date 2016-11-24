@@ -1,5 +1,8 @@
 class_memb_t print_fn;
 
+
+#define STR(x) if(!(str = str_init( x ))) { fprintf(stderr, "ERR: Internal error.\n"); return 99; }
+
 int populate_sym_table();
 
 // embedded functions

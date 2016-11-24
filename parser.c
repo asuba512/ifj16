@@ -22,7 +22,6 @@ extern bool outside_func;
 
 int c_list(){
 	outside_func = true;
-	sem_id_decoded.class_id = sem_id_decoded.memb_id = NULL;
 	sem_id_decoded.ptr = NULL;
 	calling_function = NULL;
 	next_token();
@@ -227,9 +226,7 @@ int fn_body(){
 				errno = sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
 				if(errno) return errno;
 				// OPTIMALIZATION FLAG - redundant search
-				sem_id_decoded.memb_id = t.attr.s;
-				sem_id_decoded.class_id = NULL;
-				sem_search(); // never causes error
+				sem_search(NULL, t.attr.s); // never causes error
 			}
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
@@ -382,25 +379,30 @@ int val_id(){
 int id(){
 	if(is(token_id)){
 		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
-			sem_id_decoded.memb_id = t.attr.s;
-			sem_id_decoded.class_id = NULL;
-			sem_search();
+			sem_search(NULL, t.attr.s);
 			if(!sem_id_decoded.ptr) {
-				fprintf(stderr, "ERR: Unknown identifier %s\n", sem_id_decoded.memb_id->data);
+				fprintf(stderr, "ERR: Unknown identifier %s\n", t.attr.s->data);
 				return errno = 3;
 			}
 		}
 		return 0;
 	}
 	else if(is(token_fqid)){
+		string_t class_id = NULL, memb_id = NULL;
 		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
 			char *ptr = strchr(t.attr.s->data, '.');
 			*ptr = 0;
-			sem_id_decoded.class_id = str_init(t.attr.s->data);
-			sem_id_decoded.memb_id = str_init(ptr + 1);
-			sem_search();
+			if(!(class_id = str_init(t.attr.s->data))) {
+				fprintf(stderr, "ERR: Internal error.\n");
+				return errno = 99;
+			}
+			if(!(memb_id = str_init(ptr + 1))) {
+				fprintf(stderr, "ERR: Internal error.\n");
+				return errno = 99;
+			}
+			sem_search(class_id, memb_id);
 			if(!sem_id_decoded.ptr) {
-				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
+				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", t.attr.s->data, ptr + 1);
 				return errno = 3;
 			}
 		}
