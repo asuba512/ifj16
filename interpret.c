@@ -144,6 +144,8 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
                         clear_frames();
                         return 8;
                 }
@@ -167,6 +169,9 @@ int inter(instr_t I){
                 dest->s_val = str_init(arr);
                 if(dest->s_val == NULL){
     	        	fprintf(stderr, "ERR: Internal error.\n");
+                    free(new_frame->vars);
+                    free(new_frame);
+                    clear_frames();
 	        		return 99;
 		        }
                 break;
@@ -186,6 +191,9 @@ int inter(instr_t I){
                 	dest->s_val=str_init("true");
                     if(dest->s_val == NULL){
         	        	fprintf(stderr, "ERR: Internal error.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
+                        clear_frames();
     	        		return 99;
     		        }
                 }
@@ -193,6 +201,9 @@ int inter(instr_t I){
                 	dest->s_val=str_init("false");
                     if(dest->s_val == NULL){
         	        	fprintf(stderr, "ERR: Internal error.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
+                        clear_frames();
     	        		return 99;
     		        }
                 }
@@ -213,6 +224,9 @@ int inter(instr_t I){
                 dest->s_val = str_init(arr);
                 if(dest->s_val == NULL){
     	        	fprintf(stderr, "ERR: Internal error.\n");
+                    free(new_frame->vars);
+                    free(new_frame);
+                    clear_frames();
 	        		return 99;
 		        }
                 break;
@@ -399,12 +413,16 @@ int inter(instr_t I){
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init!=true) {
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
                         clear_frames();
                         return 8;
                     } 
                 init=decode_address(I->src2,&(value2),&(dtype),&(init_src2)); 
                     if(init!=true) {
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
+                        free(new_frame->vars);
+                    	free(new_frame);
                         clear_frames();
                         return 8;
                     }
@@ -412,6 +430,9 @@ int inter(instr_t I){
                 dest->s_val = str_init(value1->s_val->data);
                 if(dest->s_val == NULL){
     	        	fprintf(stderr, "ERR: Internal error.\n");
+                    free(new_frame->vars);
+                    free(new_frame);
+                    clear_frames();
 	        		return 99;
 		        }
                 str_cat(dest->s_val, value2->s_val);
@@ -683,13 +704,23 @@ int inter(instr_t I){
 
             case r_str://not implemeted yet
                 (inter_stack.top)->vars[0].val.s_val=ifj16_readString();
+                if(errno==99){
+                    fprintf(stderr, "ERR: Internal error.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
             case r_int:
                 (inter_stack.top)->vars[0].val.i_val=ifj16_readInt();
-                if(errno) {
+                if(errno==7) {
                     fprintf(stderr, "ERR: Given input is not valid integer.\n");
+                    clear_frames();
+                    return errno;
+                }
+                if(errno==99){
+                    fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
                     return errno;
                 }
@@ -698,11 +729,17 @@ int inter(instr_t I){
             
             case r_dbl:
                 (inter_stack.top)->vars[0].val.d_val=ifj16_readDouble();
-                if(errno) {
+                if(errno==7) {
                     fprintf(stderr, "ERR: Given input is not valid floating point number.\n");
                     clear_frames();
                     return errno;
                 }
+                if(errno==99){
+                    fprintf(stderr, "ERR: Internal error.\n");
+                    clear_frames();
+                    return errno;
+                }
+
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
@@ -711,8 +748,13 @@ int inter(instr_t I){
                 (inter_stack.top)->vars[1].initialized = true;
                 break;
             
-            case subs://not implemeted yet
+            case subs:
                 (inter_stack.top)->vars[3].val.s_val=ifj16_substr((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.i_val,(inter_stack.top)->vars[2].val.i_val);
+                if(errno==99){
+                    fprintf(stderr, "ERR: Internal error.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[3].initialized = true;
                 break;
             
@@ -728,6 +770,11 @@ int inter(instr_t I){
             
             case sortstr:
                 (inter_stack.top)->vars[1].val.s_val=ifj16_sort((inter_stack.top)->vars[0].val.s_val);
+                if(errno==99){
+                    fprintf(stderr, "ERR: Internal error.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[1].initialized = true;
                 break;
             

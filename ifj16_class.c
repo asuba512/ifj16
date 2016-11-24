@@ -130,59 +130,70 @@ void ifj16_print(string_t s) {
 
 int ifj16_readInt() {
     string_t s=str_init("");
+    if(s==NULL){
+        errno=99;
+    }
     int c;
     long int num;
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
-    	    str_addchar(s, c);
+    	    //str_addchar(s, c);
+            if((str_addchar(s, c)) == 99){
+                errno=99;
+            }
     	}
-    str_addchar(s,'\0');
+    if((str_addchar(s, '\0')) == 99){
+                errno=99;
+            }
     num=strtol(s->data,&pEnd,10);
     if (*pEnd != '\0') {
     	errno=7;
     }
     return (int)num;
-
-    /*int c = 0;
-    if(scanf("%d", &c) != 1)
-        errno = 7;
-    return c;
-*/
 }
 
 double ifj16_readDouble() {
 	string_t s=str_init("");
+    if(s==NULL){
+        errno=99;
+    }
     int c;
     double num;
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
-    	    str_addchar(s, c);
+    	    if((str_addchar(s, c)) == 99){
+                errno=99;
+            }
     	}
-    str_addchar(s,'\0');
+    if((str_addchar(s, '\0')) == 99){
+                errno=99;
+            }
     num=strtod(s->data,&pEnd);
     if (*pEnd != '\0') {
     	errno=7;
     }
     return num;
 
-  /*  double c = 0.0;
-    if(scanf("%lg", &c) != 1)
-        errno = 7;
-    return c;
-*/
-
 }
 
 string_t ifj16_readString() {
     string_t s=str_init("");
+    if(s==NULL){
+        errno=99;
+    }
     int c;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
-    	    str_addchar(s, c);
+    	   // str_addchar(s, c);
+            if((str_addchar(s, c)) == 99){
+                errno=99;
+            }
     	}
-    str_addchar(s,'\0');
+    if((str_addchar(s, '\0')) == 99){
+                errno=99;
+            }
     return s;
 }
 
@@ -193,11 +204,19 @@ int ifj16_length(string_t s) {
 string_t ifj16_substr(string_t s, int i, int n) {
     //osetrit pristup mimo hranic
     string_t s2=str_init("");
+    if(s2==NULL){
+        errno=99;
+    }
     for(int j=0;j<n;j++){
-        str_addchar(s2,s->data[i+j]);
-    	//check error
+        //str_addchar(s2,s->data[i+j]);
+        if((str_addchar(s2, s->data[i+j])) == 99){
+                errno=99;
+            }
  	}
- 	str_addchar(s2,'\0');
+ 	//str_addchar(s2,'\0');
+    if((str_addchar(s2, '\0')) == 99){
+                errno=99;
+            }
  	return s2;
 }
 
@@ -211,6 +230,9 @@ int ifj16_search(string_t s, string_t search) {
 
 string_t ifj16_sort(string_t s) {
     string_t s2 = str_init(s->data);
+    if(s2==NULL){
+        errno=99;
+    }
     shell_sort(s2);
     return s2;
 }
