@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern string_t buff; // <- variable which has to be destroyed before exit, internal scanner variable
 extern token_t t;
 extern FILE *fd;
 extern int errno;
@@ -29,6 +28,7 @@ char *op[30] = {"halt", "add", "sub", "imul", "idiv", "conc", "eql", "neq", "gre
 int add_head();
 
 int main(int argc, char **argv){
+	/* Opening file and initialization */
 	(void)argc;
 	fd = fopen(argv[1],"r");
 	if(fd == NULL){
@@ -38,6 +38,7 @@ int main(int argc, char **argv){
 	init_class_table();
 	populate_sym_table();
 	tok_q = tok_que_init();
+
 	/* FIRST PASS */
 	pass_number = 1;
 	int retval = c_list();
@@ -55,6 +56,7 @@ int main(int argc, char **argv){
 		fprintf(stderr, "ERR: Syntax error.\n");
 		return retval;
 	}
+
 	/* SECOND PASS */
 	pass_number = 2;
 	retval = c_list();
@@ -77,6 +79,8 @@ int main(int argc, char **argv){
 		st_destroy_all();
 		return errno;
 	}
+
+	/* some random junk */
 	// printf("Global instruction tape:\n");
  	// instr_t i = glob_instr_list.head;
 	// for (instr_t ins = i; ins != NULL; ins = (instr_t)ins->next) {
@@ -93,6 +97,7 @@ int main(int argc, char **argv){
 	//printf("\nInterpret ret val: %d\n", a);
 	free_all();
 	st_destroy_all();
+	
     return retval;
 }
 
