@@ -6,7 +6,7 @@
  *
  */
 #define STRING_CHUNK 32
-#define STRING_ERR 1
+#define STRING_ERR 99
 #define STRING_OK 0
 
 typedef struct string {
