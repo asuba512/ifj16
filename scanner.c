@@ -84,11 +84,7 @@ int get_token(FILE *fd, token_t *t) {
 					state = state_and;
 				else if(c == '|') // or
 					state = state_or;
-                else if(c == '_'){ // identifier, after '_' at least one more character must follow
-					addchar(c);
-					state = _state_identifier;
-				}
-				else if(isalpha(c) || c == '$'){ // identifier
+				else if(isalpha(c) || c == '$' || c == '_'){ // identifier
 					addchar(c);	
                     state = state_identifier;
                 }
@@ -139,16 +135,6 @@ int get_token(FILE *fd, token_t *t) {
 				else // no longer potential end of block comment
 					state = _state_blockcomment;
 				break;
-			case _state_identifier:
-					if(c == '_' || c == '$' || isalnum(c)){ // after '_' there must be at least one more supported character
-						addchar(c);
-						state = state_identifier;
-					}
-					else{ // '_' can't be an identifier
-						ungetc(c, fd);
-						return 1;
-					}
-				break;
             case state_identifier:
                 if(isalnum(c) || c == '$' || c == '_') // supported characters
 					addchar(c);	
@@ -187,26 +173,11 @@ int get_token(FILE *fd, token_t *t) {
 		        }
 				break;
 			case _state_dot_fqidentifier:
-				if(c == '_'){ // after '_' in FQID second part, must be at least one more supported character
-					addchar(c);
-					state = _state_fqidentifier;
-				}
-				else if(isalpha(c) || c == '$'){ // fully qualified idenfier, second part
+				if(isalpha(c) || c == '$' || c == '_'){ // fully qualified idenfier, second part
 					addchar(c);
 					state = state_fqidentifier;
 				}
 				else{ // anything else is an error
-					str_destroy(t->attr.s);
-					ungetc(c, fd);
-					return 1;
-				}
-				break;
-			case _state_fqidentifier:
-				if(c == '_' || c == '$' || isalnum(c)){ // after '_' must be at least one more supported character
-					addchar(c);
-					state = state_fqidentifier;
-				}
-				else{ // '_' can't be an identifier
 					str_destroy(t->attr.s);
 					ungetc(c, fd);
 					return 1;
