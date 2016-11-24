@@ -384,6 +384,9 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
     }
     if(arg->dtype == ((called_fn->arg_list)[arg_counter])->op.dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double)) { 
         // OK
+		if(arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double){
+			// generace cast ya bitch
+		}
     } else {
         fprintf(stderr, "ERR: Incompatible type of argument.\n");
         return 4;
