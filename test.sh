@@ -1,5 +1,4 @@
 #!/bin/sh
-ifj16_dir=pwd
 
 ############################################################
 # ON  switch == 0
@@ -42,24 +41,31 @@ SYMBOLIC_TABLE="`pwd`/tests/symbol_table_tests"
 
 if [ $# -eq 0 ]; then
 	printf "Unexpected arguments. \"$0\" aborted!\n"
-	exit
+	exit 1
 fi
 
 if [ $# -gt 1 ]; then
 	printf "Unexpected arguments. \"$0\" aborted!\n"
-	exit
+	exit 1
 fi
 
 if [ $# -eq 1 ]; then
 	c=$(echo $1 | cut -c1)
 	if [ $c != "-" ]; then
 		printf "Unexpected arguments. \"$0\" aborted!\n"
-		exit
+		exit 1
 	fi
 fi
 
-while getopts "sSpPaAeE" opt; do
+while getopts "hHgGsSpPaAeE" opt; do
 	case "$opt" in
+		g)  printf "== TESTS WITHOUT ERROR ==\n"
+				switch_GOOD_dir_1=0
+			;;
+		G)  printf "== TESTS WITHOUT ERROR with VALGRIND ==\n"
+				switch_VALGRIND=0
+				switch_GOOD_dir_1=0
+			;;          
 		e)  printf "== EXITCODE ==\n"
 				switch_EXITCODE_TESTS=0
 			;;
@@ -108,8 +114,34 @@ while getopts "sSpPaAeE" opt; do
 				switch_SCANNER_DIR_2=0
 				switch_SYMBOLIC_TABLE=1
 			;;
+		h)  printf "== HELP ==\n"
+			printf "  -a    all tests without valgrind\n"
+			printf "  -A    all tests with valgrind\n"
+			printf "  -s    scanner tests without valgrind\n"
+			printf "  -S    scanner tests with valgrind\n"
+			printf "  -p    parser tests without valgrind\n"
+			printf "  -P    parser tests with valgrind\n"
+			printf "  -e    exitcode tests without valgrind\n"
+			printf "  -E    exitcode tests with valgrind\n"
+			printf "  -g    without error tests without valgrind\n"
+			printf "  -G    without error tests with valgrind\n"
+			exit 0
+			;;
+		H)  printf "== HELP ==\n"
+			printf "  -a    all tests without valgrind\n"
+			printf "  -A    all tests with valgrind\n"
+			printf "  -s    scanner tests without valgrind\n"
+			printf "  -S    scanner tests with valgrind\n"
+			printf "  -p    parser tests without valgrind\n"
+			printf "  -P    parser tests with valgrind\n"
+			printf "  -e    exitcode tests without valgrind\n"
+			printf "  -E    exitcode tests with valgrind\n"
+			printf "  -g    without error tests without valgrind\n"
+			printf "  -G    without error tests with valgrind\n"
+			exit 0
+			;;
 	   '?') printf "Unexpected arguments. \"$0\" aborted!\n"
-			exit
+			exit 1
 			;;
 	esac
 done
