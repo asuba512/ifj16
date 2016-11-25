@@ -125,6 +125,8 @@ while getopts "hHgGsSpPaAeE" opt; do
 			printf "  -E    exitcode tests with valgrind\n"
 			printf "  -g    without error tests without valgrind\n"
 			printf "  -G    without error tests with valgrind\n"
+			printf "  -h    display help\n"
+			printf "  -H    display help\n"
 			exit 0
 			;;
 		H)  printf "== HELP ==\n"
@@ -138,6 +140,8 @@ while getopts "hHgGsSpPaAeE" opt; do
 			printf "  -E    exitcode tests with valgrind\n"
 			printf "  -g    without error tests without valgrind\n"
 			printf "  -G    without error tests with valgrind\n"
+			printf "  -h    display help\n"
+			printf "  -H    display help\n"
 			exit 0
 			;;
 	   '?') printf "Unexpected arguments. \"$0\" aborted!\n"
