@@ -755,6 +755,11 @@ int inter(instr_t I){
                     clear_frames();
                     return errno;
                 }
+                if(errno==10){
+                    fprintf(stderr,"ERR: Index out of bounds.\n");
+                    clear_frames();
+                    return errno;
+                }
                 (inter_stack.top)->vars[3].initialized = true;
                 break;
             

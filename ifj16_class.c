@@ -223,6 +223,11 @@ int ifj16_length(string_t s) {
 
 string_t ifj16_substr(string_t s, int i, int n) {
     //osetrit pristup mimo hranic
+    if(i<0 || i > s->length){
+    	errno=10;
+    }
+
+
     string_t s2=str_init("");
     if(s2==NULL){
         errno=99;
