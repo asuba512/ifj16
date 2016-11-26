@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		String str1 = "AB";
+		String str2 = "BA";
+		int i = ifj16.compare(str1, str2);
+		ifj16.print(i+"\n");
+	}
+}
