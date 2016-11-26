@@ -27,6 +27,9 @@ EXITCODE_TESTS="`pwd`/tests/exitcode_tests"
 switch_MANUAL_CODES=1
 MANUAL_CODES="`pwd`/tests/codes_from_manual"
 
+switch_STDOUT_DIR=1
+STDOUT_DIR="`pwd`/tests/stdout_tests"
+
 	# SCANNER TESTS (the first one) are for nothing because the behaviour was changed with FQID
 	switch_SCANNER_DIR=1 # keep your dirty hands off
 	SCANNER_DIR="`pwd`/tests/scanner_tests"
@@ -57,8 +60,15 @@ if [ $# -eq 1 ]; then
 	fi
 fi
 
-while getopts "hHgGsSpPaAeE" opt; do
+while getopts "oOhHgGsSpPaAeE" opt; do
 	case "$opt" in
+		o)  printf "== STDOUT .OUTPUT COMPARISON ==\n"
+				switch_STDOUT_DIR=0
+			;;
+		O)  printf "== STDOUT .OUTPUT COMPARISON with VALGRIND ==\n"
+				switch_VALGRIND=0
+				switch_STDOUT_DIR=0
+			;;        		
 		g)  printf "== TESTS WITHOUT ERROR ==\n"
 				switch_GOOD_dir_1=0
 			;;
@@ -98,6 +108,7 @@ while getopts "hHgGsSpPaAeE" opt; do
 				switch_SCANNER_DIR_3=0
 				switch_EXITCODE_TESTS=0
 				switch_MANUAL_CODES=0
+				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
 				switch_SYMBOLIC_TABLE=1
@@ -110,6 +121,7 @@ while getopts "hHgGsSpPaAeE" opt; do
 				switch_SCANNER_DIR_3=0
 				switch_EXITCODE_TESTS=0
 				switch_MANUAL_CODES=0
+				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
 				switch_SYMBOLIC_TABLE=1
@@ -125,6 +137,8 @@ while getopts "hHgGsSpPaAeE" opt; do
 			printf "  -E    exitcode tests with valgrind\n"
 			printf "  -g    without error tests without valgrind\n"
 			printf "  -G    without error tests with valgrind\n"
+			printf "  -o    stdout comparison tests without valgrind\n"
+			printf "  -O    stdout comparison tests with valgrind\n"
 			printf "  -h    display help\n"
 			printf "  -H    display help\n"
 			exit 0
@@ -140,6 +154,8 @@ while getopts "hHgGsSpPaAeE" opt; do
 			printf "  -E    exitcode tests with valgrind\n"
 			printf "  -g    without error tests without valgrind\n"
 			printf "  -G    without error tests with valgrind\n"
+			printf "  -o    stdout comparison tests without valgrind\n"
+			printf "  -O    stdout comparison tests with valgrind\n"
 			printf "  -h    display help\n"
 			printf "  -H    display help\n"
 			exit 0
@@ -152,7 +168,8 @@ done
 
 ############################################################
 if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1    -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
-   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ]; then
+   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] ||
+   [ $switch_STDOUT_DIR     -eq 0 ]; then
 	printf "\n\n=== IFJ BUILD ===\n"
 	printf "=== make clean ===\n"
 	make clean
@@ -498,6 +515,74 @@ if [ $switch_MANUAL_CODES -eq 0 ]; then
 fi
 
 ############################################################
+if [ $switch_STDOUT_DIR -eq 0 ]; then
+
+	dir=$(echo $STDOUT_DIR | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS WITHOUT ERROR ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) AND (STDOUT == responding file.output) THEN TEST PASSED ===\n"
+	printf "==\n"
+
+	counter=0
+	for i in `ls $STDOUT_DIR`
+	do
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+
+		counter=$(expr $counter + 1)
+		printf "= $counter.)\t$i \n"
+
+		./ifj $STDOUT_DIR/$i >stdout_file 2>stderr_file
+
+		exitvalue=$?
+		stderr_check=$(cat stderr_file | wc -l)
+
+		#DEBUG
+		#printf "\t$exitvalue "$""?"\n"
+		#printf "\t$stderr_check stderr\n"
+
+		if [ $exitvalue -ne 0 ]; then
+			printf "\t\t"$""?" = $exitvalue\n"
+		fi
+		if [ $stderr_check -ne 0 ]; then
+			printf "\t\tSTDERR is NOT empty\n"
+		fi
+
+		diff stdout_file "$STDOUT_DIR/$i.output" >/dev/null
+		diff_exitvalue=$?
+
+		if [ $diff_exitvalue -ne 0 ]; then
+			printf "\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
+		fi
+
+
+		if [ $switch_VALGRIND -eq 0 ]; then
+			valgrind ./ifj $STDOUT_DIR/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+			#echo $memory_leaks
+
+			if [ $memory_leaks -ne 1 ]; then
+				printf "\t\t$summary\n"
+			fi
+		fi
+
+	done
+
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
+	rm stdout_file
+	rm stderr_file
+fi
+
+############################################################
 if [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ; then
 	printf "\n\n=== IFJ SCANNER BUILD ===\n"
 	printf "=== make clean ===\n"
@@ -638,7 +723,8 @@ fi
 ############################################################
 if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2      -eq 0 ] ||
    [ $switch_MANUAL_CODES   -eq 0 ] || [ $switch_SCANNER_DIR   -eq 0 ] || [ $switch_SCANNER_DIR_2  -eq 0 ] ||
-   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ]; then
+   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ] ||
+   [ $switch_STDOUT_DIR     -eq 0 ]; then
 	printf "\n\n=== MAKE CLEAN ===\n"
 	make clean
 	printf "\n\n=== FINISH ===\n"
