@@ -94,6 +94,9 @@ int BMA_index(string_t str,string_t substr) {
 	int index;
 	unsigned compute_jumps_array[257];//in compute jumps for from 0 to 255(256 items)
     unsigned match_jumps_array[substr->length+2];//in compute match jumps indexed with q(q=substr->length+1)
+    if(substr->length==0) {
+    	return 0;
+    }
     BMA_compute_jumps(substr,compute_jumps_array);
     BMA_compute_match_jumps(substr,match_jumps_array);
     index=BMA(str,substr,compute_jumps_array,match_jumps_array);
