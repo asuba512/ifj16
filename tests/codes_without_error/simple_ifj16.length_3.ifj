@@ -1,0 +1,9 @@
+class Main
+{
+	static void run()
+	{
+		String str = " ";
+		int i = ifj16.length(str);
+		ifj16.print(i+"\n");
+	}
+}

@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		String str 	  = " ";
+		String substr = ifj16.substr(str, 1, 1);
+		ifj16.print(str + "\n");
+		ifj16.print(substr + "\n");
+	}
+}

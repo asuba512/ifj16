@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		boolean b = true;
+		double  d = 3.14159265;
+		int     i = 31415; 
+		ifj16.print(b+""+d+""+i+"\n");
+	}	
+}

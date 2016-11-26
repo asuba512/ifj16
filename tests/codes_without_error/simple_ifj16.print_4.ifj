@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		double x = 3.14159265;
+		ifj16.print(x+"\n");
+	}	
+}

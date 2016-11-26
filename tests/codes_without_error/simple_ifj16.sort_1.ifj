@@ -1,0 +1,12 @@
+class Main
+{
+	static void run()
+	{
+		String str;
+		String str_sorted;
+
+		str = "qpwoeirutzlaskdjfhgmynxbcv";
+		str_sorted = ifj16.sort(str);
+		ifj16.print(str_sorted+"\n");
+	}	
+}

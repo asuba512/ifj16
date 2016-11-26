@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		String str    = "";
+		String substr = "";
+		int index = ifj16.find(str, substr);
+		ifj16.print("index = " + index + "\n");
+	}
+}

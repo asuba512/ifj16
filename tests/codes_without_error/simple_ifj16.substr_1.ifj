@@ -4,7 +4,8 @@ class Main
 	{
 		String str 	  = "123456789";
 		String substr = ifj16.substr(str, 3, 3);
-		int i = ifj16.compare(str, substr);
+		int i = ifj16.compare("456", substr);
+		ifj16.print(substr+"\n");
 		if ( i == 0 )
 		{
 			ifj16.print("ifj16.substr\n");

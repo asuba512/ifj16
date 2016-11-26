@@ -2,10 +2,10 @@ class Main
 {
 	static void run()
 	{
-		String str 	  = "ASDFGHaljksdfhalGDoiasASDuqerJKLQasASWEPIOZEasASRWR";
-		String substr = "asAS";
+		String str 	  = "        a      !           b    \041     c";
+		String substr = "!";
 		int index = ifj16.find(str, substr);
-		if (index == 20)
+		if (index == 15)
 		{
 			ifj16.print("ifj16.find!\n");
 		}
