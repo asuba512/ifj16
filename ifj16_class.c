@@ -246,7 +246,16 @@ string_t ifj16_substr(string_t s, int i, int n) {
 }
 
 int ifj16_compare(string_t s1, string_t s2) {
-    return str_compare(s1,s2);
+    int cmp=str_compare(s1,s2);
+    if(cmp==0){
+    	return 0;
+    }
+    else if(cmp>0){
+    	return 1;
+    }
+    else {
+    	return -1;
+    }
 }
 
 int ifj16_search(string_t s, string_t search) {
