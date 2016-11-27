@@ -163,9 +163,9 @@ int ifj16_readInt() {
                 errno=99;
             }
     	}
-    if((str_addchar(s, '\0')) == 99){
+    /*if((str_addchar(s, '\0')) == 99){
                 errno=99;
-            }
+            }*/
     num=strtol(s->data,&pEnd,10);
     if (*pEnd != '\0') {
     	errno=7;
@@ -187,9 +187,9 @@ double ifj16_readDouble() {
                 errno=99;
             }
     	}
-    if((str_addchar(s, '\0')) == 99){
+    /*if((str_addchar(s, '\0')) == 99){
                 errno=99;
-            }
+            }*/
     num=strtod(s->data,&pEnd);
     if (*pEnd != '\0') {
     	errno=7;
@@ -211,9 +211,9 @@ string_t ifj16_readString() {
                 errno=99;
             }
     	}
-    if((str_addchar(s, '\0')) == 99){
+    /*if((str_addchar(s, '\0')) == 99){
                 errno=99;
-            }
+            }*/
     return s;
 }
 
@@ -223,7 +223,7 @@ int ifj16_length(string_t s) {
 
 string_t ifj16_substr(string_t s, int i, int n) {
     //osetrit pristup mimo hranic
-    if(i<0 || i > s->length){
+    if(i<0 || i > s->length || (i+n)>s->length){
     	errno=10;
     }
 
@@ -239,9 +239,9 @@ string_t ifj16_substr(string_t s, int i, int n) {
             }
  	}
  	//str_addchar(s2,'\0');
-    if((str_addchar(s2, '\0')) == 99){
+    /*if((str_addchar(s2, '\0')) == 99){
                 errno=99;
-            }
+            }*/
  	return s2;
 }
 
