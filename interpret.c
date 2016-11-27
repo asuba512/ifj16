@@ -40,7 +40,7 @@ int inter(instr_t I){
             case halt:
                 fprintf(stderr,"Error! Missing return in non-void function.\n");
                 clear_frames();
-                return 10;
+                return 8;
                 break;
 
             case sframe:
@@ -456,14 +456,10 @@ int inter(instr_t I){
                 switch(dtype)
                     {
                         case dt_double:
-                            src1_d_value=(*value1).d_val;
-                            src2_d_value=(*value2).d_val;
-                            dest->b_val = src1_d_value == src2_d_value;
+                            dest->b_val = (*value1).d_val == (*value2).d_val;
                             break;
                         case dt_int:
-                            src1_i_value=(*value1).i_val;
-                            src2_i_value=(*value2).i_val;
-                            dest->b_val = src1_i_value == src2_i_value;
+                            dest->b_val = (*value1).i_val == (*value2).i_val;
                             break;
                         case dt_boolean:
                             dest->b_val = value1->b_val == value2->b_val;

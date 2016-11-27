@@ -61,6 +61,7 @@ int main(int argc, char **argv){
 	/* SECOND PASS */
 	pass_number = 2;
 	retval = c_list();
+	//printf("%d %d\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();

@@ -301,7 +301,7 @@ int assign(){
 				if(!fn_plist())
 					if(is(token_semicolon)){					
 						if(!sem_args_ok(calling_function)) {
-							return 4;
+							return errno = 4;
 						}
 						if((errno = sem_generate_call(calling_function))) return errno;
 						return 0;
@@ -631,7 +631,7 @@ int as_ca(){
 		}
 	}
 	else if(is(token_assign)) {
-		op_t tmp_dst = NULL; // totally pointless, just to avoid optimizer warning
+		op_t tmp_dst = NULL; // initialization totally pointless, just to avoid optimizer warning
 		if(SECOND_PASS) {
 			tmp_dst = (op_t)(sem_id_decoded.ptr);
 		}
