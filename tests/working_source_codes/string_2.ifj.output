@@ -1,0 +1,4 @@
+str = Abcdefghijklmnoprstuvwxyz
+substr = substr(str, 5, 4) = klmno
+i = find(str,substr) = 10
+j = find(str,"123") = -1
