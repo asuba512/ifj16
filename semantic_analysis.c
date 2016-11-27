@@ -4,8 +4,6 @@
 #include "token.h"
 #include <stdio.h>
 
-bool print_bullshit;
-
 int sem_new_class(string_t id) {
     class_t c;
     int err = insert_class(id, &c);
@@ -62,30 +60,7 @@ int sem_prec_reduction() {
     return 42;
 } // LOL ???
 
-// static void _print_decoded_id(void *symbol) {
-//     if(!print_bullshit) return;
-//     if(symbol == NULL) {
-//         printf("Nothing decoded.. \n");
-//         return;
-//     }
-//     local_var_t elem = (local_var_t) symbol;
-//     if(elem->sc != helper) {
-//         printf("Decoded %s (%d): %s (%p)\n", sem_id_decoded.isFun ? "fun" : "var", elem->sc, elem->id->data, symbol);
-//     }
-// }
-
-// static void _print_demand() {
-//     if(!print_bullshit) return;
-//     if(sem_id_decoded.class_id != NULL) {
-//         printf("Demanded: %s.%s\n", sem_id_decoded.class_id->data, sem_id_decoded.memb_id->data);
-//     } else  {
-//         printf("Demanded: %s\n", sem_id_decoded.memb_id->data);
-//     }
-// }
-
 void sem_search(string_t class_id, string_t memb_id) {
-    //print_bullshit = false;
-    //_print_demand();
     void *symbol = NULL;
     if (class_id == NULL) {
         if(!outside_func) { // local scope has more priority inside function
@@ -103,7 +78,6 @@ void sem_search(string_t class_id, string_t memb_id) {
     }
     sem_id_decoded.ptr = symbol;
     setIsFunFlag(symbol);
-    //_print_decoded_id(symbol);
 } // OK -> never causes error by itself
 
 void setIsFunFlag(void *symbol) {

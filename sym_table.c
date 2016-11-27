@@ -66,7 +66,7 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	local_var_t lv;
 	if ((lv = malloc(sizeof(struct local_var))) == NULL)
 		return 99;
-	// this shat allows us to search for function arguments by their indexes
+	// this thing allows us to search for function arguments by their indexes
 	if(fn->arg_count == fn->_max_arg_count) {
 		if(_add_fn_arg_space(fn) == 99) {
 			free(lv);
