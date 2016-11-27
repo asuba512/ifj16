@@ -43,6 +43,7 @@ int main(int argc, char **argv){
 	pass_number = 1;
 	int retval = c_list();
 	fclose(fd);
+	//printf("%d %d\n", retval, errno);
 	if(errno) {
 		free_all();
 		st_destroy_all();

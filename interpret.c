@@ -465,6 +465,8 @@ int inter(instr_t I){
                             src2_i_value=(*value2).i_val;
                             dest->b_val = src1_i_value == src2_i_value;
                             break;
+                        case dt_boolean:
+                            dest->b_val = value1->b_val == value2->b_val;
                         default:
                             break;
                     }
@@ -497,6 +499,8 @@ int inter(instr_t I){
                             src2_i_value=(*value2).i_val;
                             dest->b_val = src1_i_value != src2_i_value;
                             break;
+                        case dt_boolean:
+                            dest->b_val = value1->b_val != value2->b_val;
                         default:
                             break;
                     }

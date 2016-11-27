@@ -164,10 +164,10 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     // dst will be set at the end because we don't know its datatype yet
     if(src1->sc == global && (((class_memb_t)(src1))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
-        return 4;
+        return 3;
     } else if (src2 && src2->sc == global && (((class_memb_t)(src2))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
-        return 4;
+        return 3;
     }
     if(src1->dtype == dt_String || (src2 && src2->dtype == dt_String)) {
         if(type == add) {
@@ -318,7 +318,7 @@ int sem_generate_mov(op_t src, op_t dst) {
     i.type = mov;
     if(src->sc == global && (((class_memb_t)(src))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
-        return 4;
+        return 3;
     } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
         return 4;

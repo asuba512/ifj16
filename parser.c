@@ -148,6 +148,10 @@ int c_memb2(){
 			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 				return 2;
 			errno = precedence(expr_queue, &precedence_result);
+			if(errno == 2) {
+				errno = 0;
+				return 2;
+			}
 			if(!errno) {
 				if((errno = sem_generate_mov(precedence_result, (op_t)tmp_dst)))
 					return errno;
