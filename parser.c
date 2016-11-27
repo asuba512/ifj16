@@ -554,6 +554,10 @@ int as_ca(){
 				token_t tmp;
 				next_token();
 				do{
+					if(is(token_comma)){
+						fprintf(stderr, "ERR: Function ifj16.print() takes only simple concatenation expression.\n");
+						return 2;
+					}
 					if((counter%2 == 0 && !is(token_addition)) || (counter%2 == 1 && is(token_addition))){
 						fprintf(stderr, "ERR: Function ifj16.print() supports only simple concatenation expressions.\n");
 						return 2;
@@ -579,7 +583,7 @@ int as_ca(){
 
 					next_token();
 					counter++;
-				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition));
+				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
 
 				if(!(counter == 2 && is(token_rbracket)) && !is_string){
 				 	printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
