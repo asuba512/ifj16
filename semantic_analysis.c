@@ -121,15 +121,21 @@ void setIsFunFlag(void *symbol) {
 } // OK
 
 int sem_new_loc_var(datatype dt, string_t id) {
-    int err = st_add_fn_locvar(active_function, dt, id);
-    if (err == 0) {
-        return 0;
-    } else if(err == 3) {
-        fprintf(stderr, "ERR: Function local variable with same identifier already exists.\n");
-    } else if(err == 99) {
-        fprintf(stderr, "ERR: Internal error.\n");
+    if(!st_getmemb(active_class, id)) {
+        int err = st_add_fn_locvar(active_function, dt, id);
+        if (err == 0) {
+            return 0;
+        } else if(err == 3) {
+            fprintf(stderr, "ERR: Function local variable with same identifier already exists.\n");
+        } else if(err == 99) {
+            fprintf(stderr, "ERR: Internal error.\n");
+        }
+        return err;
+    } else {
+        fprintf(stderr, "ERR: Cannot define local variable '%s'. A function already exists with same identifier in current context.\n", id->data);
+        return 3;
     }
-    return err;
+    
 } // OK
 
 local_var_t sem_new_tmp_var(datatype dt) {
