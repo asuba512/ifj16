@@ -4,6 +4,9 @@
 # ON  switch == 0
 # OFF swtich != 0
 
+
+TOTAL_ERROR_COUNT=0
+
 # "valgrind ./program file"
 switch_VALGRIND=1
 
@@ -219,9 +222,11 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 		#printf "\t$stderr_check stderr\n"
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $stderr_check -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is NOT empty\n"
 		fi
 
@@ -234,6 +239,7 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -280,9 +286,11 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 		file_value=$(cat "$BAD_dir_1/$i.output")
 
 		if [ $exitvalue -ne $file_value ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue, expecting $file_value\n"
 		fi
 		if [ $stderr_check -eq 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is empty\n"
 		fi
 
@@ -295,6 +303,7 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -342,9 +351,11 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 		#printf "\t$stderr_check stderr\n"
 
 		if [ $exitvalue -ne 2 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $stderr_check -eq 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is empty\n"
 		fi
 
@@ -357,6 +368,7 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -404,9 +416,11 @@ if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 		#printf "\t$stderr_check stderr\n"
 
 		if [ $exitvalue -ne 1 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $stderr_check -eq 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is empty\n"
 		fi
 
@@ -419,6 +433,7 @@ if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -465,9 +480,11 @@ if [ $switch_EXITCODE_TESTS -eq 0 ]; then
 		file_value=$(cat "$EXITCODE_TESTS/$i.output")
 
 		if [ $exitvalue -ne $file_value ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue, expecting $file_value\n"
 		fi
 		if [ $stderr_check -eq 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is empty\n"
 		fi
 
@@ -480,6 +497,7 @@ if [ $switch_EXITCODE_TESTS -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -518,9 +536,11 @@ if [ $switch_MANUAL_CODES -eq 0 ]; then
 		exitvalue_diff=$?
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $exitvalue_diff -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is NOT empty\n"
 		fi
 
@@ -556,9 +576,11 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 		exitvalue_diff=$?
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $exitvalue_diff -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is NOT empty\n"
 		fi
 		printf "\n"
@@ -601,9 +623,11 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 		#printf "\t$stderr_check stderr\n"
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
 		if [ $stderr_check -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is NOT empty\n"
 		fi
 
@@ -611,6 +635,7 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 		diff_exitvalue=$?
 
 		if [ $diff_exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
 		fi
 
@@ -624,6 +649,7 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 			#echo $memory_leaks
 
 			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
 		fi
@@ -675,6 +701,7 @@ if [ $switch_SCANNER_DIR -eq 0 ]; then
 		exitvalue=$?
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\tDIFF "$""?" = 1 (different output)\n"
 		fi
 
@@ -711,6 +738,7 @@ if [ $switch_SCANNER_DIR_2 -eq 0 ]; then
 		exitvalue=$?
 
 		if [ $exitvalue -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\tDIFF "$""?" = 1 (different output)\n"
 		fi
 
@@ -757,6 +785,7 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 			number_of_errors_file=$(cat $SYMBOLIC_TABLE/$i.output | head -2 | tail -1 | awk '{print $3}')
 			number_of_errors_stderr=$(cat stderr_file | grep ^.*ERR.*$ | wc -l)
 			if [ $number_of_errors_file -ne $number_of_errors_stderr ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\tNumber of stderr errors  = $number_of_errors_stderr\n"
 				printf "\t\tExpected count of errors = $number_of_errors_file\n"
 			fi
@@ -765,6 +794,7 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 		if [ $ok = "=OK=" ]; then
 			number_of_errors_stderr=$(cat stderr_file | grep ^.*ERR.*$ | wc -l)
 			if [ $number_of_errors_stderr -ne 0 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\tNumber of stderr errors  = $number_of_errors_stderr\n"
 				printf "\t\tExpected count of errors = 0\n"
 			fi
@@ -783,6 +813,7 @@ if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $swi
 	printf "\n\n=== MAKE CLEAN ===\n"
 	make clean
 	printf "\n\n=== FINISH ===\n"
+	printf "Total number of ERRORs = $TOTAL_ERROR_COUNT\n"
 else
 	printf "=== TESTS ARE SWITCHED OFF ===\n=== FINISH ====\n"
 fi
