@@ -31,5 +31,6 @@ printf "BOOLOP\n" > $tmpdir/rozsireni
 
 currentdir=`pwd`
 cd $tmpdir
-tar -zcvf $currentdir/xsubaa00.tar.gz *
+tar -zcvf $currentdir/xsubaa00.tgz *
 cd $currentdir
+rm -rf $tmpdir
