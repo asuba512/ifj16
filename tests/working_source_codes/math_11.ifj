@@ -1,0 +1,23 @@
+class Main
+{
+	static void run()
+	{
+		int a;
+		double b;
+
+
+		a=1;
+		ifj16.print("a = "+a+"\n");
+
+		b=1.0;
+		ifj16.print("b = "+b+"\n");
+	
+		if (a == b)
+		{
+			ifj16.print("condition\n");
+		}
+		else
+		{			
+		}
+	}
+}

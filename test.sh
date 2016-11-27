@@ -614,7 +614,9 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 
 	done
 
-	rm valgrind_file
+	if [ $switch_VALGRIND -eq 0 ]; then
+		rm valgrind_file
+	fi
 	rm stdout_file
 	rm stderr_file
 	rm empty_file
