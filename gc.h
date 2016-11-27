@@ -40,7 +40,7 @@ int gc_push(int, void *);
 void gc_remove(int, void*);
 
 /*
-* Free's all allocated memory
+* Free all allocated memory
 */
 void free_all();
 
