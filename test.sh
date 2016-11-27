@@ -27,6 +27,9 @@ EXITCODE_TESTS="`pwd`/tests/exitcode_tests"
 switch_MANUAL_CODES=1
 MANUAL_CODES="`pwd`/tests/codes_from_manual"
 
+switch_WORKING_CODES=1
+WORKING_CODES="`pwd`/tests/working_source_codes"
+
 switch_STDOUT_DIR=1
 STDOUT_DIR="`pwd`/tests/stdout_tests"
 
@@ -60,8 +63,15 @@ if [ $# -eq 1 ]; then
 	fi
 fi
 
-while getopts "oOhHgGsSpPaAeE" opt; do
+while getopts "cCoOhHgGsSpPaAeE" opt; do
 	case "$opt" in
+		c)  printf "== WORKING SOURCE CODES ==\n"
+				switch_WORKING_CODES=0
+			;;
+		C)  printf "== WORKING SOURCE CODES with VALGRIND ==\n"
+				switch_VALGRIND=0
+				switch_WORKING_CODES=0
+			;; 
 		o)  printf "== STDOUT .OUTPUT COMPARISON ==\n"
 				switch_STDOUT_DIR=0
 			;;
@@ -108,6 +118,7 @@ while getopts "oOhHgGsSpPaAeE" opt; do
 				switch_SCANNER_DIR_3=0
 				switch_EXITCODE_TESTS=0
 				switch_MANUAL_CODES=0
+				switch_WORKING_CODES=0
 				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
@@ -121,6 +132,7 @@ while getopts "oOhHgGsSpPaAeE" opt; do
 				switch_SCANNER_DIR_3=0
 				switch_EXITCODE_TESTS=0
 				switch_MANUAL_CODES=0
+				switch_WORKING_CODES=0
 				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
 				switch_SCANNER_DIR_2=0
@@ -139,6 +151,8 @@ while getopts "oOhHgGsSpPaAeE" opt; do
 			printf "  -G    without error tests with valgrind\n"
 			printf "  -o    stdout comparison tests without valgrind\n"
 			printf "  -O    stdout comparison tests with valgrind\n"
+			printf "  -c    working source codes tests without valgrind\n"
+			printf "  -C    working source codes tests with valgrind\n"
 			printf "  -h    display help\n"
 			printf "  -H    display help\n"
 			exit 0
@@ -156,6 +170,8 @@ while getopts "oOhHgGsSpPaAeE" opt; do
 			printf "  -G    without error tests with valgrind\n"
 			printf "  -o    stdout comparison tests without valgrind\n"
 			printf "  -O    stdout comparison tests with valgrind\n"
+			printf "  -c    working source codes tests without valgrind\n"
+			printf "  -C    working source codes tests with valgrind\n"
 			printf "  -h    display help\n"
 			printf "  -H    display help\n"
 			exit 0
@@ -167,9 +183,9 @@ while getopts "oOhHgGsSpPaAeE" opt; do
 done
 
 ############################################################
-if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1    -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
-   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] ||
-   [ $switch_STDOUT_DIR     -eq 0 ]; then
+if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
+   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES  -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] ||
+   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
 	printf "\n\n=== IFJ BUILD ===\n"
 	printf "=== make clean ===\n"
 	make clean
@@ -515,6 +531,45 @@ if [ $switch_MANUAL_CODES -eq 0 ]; then
 fi
 
 ############################################################
+if [ $switch_WORKING_CODES -eq 0 ]; then
+
+	dir=$(echo $WORKING_CODES | sed "s/^.*\///")
+	printf "\n\n"
+	printf "=== TESTS WORKING CODES ===\n"
+	printf "=== Directory: $dir ===\n"
+	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) THEN TEST PASSED ===\n"
+	printf "==\n"
+
+	> empty_file
+
+	counter=0
+	for i in `ls $WORKING_CODES`
+	do
+		counter=$(expr $counter + 1)
+		printf "= $counter.)\t$i \n"
+
+		./ifj $WORKING_CODES/$i 2>stderr_file
+
+		exitvalue=$?
+
+		diff stderr_file empty_file > /dev/null
+		exitvalue_diff=$?
+
+		if [ $exitvalue -ne 0 ]; then
+			printf "\t\t"$""?" = $exitvalue\n"
+		fi
+		if [ $exitvalue_diff -ne 0 ]; then
+			printf "\t\tSTDERR is NOT empty\n"
+		fi
+		printf "\n"
+
+	done
+
+	rm stderr_file
+	rm empty_file
+fi
+
+############################################################
 if [ $switch_STDOUT_DIR -eq 0 ]; then
 
 	dir=$(echo $STDOUT_DIR | sed "s/^.*\///")
@@ -724,7 +779,7 @@ fi
 if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2      -eq 0 ] ||
    [ $switch_MANUAL_CODES   -eq 0 ] || [ $switch_SCANNER_DIR   -eq 0 ] || [ $switch_SCANNER_DIR_2  -eq 0 ] ||
    [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ] ||
-   [ $switch_STDOUT_DIR     -eq 0 ]; then
+   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
 	printf "\n\n=== MAKE CLEAN ===\n"
 	make clean
 	printf "\n\n=== FINISH ===\n"
