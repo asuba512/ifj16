@@ -557,7 +557,7 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 	printf "\n\n"
 	printf "=== TESTS WORKING CODES ===\n"
 	printf "=== Directory: $dir ===\n"
-	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) THEN TEST PASSED ===\n"
+	printf "=== IF ("$""?" == 0) AND (STDERR is EMPTY) AND (STDOUT == responding file.output) THEN TEST PASSED ===\n"
 	printf "==\n"
 
 	> empty_file
@@ -565,28 +565,57 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 	counter=0
 	for i in `ls $WORKING_CODES`
 	do
+		# file name ends with "...output" then skip this file
+		i_cond=$(echo $i | grep ^.*output$ | wc -l)
+		if [ $i_cond -eq 1 ]; then
+			continue
+		fi
+
 		counter=$(expr $counter + 1)
 		printf "= $counter.)\t$i \n"
 
-		./ifj $WORKING_CODES/$i 2>stderr_file
+		./ifj $WORKING_CODES/$i >stdout_file 2>stderr_file
 
 		exitvalue=$?
 
 		diff stderr_file empty_file > /dev/null
-		exitvalue_diff=$?
+		exitvalue_diff_stderr=$?
+
+		diff stdout_file "$WORKING_CODES/$i.output" >/dev/null
+		exitvalue_diff_stdout=$?
 
 		if [ $exitvalue -ne 0 ]; then
 			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\t"$""?" = $exitvalue\n"
 		fi
-		if [ $exitvalue_diff -ne 0 ]; then
+		if [ $exitvalue_diff_stderr -ne 0 ]; then
 			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 			printf "\t\tSTDERR is NOT empty\n"
 		fi
-		printf "\n"
+
+		if [ $exitvalue_diff_stdout -ne 0 ]; then
+			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
+			printf "\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
+		fi
+
+		if [ $switch_VALGRIND -eq 0 ]; then
+			valgrind ./ifj $WORKING_CODES/$i >valgrind_file 2>&1
+
+			summary=$(cat valgrind_file | grep ".*ERROR SUMMARY:.*")
+			#echo $summary
+			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
+			#echo $memory_leaks
+
+			if [ $memory_leaks -ne 1 ]; then
+				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
+				printf "\t\t$summary\n"
+			fi
+		fi
 
 	done
 
+	rm valgrind_file
+	rm stdout_file
 	rm stderr_file
 	rm empty_file
 fi

@@ -1,0 +1,5 @@
+str = zhomAbfgwnuxylcprstijkdev
+sorted = sort(str) = Abcdefghijklmnoprstuvwxyz
+substr = substr(str,9,4) = nuxy
+i = find(str,substr) = 9
+j = find(str,"nuxy") = 9

@@ -1,0 +1,10 @@
+a = true
+b = false
+e=!(a && a) = false
+e=!(a && b) = true
+e=!(b && a) = true
+e=!(b && b) = true
+e=!(a || a) = false
+e=!(a || b) = false
+e=!(b || a) = false
+e=!(b || b) = true

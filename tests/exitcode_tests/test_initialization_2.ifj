@@ -1,0 +1,11 @@
+class Main
+{
+	static void run()
+	{
+		int i = 1 + foo;
+	}
+	static int foo()
+	{
+		return 42;
+	}
+}

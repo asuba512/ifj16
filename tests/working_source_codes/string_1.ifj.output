@@ -1,0 +1,7 @@
+str = Abcdefghijklmnoprstuvwxyz
+substr = substr(str, 5, 4) = fghi
+i = compare(str,substr) = -1
+j = compare("fghi",substr) = 0
+a = length(str) = 25
+b = length(substr) = 4
+c = length("fghi") = 4
