@@ -1,0 +1,20 @@
+class Main
+{
+	static void run()
+	{
+		String str = "zhomAbfgwnuxylcprstijkdev";
+		ifj16.print("str = "+str+"\n");
+
+		String sorted = ifj16.sort(str);
+		ifj16.print("sorted = sort(str) = " + sorted + "\n");
+
+		String substr = ifj16.substr(str,9,4);
+		ifj16.print("substr = substr(str,9,4) = " + substr + "\n");
+
+		int i = ifj16.find(str,substr);
+		ifj16.print("i = find(str,substr) = " + i + "\n");
+
+		double j = ifj16.find(str,"nuxy");
+		ifj16.print("j = find(str,\"nuxy\") = " + j + "\n");
+	}
+}

@@ -1,0 +1,43 @@
+class Main
+{
+	static void run()
+	{
+		int a;
+		int b;
+
+		double c;
+		double d;
+
+		a=2;
+		ifj16.print("a = "+a+"\n");
+
+		b=3;
+		ifj16.print("b = "+b+"\n");
+
+		c=0.5;
+		ifj16.print("c = "+c+"\n");
+
+		d=1.5;
+		ifj16.print("d = "+d+"\n");
+	
+		int e;
+		e=b*a;
+		ifj16.print("e=b*a = "+e+"\n");
+	
+		e=b/a;
+		ifj16.print("e=b/a = "+e+"\n");
+
+		double f;
+		f=a*c;
+		ifj16.print("f=a*c = "+f+"\n");		
+
+		f=b/d;
+		ifj16.print("f=b/d = "+f+"\n");
+	
+		f=b/a;
+		ifj16.print("f=b/a = "+f+"\n");
+
+		f=5/3;
+		ifj16.print("f=5/3 = "+f+"\n");
+	}
+}

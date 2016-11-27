@@ -1,0 +1,18 @@
+class Main
+{
+	static void run()
+	{
+		String str = "Abcdefghijklmnoprstuvwxyz";
+		ifj16.print("str = "+str+"\n");
+
+		String substr = ifj16.substr(str, 10, 5);
+		ifj16.print("substr = substr(str, 5, 4) = " + substr + "\n");
+
+		int i = ifj16.find(str,substr);
+		ifj16.print("i = find(str,substr) = " + i + "\n");
+
+		double j = ifj16.find("123",substr);
+		ifj16.print("j = find(str,\"123\") = " + j + "\n");
+
+	}
+}

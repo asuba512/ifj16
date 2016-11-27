@@ -1,0 +1,36 @@
+class Main
+{
+	static void run()
+	{
+		boolean a;
+		boolean b;
+
+
+		a=true;
+		ifj16.print("a = "+a+"\n");
+
+		b=false;
+		ifj16.print("b = "+b+"\n");
+	
+		boolean e;
+		e=!(a&&a);
+		ifj16.print("e=!(a && a) = "+e+"\n");
+		e=!(a&&b);
+		ifj16.print("e=!(a && b) = "+e+"\n");
+		e=!(b&&a);
+		ifj16.print("e=!(b && a) = "+e+"\n");
+		e=!(b&&b);
+		ifj16.print("e=!(b && b) = "+e+"\n");
+	
+		e=!(a||a);
+		ifj16.print("e=!(a || a) = "+e+"\n");
+		e=!(a||b);
+		ifj16.print("e=!(a || b) = "+e+"\n");
+		e=!(b||a);
+		ifj16.print("e=!(b || a) = "+e+"\n");
+		e=!(b||b);
+		ifj16.print("e=!(b || b) = "+e+"\n");
+
+
+	}
+}
