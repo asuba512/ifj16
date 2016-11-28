@@ -9,8 +9,7 @@
 
 void init_class_table() {
 	classes = &ctable; // yep that's all
-	glob_helper_vars.length = 0; // initializing literal array as well
-	glob_helper_vars.max_length = 0;
+	glob_helper_vars.head = glob_helper_vars.tail = NULL; // initializing literal array as well
 }
 
 int insert_class(string_t id, class_t *target) {
@@ -124,43 +123,48 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id) {
 	return result ? (local_var_t)(result->data) : NULL;
 } // OK
 
-static int _add_global_helper_var_space() {
-	glob_helper_var_t new_space = gc_realloc(glob_helper_vars.arr, (glob_helper_vars.length + 100) * sizeof(struct global_helper_var));
-	if(new_space == NULL)
-		return 99;
-	glob_helper_vars.arr = new_space;
-	glob_helper_vars.max_length += 100;
-	return 0;
-} // OK
+// static int _add_global_helper_var_space() {
+// 	glob_helper_var_t new_space = gc_realloc(glob_helper_vars.arr, (glob_helper_vars.length + 1000) * sizeof(struct global_helper_var));
+// 	if(new_space == NULL)
+// 		return 99;
+// 	glob_helper_vars.arr = new_space;
+// 	glob_helper_vars.max_length += 1000;
+// 	return 0;
+// } // OK
 
 glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
-	if(glob_helper_vars.length == glob_helper_vars.max_length) 
-		if(_add_global_helper_var_space() != 0)
-			return NULL;
+	glob_helper_var_t new_node = malloc(sizeof(struct global_helper_var));
+    if(new_node == NULL)
+        return NULL;
+    new_node->next = NULL;
+    if(glob_helper_vars.head == NULL)
+        glob_helper_vars.head = new_node;
+    else
+        glob_helper_vars.tail->next = new_node;
+    glob_helper_vars.tail = new_node;
 	switch(t.type) {
 		case token_double:
-			glob_helper_vars.arr[glob_helper_vars.length].val.d_val = t.attr.d;
-			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_double;
+			(new_node->val).d_val = t.attr.d;
+			(new_node->op).dtype = dt_double;
 			break;
 		case token_int:
-			glob_helper_vars.arr[glob_helper_vars.length].val.i_val = t.attr.i;
-			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_int;
+			(new_node->val).i_val = t.attr.i;
+			(new_node->op).dtype = dt_int;
 			break;
 		case token_string:
-			glob_helper_vars.arr[glob_helper_vars.length].val.s_val = t.attr.s;
-			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_String;
+			(new_node->val).s_val = t.attr.s;
+			(new_node->op).dtype = dt_String;
 			break;
 		case token_boolean:
-			glob_helper_vars.arr[glob_helper_vars.length].val.b_val = t.attr.b;
-			glob_helper_vars.arr[glob_helper_vars.length].op.dtype = dt_boolean;
+			(new_node->val).b_val = t.attr.b;
+			(new_node->op).dtype = dt_boolean;
 			break;
 		default:
 			break;
 	}
-	glob_helper_vars.arr[glob_helper_vars.length].op.sc = helper; // just interpret things
-	glob_helper_vars.arr[glob_helper_vars.length].initialized = initialized;
-	glob_helper_vars.length++;
-	return &(glob_helper_vars.arr[glob_helper_vars.length-1]);
+	(new_node->op).sc = helper; // just interpret things
+	new_node->initialized = initialized;
+	return new_node;
 } // OK
 
 int st_add_fn_instr(class_memb_t fn, struct instr i) {
@@ -213,6 +217,13 @@ int st_add_glob_instr(struct instr i) {
 
 void st_destroy_all() {
 	bst_postorder(classes->root, destroy_class);
+	glob_helper_var_t previous = glob_helper_vars.head;
+    for(glob_helper_var_t item = previous->next; item != NULL; item = item->next) {
+        free(previous);
+        previous = item;
+    }
+
+    free(previous);
 }
 
 void destroy_class(bst_node_t c) {

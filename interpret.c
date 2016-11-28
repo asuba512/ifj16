@@ -693,6 +693,7 @@ int inter(instr_t I){
             case mov:
                 init=decode_address(I->src1,&(value1),&(dtype),&(init_src1));
                 if(init != true){
+                    printf("%d\n", I->src1->sc);
                         fprintf(stderr,"Error! Working with non-initialized variable.\n");
                         clear_frames();
                         return 8;

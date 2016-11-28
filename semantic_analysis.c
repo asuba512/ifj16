@@ -95,7 +95,8 @@ void setIsFunFlag(void *symbol) {
 } // OK
 
 int sem_new_loc_var(datatype dt, string_t id) {
-    if(!st_getmemb(active_class, id)) {
+    class_memb_t m = st_getmemb(active_class, id);
+    if((m && !(m->type == func)) || !(m)) {
         int err = st_add_fn_locvar(active_function, dt, id);
         if (err == 0) {
             return 0;

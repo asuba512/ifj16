@@ -63,11 +63,12 @@ typedef struct global_helper_var {
 	struct operand op;
 	bool initialized;
 	var_value val; ///< value
+	struct global_helper_var *next; // stored in linked list
 } *glob_helper_var_t; // literals and global tmp variables are stored in this struct (created during generation of global var initialization code)
 
 struct global_helper_var_arr {
-	int length, max_length;
-	glob_helper_var_t arr;
+	glob_helper_var_t head;
+	glob_helper_var_t tail;
 } glob_helper_vars;
 
 /** 
