@@ -218,6 +218,7 @@ int st_add_glob_instr(struct instr i) {
 void st_destroy_all() {
 	bst_postorder(classes->root, destroy_class);
 	glob_helper_var_t previous = glob_helper_vars.head;
+	if(!previous) return; // empty list
     for(glob_helper_var_t item = previous->next; item != NULL; item = item->next) {
         free(previous);
         previous = item;
