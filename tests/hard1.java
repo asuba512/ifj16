@@ -22,9 +22,9 @@ class Main
 	}
 	static double b = 5.5;
 	static void neviem_kde_som(){
-		boolean baszdmeg = true;
-		boolean faszom = false;
-		if (faszom || baszdmeg && ((5+(8-1))>0))
+		boolean wwwww = true;
+		boolean ooooo = false;
+		if (ooooo || wwwww && ((5+(8-1))>0))
 		{
 			bez_na_koniec();
 		}
