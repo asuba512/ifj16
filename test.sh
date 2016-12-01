@@ -6,6 +6,7 @@
 
 
 TOTAL_ERROR_COUNT=0
+switch_make=0
 
 # "valgrind ./program file"
 switch_VALGRIND=1
@@ -66,8 +67,22 @@ if [ $# -eq 1 ]; then
 	fi
 fi
 
-while getopts "cCoOhHgGsSpPaAeE" opt; do
+while getopts "tcCoOhHgGsSpPaAeE" opt; do
 	case "$opt" in
+		t) printf "== TESTS ==\n"
+				switch_make=1
+				switch_GOOD_dir_1=0
+				switch_BAD_dir_1=0
+				switch_BAD_dir_2=0
+				switch_SCANNER_DIR_3=0
+				switch_EXITCODE_TESTS=0
+				switch_MANUAL_CODES=1
+				switch_WORKING_CODES=0
+				switch_STDOUT_DIR=0
+				switch_SCANNER_DIR=1
+				switch_SCANNER_DIR_2=1
+				switch_SYMBOLIC_TABLE=1
+			;;
 		c)  printf "== WORKING SOURCE CODES ==\n"
 				switch_WORKING_CODES=0
 			;;
@@ -186,16 +201,17 @@ while getopts "cCoOhHgGsSpPaAeE" opt; do
 done
 
 ############################################################
-if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
-   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES  -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] ||
-   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
-	printf "\n\n=== IFJ BUILD ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make ===\n"
-	make
+if [ $switch_make -eq 0 ]; then
+	if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2     -eq 0 ] ||
+	   [ $switch_EXITCODE_TESTS -eq 0 ] || [ $switch_MANUAL_CODES  -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] ||
+	   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
+		printf "\n\n=== IFJ BUILD ===\n"
+		printf "=== make clean ===\n"
+		make clean
+		printf "=== make ===\n"
+		make
+	fi
 fi
-
 ############################################################
 if [ $switch_GOOD_dir_1 -eq 0 ]; then
 
@@ -695,12 +711,14 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 fi
 
 ############################################################
-if [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ; then
-	printf "\n\n=== IFJ SCANNER BUILD ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make test ===\n"
-	make test
+if [ $switch_make -eq 0 ]; then
+	if [ $switch_SCANNER_DIR -eq 0 ] || [ $switch_SCANNER_DIR_2 -eq 0 ] ; then
+		printf "\n\n=== IFJ SCANNER BUILD ===\n"
+		printf "=== make clean ===\n"
+		make clean
+		printf "=== make scnr_test ===\n"
+		make scnr_test
+	fi
 fi
 
 ############################################################
@@ -779,12 +797,14 @@ if [ $switch_SCANNER_DIR_2 -eq 0 ]; then
 fi
 
 ############################################################
-if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
-	printf "\n\n=== IFJ SYMBOLIC_TABLE BUILD ===\n"
-	printf "=== make clean ===\n"
-	make clean
-	printf "=== make sem_test ===\n"
-	make sem_test
+if [ $switch_make -eq 0 ]; then
+	if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
+		printf "\n\n=== IFJ SYMBOLIC_TABLE BUILD ===\n"
+		printf "=== make clean ===\n"
+		make clean
+		printf "=== make sem_test ===\n"
+		make sem_test
+	fi
 fi
 
 ############################################################
@@ -837,14 +857,19 @@ if [ $switch_SYMBOLIC_TABLE -eq 0 ]; then
 fi
 
 ############################################################
-if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2      -eq 0 ] ||
-   [ $switch_MANUAL_CODES   -eq 0 ] || [ $switch_SCANNER_DIR   -eq 0 ] || [ $switch_SCANNER_DIR_2  -eq 0 ] ||
-   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ] ||
-   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
-	printf "\n\n=== MAKE CLEAN ===\n"
-	make clean
+if [ $switch_make -eq 0 ]; then
+	if [ $switch_GOOD_dir_1     -eq 0 ] || [ $switch_BAD_dir_1     -eq 0 ] || [ $switch_BAD_dir_2      -eq 0 ] ||
+	   [ $switch_MANUAL_CODES   -eq 0 ] || [ $switch_SCANNER_DIR   -eq 0 ] || [ $switch_SCANNER_DIR_2  -eq 0 ] ||
+	   [ $switch_SYMBOLIC_TABLE -eq 0 ] || [ $switch_SCANNER_DIR_3 -eq 0 ] || [ $switch_EXITCODE_TESTS -eq 0 ] ||
+	   [ $switch_STDOUT_DIR     -eq 0 ] || [ $switch_WORKING_CODES -eq 0 ]; then
+		printf "\n\n=== MAKE CLEAN ===\n"
+		make clean
+		printf "\n\n=== FINISH ===\n"
+		printf "Total number of ERRORs = $TOTAL_ERROR_COUNT\n"
+	else
+		printf "=== TESTS ARE SWITCHED OFF ===\n=== FINISH ====\n"
+	fi
+else
 	printf "\n\n=== FINISH ===\n"
 	printf "Total number of ERRORs = $TOTAL_ERROR_COUNT\n"
-else
-	printf "=== TESTS ARE SWITCHED OFF ===\n=== FINISH ====\n"
 fi
