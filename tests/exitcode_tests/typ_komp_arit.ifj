@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		int a = 5;
+		String b = "A";
+		int c;
+		c=a+b;
+	}
+}

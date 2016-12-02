@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{	
+		a = AA.funkcia();	
+	}
+}
+class AA
+{
+	static void aaa()
+	{
+
+	}
+}
