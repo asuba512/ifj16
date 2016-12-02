@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{
+		int a = 5;
+		String b = "A";
+		if (a != b) {
+
+		}
+		else{
+		
+		}
+	}
+}

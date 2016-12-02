@@ -1,0 +1,21 @@
+class Main
+{
+	static void run()
+	{	
+
+	}
+}
+class AA
+{
+	static void aaa()
+	{
+
+	}
+}
+class AA
+{
+	static void bbb()
+	{
+	
+	}
+}
