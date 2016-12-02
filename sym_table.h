@@ -100,6 +100,7 @@ typedef struct class_memb {
 	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
 	var_value val; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
+	bool second_pass; ///< indicates whether variable was already processed in second pass (applies on vars only)
 	int arg_count; ///< argument count, not used by static variable
 	int _max_arg_count;
 	int var_count; ///< local variable count, including arguments, not used by static variable

@@ -39,6 +39,7 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
+	m->second_pass = false;
 	//m->id = id; // UNUSEFUL
 	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;

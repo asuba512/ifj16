@@ -48,6 +48,11 @@ int sem_add_arg_active_fn() {
     return err;
 } // OK
 
+void sem_mark_sec_pass(string_t id) {
+    class_memb_t var = st_getmemb(active_class, id);
+    var->second_pass = true;
+}
+
 void sem_set_active_class(string_t id) {
     active_class = st_getclass(id); // cant cause err (I think)
 } // OK
