@@ -20,7 +20,7 @@ int insert_class(string_t id, class_t *target) {
 	new_class->root = NULL;
 	//new_class->id = id;
 	int err;
-	if((err = bst_insert_or_err(&(classes->root), id, (void *)new_class)) == 0) {
+	if((err = bst_insert(&(classes->root), id, (void *)new_class)) == 0) {
 		*target = new_class;
 		return 0; // OK
 	}
@@ -39,11 +39,12 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
-	//m->id = id; // UNUSEFUL
+	m->second_pass = false;
+	m->helper_vars = NULL;
 	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;
 	int err;
-	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
+	if((err = bst_insert(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
 		return 0; // OK
 	}
@@ -77,10 +78,9 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	// initialization
 	lv->op.dtype = dt;
 	lv->index = (fn->arg_count)++;
-	//lv->id = id;
 	lv->op.sc = local;
 	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
+	if((err = bst_insert(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
 	if(err == 3) {
@@ -97,10 +97,9 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 		return 99;
 	lv->op.dtype = dt;
 	lv->index = (fn->var_count)++;
-	//lv->id = id;
 	lv->op.sc = local;
 	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
+	if((err = bst_insert(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
 	if(err == 3) (fn->var_count)--; // doesn't matter anyways, if there's an error
@@ -122,15 +121,6 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id) {
 	bst_node_t result = bst_search_get(m->local_sym_table_root, id);
 	return result ? (local_var_t)(result->data) : NULL;
 } // OK
-
-// static int _add_global_helper_var_space() {
-// 	glob_helper_var_t new_space = gc_realloc(glob_helper_vars.arr, (glob_helper_vars.length + 1000) * sizeof(struct global_helper_var));
-// 	if(new_space == NULL)
-// 		return 99;
-// 	glob_helper_vars.arr = new_space;
-// 	glob_helper_vars.max_length += 1000;
-// 	return 0;
-// } // OK
 
 glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
 	glob_helper_var_t new_node = malloc(sizeof(struct global_helper_var));
@@ -181,20 +171,16 @@ int st_add_fn_instr(class_memb_t fn, struct instr i) {
     return 0;
 } // OK
 
-local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
+local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt) {
 	local_var_t tmp;
 	if ((tmp = malloc(sizeof(struct local_var))) == NULL)
 		return NULL;
 	tmp->op.dtype = dt;
 	tmp->index = (fn->var_count)++;
-	//tmp->id = id;
 	tmp->op.sc = local;
-	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {
-		return tmp; // OK
-	}
-	free(tmp);
-	return NULL;
+	tmp->next = fn->helper_vars;
+	fn->helper_vars = tmp;
+	return tmp;
 } // OK
 
 void st_init_glob_instr_list() {
@@ -244,7 +230,15 @@ void destroy_class_memb(bst_node_t m) {
 			previous = item;
 		}
 		free(previous);
-		((class_memb_t)(m->data))->instr_list = NULL;
+	}
+	if(((class_memb_t)(m->data))->helper_vars != NULL) {
+		local_var_t previous = ((class_memb_t)(m->data))->helper_vars;
+		// zakadym sa posunieme o prvok dopredu a zmazene predchadzajuci
+		for(local_var_t item = previous->next; item != NULL; item = item->next) {
+			free(previous);
+			previous = item;
+		}
+		free(previous);
 	}
 	free(m->data);
 	free(m);

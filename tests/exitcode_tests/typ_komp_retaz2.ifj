@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		int a = 5;
+		String b = "A";
+		String c;
+		c=ifj16.find(a,b);
+	}
+}

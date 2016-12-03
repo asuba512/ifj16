@@ -1,0 +1,9 @@
+class Main
+{
+	static void run()
+	{
+		String s;
+		int a;
+		a=ifj16.length(s);
+	}
+}

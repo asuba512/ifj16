@@ -6,8 +6,6 @@
 #include "ial.h"
 #include "gc.h"
 
-static bst_node_t _bst_helper_ptr;
-
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
     for(int i=0; i<256; i++){ //the interval is from algorithm
@@ -159,29 +157,12 @@ int bst_insert(bst_node_t *root_ptr, string_t key, void *data) {
     if(*root_ptr == NULL) {
         return _bst_create_node(root_ptr, key, data);
     } else {
-        if(str_compare((*root_ptr)->key, key) > 0) {
-            return bst_insert(&((*root_ptr)->left_p), key, data);
-        } else if(str_compare((*root_ptr)->key, key) < 0) {
-            return bst_insert(&((*root_ptr)->right_p), key, data);
-        } else {
-            (*root_ptr)->data = data;
-            return 0;
-        }
-    }
-}
-
-// almost copy-paste of function above
-int bst_insert_or_err(bst_node_t *root_ptr, string_t key, void *data) {
-    if(*root_ptr == NULL) {
-        return _bst_create_node(root_ptr, key, data);
-    } else {
         int cmp = str_compare((*root_ptr)->key, key);
         if(cmp > 0) {
-            return bst_insert_or_err(&((*root_ptr)->left_p), key, data);
+            return bst_insert(&((*root_ptr)->left_p), key, data);
         } else if(cmp < 0) {
-            return bst_insert_or_err(&((*root_ptr)->right_p), key, data);
+            return bst_insert(&((*root_ptr)->right_p), key, data);
         } else {
-            // normally would update data, but why the hell would I want to cause a memory leak? why??
             return BST_NODE_ALREADY_EXISTS;
         }
     }
@@ -195,48 +176,6 @@ int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     (*node_ptr)->data = data;
     return 0;
 } // OK
-
-void bst_delete(bst_node_t *root, string_t key) {
-    if(*root != NULL) {
-        if(str_compare((*root)->key, key) > 0) {
-            bst_delete(&((*root)->left_p), key);
-        } else if(str_compare((*root)->key, key) < 0) {
-            bst_delete(&((*root)->right_p), key);
-        } else {
-            _bst_helper_ptr = *root;
-            if(_bst_helper_ptr->right_p == NULL) {
-                *root = _bst_helper_ptr->left_p;
-            } else if(_bst_helper_ptr->left_p == NULL) {
-                *root = _bst_helper_ptr->right_p;
-            } else {
-                _bst_del(&(_bst_helper_ptr->left_p));
-            }
-            str_destroy(_bst_helper_ptr->key);
-            //free(_bst_helper_ptr);
-            _bst_helper_ptr = NULL;
-        }
-    }
-}
-
-void _bst_del(bst_node_t *node) {
-    if((*node)->right_p != NULL) {
-        _bst_del(&((*node)->right_p));
-    } else {
-        _bst_helper_ptr->data = (*node)->data;
-        _bst_helper_ptr->key = (*node)->key;
-        _bst_helper_ptr = *node;
-        *node = (*node)->left_p;
-    }
-}
-
-// void bst_inorder(bst_node_t root, void (*do_work)(void *)) {
-//     if(root != NULL) {
-//         bst_inorder(root->left_p, do_work);
-//         do_work(root->data);
-//         bst_inorder(root->right_p, do_work);
-        
-//     }
-// }
 
 void bst_postorder(bst_node_t root, void (*do_work)(bst_node_t)) {
     if(root != NULL) {

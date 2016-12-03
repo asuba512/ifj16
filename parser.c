@@ -132,6 +132,12 @@ int c_memb2(){
 	if(is(token_assign)){
 		if (FIRST_PASS) {
 			if((errno = sem_add_member_active_class(var))) return errno;
+			do{
+				next_token();
+				if(is(token_eof)) return 2;
+			} while(!is(token_semicolon));
+		} else {
+			sem_mark_sec_pass(sem_tmp_data.id);
 			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
 			next_token();
 			token_t tmp;
@@ -157,16 +163,16 @@ int c_memb2(){
 					return errno;
 			}
 			return errno;
-		} else {
-			do{
-				next_token();
-			} while(!is(token_semicolon));
 		}
 		return 0;
 	}
 	else if(is(token_semicolon)){
-		if (FIRST_PASS)
+		if (FIRST_PASS) {
 			if ((errno = sem_add_member_active_class(var))) return errno;
+		}
+		else {
+			sem_mark_sec_pass(sem_tmp_data.id);
+		}			
 		return 0;
 	}
 	else if(is(token_lbracket)){
@@ -382,18 +388,21 @@ int val_id(){
 
 int id(){
 	if(is(token_id)){
-		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
+		if(SECOND_PASS) {
 			sem_search(NULL, t.attr.s);
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s\n", t.attr.s->data);
 				return errno = 3;
+			} else if(outside_func && ((class_memb_t)(sem_id_decoded.ptr))->type == var && !(((class_memb_t)(sem_id_decoded.ptr))->second_pass)) {
+				fprintf(stderr, "ERR: Static var must be defined before its usage.\n");
+				return errno = 6;
 			}
 		}
 		return 0;
 	}
 	else if(is(token_fqid)){
 		string_t class_id = NULL, memb_id = NULL;
-		if(SECOND_PASS || (FIRST_PASS && outside_func)) {
+		if(SECOND_PASS) {
 			char *ptr = strchr(t.attr.s->data, '.');
 			*ptr = 0;
 			if(!(class_id = str_init(t.attr.s->data))) {
@@ -408,11 +417,14 @@ int id(){
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", t.attr.s->data, ptr + 1);
 				return errno = 3;
+			} else if(outside_func && ((class_memb_t)(sem_id_decoded.ptr))->type == var && !(((class_memb_t)(sem_id_decoded.ptr))->second_pass)) {
+				fprintf(stderr, "ERR: Static var must be defined before its usage.\n");
+				return errno = 6;
 			}
 		}
 		return 0;
 	}
-	if(SECOND_PASS || (FIRST_PASS && outside_func))
+	if(SECOND_PASS)
 		sem_id_decoded.ptr = NULL;
 	return 2;
 }

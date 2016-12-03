@@ -86,8 +86,8 @@ typedef struct class {
  */
 typedef struct local_var {
 	struct operand op;
-	string_t id;
 	int index; ///< index in array of variable instances in function context, unique within one function
+	struct local_var *next; // for helper vars stored in linkedlist
 } *local_var_t;
 
 /**
@@ -100,12 +100,14 @@ typedef struct class_memb {
 	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
 	var_value val; ///< value of global variable, not used by functions
 	var_func type; ///< indicates whether entry represents function or variable
+	bool second_pass; ///< indicates whether variable was already processed in second pass (applies on vars only)
 	int arg_count; ///< argument count, not used by static variable
 	int _max_arg_count;
 	int var_count; ///< local variable count, including arguments, not used by static variable
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
+	local_var_t helper_vars; // stack-like linked list of helper variables created during precedence analysis inside function
 	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
 	instr_t instr_list;
 	instr_t instr_list_end;
@@ -160,7 +162,7 @@ int insert_class(string_t id, class_t *target);
 int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func type, datatype dt);
 int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id);
 int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id);
-local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id);
+local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt);
 class_t st_getclass(string_t id);
 class_memb_t st_getmemb(class_t c, string_t id);
 glob_helper_var_t add_global_helper_var(struct token t, bool initialized);
