@@ -39,6 +39,8 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->arg_list = NULL;
 	m->local_sym_table_root = NULL;
 	m->initialized = false;
+	m->second_pass = false;
+	m->helper_vars = NULL;
 	//m->id = id; // UNUSEFUL
 	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;
@@ -181,20 +183,16 @@ int st_add_fn_instr(class_memb_t fn, struct instr i) {
     return 0;
 } // OK
 
-local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt, string_t id) {
+local_var_t st_fn_add_tmpvar(class_memb_t fn, datatype dt) {
 	local_var_t tmp;
 	if ((tmp = malloc(sizeof(struct local_var))) == NULL)
 		return NULL;
 	tmp->op.dtype = dt;
 	tmp->index = (fn->var_count)++;
-	//tmp->id = id;
 	tmp->op.sc = local;
-	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)tmp)) == 0) {
-		return tmp; // OK
-	}
-	free(tmp);
-	return NULL;
+	tmp->next = fn->helper_vars;
+	fn->helper_vars = tmp;
+	return tmp;
 } // OK
 
 void st_init_glob_instr_list() {
@@ -244,7 +242,15 @@ void destroy_class_memb(bst_node_t m) {
 			previous = item;
 		}
 		free(previous);
-		((class_memb_t)(m->data))->instr_list = NULL;
+	}
+	if(((class_memb_t)(m->data))->helper_vars != NULL) {
+		local_var_t previous = ((class_memb_t)(m->data))->helper_vars;
+		// zakadym sa posunieme o prvok dopredu a zmazene predchadzajuci
+		for(local_var_t item = previous->next; item != NULL; item = item->next) {
+			free(previous);
+			previous = item;
+		}
+		free(previous);
 	}
 	free(m->data);
 	free(m);

@@ -42,6 +42,7 @@ int sem_set_jmp_dst(instr_t, op_t);
 int sem_generate_ret(op_t src);
 int sem_generate_halt();
 op_t sem_generate_conv_to_str(op_t op);
+void sem_mark_sec_pass(string_t id);
 
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
 #define INTERNAL_ERR {fprintf(stderr, "ERR: Internal error.\n"); return 99;}

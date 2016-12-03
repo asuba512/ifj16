@@ -40,7 +40,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(readInt, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(readInt, dt_int, str_result); // local var to store result (index 0)
+    i.src1 =  (op_t)st_fn_add_tmpvar(readInt, dt_int); // local var to store result (index 0)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(readInt, i);
 
@@ -52,7 +52,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(readDouble, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(readDouble, dt_double, str_result); // local var to store result (index 0)
+    i.src1 =  (op_t)st_fn_add_tmpvar(readDouble, dt_double); // local var to store result (index 0)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(readDouble, i);
 
@@ -64,7 +64,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(readString, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(readString, dt_String, str_result); // local var to store result (index 0)
+    i.src1 =  (op_t)st_fn_add_tmpvar(readString, dt_String); // local var to store result (index 0)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(readString, i);
 
@@ -77,7 +77,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(length, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(length, dt_int, str_result); // local var to store result (index 1)
+    i.src1 =  (op_t)st_fn_add_tmpvar(length, dt_int); // local var to store result (index 1)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(length, i);
 
@@ -94,7 +94,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(substr, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(substr, dt_String, str_result); // local var to store result (index 3)
+    i.src1 =  (op_t)st_fn_add_tmpvar(substr, dt_String); // local var to store result (index 3)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(substr, i);
 
@@ -109,7 +109,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(compare, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(compare, dt_int, str_result); // local var to store result (index 2)
+    i.src1 =  (op_t)st_fn_add_tmpvar(compare, dt_int); // local var to store result (index 2)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(compare, i);
 
@@ -124,7 +124,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(find, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(find, dt_int, str_result); // local var to store result (index 2)
+    i.src1 =  (op_t)st_fn_add_tmpvar(find, dt_int); // local var to store result (index 2)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(find, i);
 
@@ -137,7 +137,7 @@ int populate_sym_table() {
     i.dst = i.src1 = i.src2 = NULL;
     st_add_fn_instr(sort, i);
     i.type = ret;
-    i.src1 =  (op_t)st_fn_add_tmpvar(sort, dt_int, str_result); // local var to store result (index 1)
+    i.src1 =  (op_t)st_fn_add_tmpvar(sort, dt_int); // local var to store result (index 1)
     i.dst = i.src2 = NULL;
     st_add_fn_instr(sort, i);
 
