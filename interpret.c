@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "gc.h"
+#include <math.h>
 
 // src1_value and src2_value ARE INTEGERS, DOUBLES ARE NOT SUPPORTED!
 
@@ -375,11 +376,6 @@ int inter(instr_t I){
                         case dt_double:
                             src1_d_value=(*value1).d_val;
                             src2_d_value=(*value2).d_val;
-                            if(src2_d_value==0.0) {
-                                fprintf(stderr,"Error! Dividing by 0.\n");
-                                clear_frames();
-                                return 9;
-                            }
                             break;
                         case dt_int:
                             src1_i_value=(*value1).i_val;
@@ -435,6 +431,7 @@ int inter(instr_t I){
                     clear_frames();
 	        		return 99;
 		        }
+                //CHECK RETURN VALUE OF STRCAT
                 str_cat(dest->s_val, value2->s_val);
                 (*init_dest) = true;
                 break;
@@ -703,7 +700,7 @@ int inter(instr_t I){
                 (*init_dest)=true;
                 break;
 
-            case r_str://not implemeted yet
+            case r_str:
                 (inter_stack.top)->vars[0].val.s_val=ifj16_readString();
                 if(errno==99){
                     fprintf(stderr, "ERR: Internal error.\n");

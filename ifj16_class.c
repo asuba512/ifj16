@@ -5,6 +5,8 @@
 #include "infinite_string.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 
 extern int errno;
 
@@ -145,7 +147,12 @@ int populate_sym_table() {
 }
 
 void ifj16_print(string_t s) {
+	if((strcmp(s->data,"inf\n")==0)){
+		printf("Infinity\n");
+	}
+	else{
     printf("%s", s->data);
+	}
 }
 
 int ifj16_readInt() {
@@ -154,18 +161,21 @@ int ifj16_readInt() {
         errno=99;
     }
     int c;
+    int counter=0;
     long int num;
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
+    	if(counter == 0){
+    		if(isspace(c) || c=='\n'){
+    			errno=7;
+    		}
+    	}
     	if(c=='\n') break;
-    	    //str_addchar(s, c);
             if((str_addchar(s, c)) == 99){
                 errno=99;
             }
+         counter++;
     	}
-    /*if((str_addchar(s, '\0')) == 99){
-                errno=99;
-            }*/
     num=strtol(s->data,&pEnd,10);
     if (*pEnd != '\0') {
     	errno=7;
@@ -179,17 +189,21 @@ double ifj16_readDouble() {
         errno=99;
     }
     int c;
+    int counter=0;
     double num;
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
+    	if(counter == 0){
+    		if(isspace(c) || c=='\n'){
+    			errno=7;
+    		}
+    	}
     	if(c=='\n') break;
     	    if((str_addchar(s, c)) == 99){
                 errno=99;
             }
+         counter++;
     	}
-    /*if((str_addchar(s, '\0')) == 99){
-                errno=99;
-            }*/
     num=strtod(s->data,&pEnd);
     if (*pEnd != '\0') {
     	errno=7;
@@ -206,14 +220,10 @@ string_t ifj16_readString() {
     int c;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
-    	   // str_addchar(s, c);
             if((str_addchar(s, c)) == 99){
                 errno=99;
             }
     	}
-    /*if((str_addchar(s, '\0')) == 99){
-                errno=99;
-            }*/
     return s;
 }
 
@@ -222,7 +232,6 @@ int ifj16_length(string_t s) {
 }
 
 string_t ifj16_substr(string_t s, int i, int n) {
-    //osetrit pristup mimo hranic
     if(i<0 || i > s->length || (i+n)>s->length){
     	errno=10;
     }
@@ -233,15 +242,10 @@ string_t ifj16_substr(string_t s, int i, int n) {
         errno=99;
     }
     for(int j=0;j<n;j++){
-        //str_addchar(s2,s->data[i+j]);
         if((str_addchar(s2, s->data[i+j])) == 99){
                 errno=99;
             }
  	}
- 	//str_addchar(s2,'\0');
-    /*if((str_addchar(s2, '\0')) == 99){
-                errno=99;
-            }*/
  	return s2;
 }
 
