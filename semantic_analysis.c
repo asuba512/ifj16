@@ -119,21 +119,11 @@ int sem_new_loc_var(datatype dt, string_t id) {
 } // OK
 
 local_var_t sem_new_tmp_var(datatype dt) {
-    static int id = 0;
-    char name[8];
-    sprintf(name, "^%d", id);
-    string_t str = str_init(name);
-    if (str == NULL) {
-        fprintf(stderr, "ERR: Internal error.\n");
-        return NULL;
-    }
-    local_var_t tmpvar = st_fn_add_tmpvar(active_function, dt, str);
+    local_var_t tmpvar = st_fn_add_tmpvar(active_function, dt);
     if (tmpvar == NULL) {
         fprintf(stderr, "ERR: Internal error.\n");
-        str_destroy(str);
         return NULL;
     }
-    id++;
     return tmpvar;
 } // OK -> only causes internal err
 
