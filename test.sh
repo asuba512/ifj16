@@ -253,8 +253,8 @@ if [ $switch_GOOD_dir_1 -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -317,8 +317,8 @@ if [ $switch_BAD_dir_1 -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -382,8 +382,8 @@ if [ $switch_BAD_dir_2 -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -447,8 +447,8 @@ if [ $switch_SCANNER_DIR_3 -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -511,8 +511,8 @@ if [ $switch_EXITCODE_TESTS -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -621,8 +621,8 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
@@ -694,8 +694,8 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 			#echo $summary
 			memory_leaks=$(echo $summary| grep ".*ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0).*" | wc -l)
 			#echo $memory_leaks
-
-			if [ $memory_leaks -ne 1 ]; then
+			in_use_at_exit=$(cat valgrind_file | grep ".*in use at exit: 0 bytes in 0 blocks.*" | wc -l)
+			if [ $memory_leaks -ne 1 ] || [ $in_use_at_exit -ne 1 ]; then
 				TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
 				printf "\t\t$summary\n"
 			fi
