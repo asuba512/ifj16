@@ -6,5 +6,6 @@ class Main
 		double b = 0.0;
 		double c;
 		c = a / b;
+		ifj16.print(c+"\n");
 	}
 }
