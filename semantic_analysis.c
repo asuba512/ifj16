@@ -61,10 +61,6 @@ void sem_set_active_fn(string_t id) {
     active_function = st_getmemb(active_class, id); // cant cause err (I think)
 } // OK
 
-int sem_prec_reduction() {
-    return 42;
-} // LOL ???
-
 void sem_search(string_t class_id, string_t memb_id) {
     void *symbol = NULL;
     if (class_id == NULL) {

@@ -107,7 +107,7 @@ typedef struct class_memb {
 	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
 	                       ///< ordered by index in function header
 	                       ///< not used by static variable
-	local_var_t helper_vars; // stack-like linked list of helper variables created during precedence analysis
+	local_var_t helper_vars; // stack-like linked list of helper variables created during precedence analysis inside function
 	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
 	instr_t instr_list;
 	instr_t instr_list_end;

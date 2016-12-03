@@ -20,7 +20,7 @@ int insert_class(string_t id, class_t *target) {
 	new_class->root = NULL;
 	//new_class->id = id;
 	int err;
-	if((err = bst_insert_or_err(&(classes->root), id, (void *)new_class)) == 0) {
+	if((err = bst_insert(&(classes->root), id, (void *)new_class)) == 0) {
 		*target = new_class;
 		return 0; // OK
 	}
@@ -41,11 +41,10 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 	m->initialized = false;
 	m->second_pass = false;
 	m->helper_vars = NULL;
-	//m->id = id; // UNUSEFUL
 	m->op.sc = global;
 	m->instr_list = m->instr_list_end = NULL;
 	int err;
-	if((err = bst_insert_or_err(&(c->root), id, (void *)m)) == 0) {
+	if((err = bst_insert(&(c->root), id, (void *)m)) == 0) {
 		*target = m;
 		return 0; // OK
 	}
@@ -79,10 +78,9 @@ int st_add_fn_arg(class_memb_t fn, datatype dt, string_t id) {
 	// initialization
 	lv->op.dtype = dt;
 	lv->index = (fn->arg_count)++;
-	//lv->id = id;
 	lv->op.sc = local;
 	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
+	if((err = bst_insert(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
 	if(err == 3) {
@@ -99,10 +97,9 @@ int st_add_fn_locvar(class_memb_t fn, datatype dt, string_t id) {
 		return 99;
 	lv->op.dtype = dt;
 	lv->index = (fn->var_count)++;
-	//lv->id = id;
 	lv->op.sc = local;
 	int err;
-	if((err = bst_insert_or_err(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
+	if((err = bst_insert(&(fn->local_sym_table_root), id, (void *)lv)) == 0) {
 		return 0; // OK
 	}
 	if(err == 3) (fn->var_count)--; // doesn't matter anyways, if there's an error
@@ -124,15 +121,6 @@ local_var_t st_get_loc_var(class_memb_t m, string_t id) {
 	bst_node_t result = bst_search_get(m->local_sym_table_root, id);
 	return result ? (local_var_t)(result->data) : NULL;
 } // OK
-
-// static int _add_global_helper_var_space() {
-// 	glob_helper_var_t new_space = gc_realloc(glob_helper_vars.arr, (glob_helper_vars.length + 1000) * sizeof(struct global_helper_var));
-// 	if(new_space == NULL)
-// 		return 99;
-// 	glob_helper_vars.arr = new_space;
-// 	glob_helper_vars.max_length += 1000;
-// 	return 0;
-// } // OK
 
 glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
 	glob_helper_var_t new_node = malloc(sizeof(struct global_helper_var));
