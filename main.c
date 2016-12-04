@@ -18,7 +18,7 @@
 
 extern token_t t;
 extern FILE *fd;
-extern int errno;
+extern int error_number;
 extern int pass_number;
 extern tok_que_t tok_q;
 
@@ -43,13 +43,13 @@ int main(int argc, char **argv){
 	pass_number = 1;
 	int retval = c_list();
 	fclose(fd);
-	//printf("%d %d\n", retval, errno);
-	if(errno) {
+	//printf("%d %d\n", retval, error_number);
+	if(error_number) {
 		free_all();
 		st_destroy_all();
-		if(errno == 1)
+		if(error_number == 1)
 			fprintf(stderr, "ERR: Lexical error.\n");
-		return errno;
+		return error_number;
 	}
 	if(retval) {
 		free_all();
@@ -61,13 +61,13 @@ int main(int argc, char **argv){
 	/* SECOND PASS */
 	pass_number = 2;
 	retval = c_list();
-	//printf("%d %d\n", retval, errno);
-	if(errno) {
+	//printf("%d %d\n", retval, error_number);
+	if(error_number) {
 		free_all();
 		st_destroy_all();
-		if(errno == 2)
+		if(error_number == 2)
 			fprintf(stderr, "ERR: Syntax error.\n");
-		return errno;
+		return error_number;
 	}
 	if(retval) {
 		free_all();
@@ -76,10 +76,10 @@ int main(int argc, char **argv){
 		return retval;
 	}	
 	str_destroy(buff);
-	if((errno = add_head())) {
+	if((error_number = add_head())) {
 		free_all();
 		st_destroy_all();
-		return errno;
+		return error_number;
 	}
 
 	/* some random junk */

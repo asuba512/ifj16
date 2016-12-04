@@ -8,7 +8,7 @@
 
 #define try(x) if((err = x)) return err
 
-extern int errno;
+extern int error_number;
 
 int precedence(tok_que_t queue, op_t *result){
 	int err;

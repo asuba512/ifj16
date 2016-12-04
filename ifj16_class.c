@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include <string.h>
 
-extern int errno;
+extern int error_number;
 
 int populate_sym_table() {
     string_t str;
@@ -158,7 +158,7 @@ void ifj16_print(string_t s) {
 int ifj16_readInt() {
     string_t s=str_init("");
     if(s==NULL){
-        errno=99;
+        error_number=99;
     }
     int c;
     int counter=0;
@@ -167,18 +167,18 @@ int ifj16_readInt() {
     while((c=getchar()) != EOF){
     	if(counter == 0){
     		if(isspace(c) || c=='\n'){
-    			errno=7;
+    			error_number=7;
     		}
     	}
     	if(c=='\n') break;
             if((str_addchar(s, c)) == 99){
-                errno=99;
+                error_number=99;
             }
          counter++;
     	}
     num=strtol(s->data,&pEnd,10);
     if (*pEnd != '\0') {
-    	errno=7;
+    	error_number=7;
     }
     return (int)num;
 }
@@ -186,7 +186,7 @@ int ifj16_readInt() {
 double ifj16_readDouble() {
 	string_t s=str_init("");
     if(s==NULL){
-        errno=99;
+        error_number=99;
     }
     int c;
     int counter=0;
@@ -195,18 +195,18 @@ double ifj16_readDouble() {
     while((c=getchar()) != EOF){
     	if(counter == 0){
     		if(isspace(c) || c=='\n'){
-    			errno=7;
+    			error_number=7;
     		}
     	}
     	if(c=='\n') break;
     	    if((str_addchar(s, c)) == 99){
-                errno=99;
+                error_number=99;
             }
          counter++;
     	}
     num=strtod(s->data,&pEnd);
     if (*pEnd != '\0') {
-    	errno=7;
+    	error_number=7;
     }
     return num;
 
@@ -215,13 +215,13 @@ double ifj16_readDouble() {
 string_t ifj16_readString() {
     string_t s=str_init("");
     if(s==NULL){
-        errno=99;
+        error_number=99;
     }
     int c;
     while((c=getchar()) != EOF){
     	if(c=='\n') break;
             if((str_addchar(s, c)) == 99){
-                errno=99;
+                error_number=99;
             }
     	}
     return s;
@@ -233,17 +233,17 @@ int ifj16_length(string_t s) {
 
 string_t ifj16_substr(string_t s, int i, int n) {
     if(i<0 || i > s->length || (i+n)>s->length){
-    	errno=10;
+    	error_number=10;
     }
 
 
     string_t s2=str_init("");
     if(s2==NULL){
-        errno=99;
+        error_number=99;
     }
     for(int j=0;j<n;j++){
         if((str_addchar(s2, s->data[i+j])) == 99){
-                errno=99;
+                error_number=99;
             }
  	}
  	return s2;
@@ -269,7 +269,7 @@ int ifj16_search(string_t s, string_t search) {
 string_t ifj16_sort(string_t s) {
     string_t s2 = str_init(s->data);
     if(s2==NULL){
-        errno=99;
+        error_number=99;
     }
     shell_sort(s2);
     return s2;

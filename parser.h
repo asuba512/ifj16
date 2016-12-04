@@ -7,7 +7,7 @@
 
 token_t t;
 FILE *fd;
-int errno;
+int error_number;
 int pass_number; // either first or second
 tok_que_t tok_q;
 
