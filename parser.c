@@ -139,18 +139,8 @@ int c_memb2(){
 		} else {
 			sem_mark_sec_pass(sem_tmp_data.id);
 			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
-			next_token();
-			token_t tmp;
 			tok_que_t expr_queue = tok_que_init();
-			if(sem_id_decoded.ptr){ // if there was id as first token
-				tmp.type = token_id;
-				tmp.attr.p = sem_id_decoded.ptr;
-				tok_enqueue(expr_queue, tmp);
-				next_token(); // if there was an id(), you should take another token
-			}
-			else if(t.type > token_string){ // unsupported tokens
-				return 2;				
-			}
+			next_token();
 			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 				return 2;
 			errno = precedence(expr_queue, &precedence_result);
@@ -714,7 +704,10 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 		else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literal processing
 			tmp.type = token_id;
 			tmp.attr.p = add_global_helper_var(t, true); // insert as variable into TS
-			if(!tmp.attr.p) return 99;
+			if(!tmp.attr.p) {
+				fprintf(stderr, "ERR: Internal error.\n");
+				return 99;
+			}
 			tok_enqueue(expr_queue, tmp);
 			next_token();	
 		}
