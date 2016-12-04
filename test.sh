@@ -611,7 +611,7 @@ if [ $switch_WORKING_CODES -eq 0 ]; then
 
 		if [ $exitvalue_diff_stdout -ne 0 ]; then
 			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
-			printf "\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
+			printf "\t\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
 		fi
 
 		if [ $switch_VALGRIND -eq 0 ]; then
@@ -683,7 +683,7 @@ if [ $switch_STDOUT_DIR -eq 0 ]; then
 
 		if [ $diff_exitvalue -ne 0 ]; then
 			TOTAL_ERROR_COUNT=$(expr $TOTAL_ERROR_COUNT + 1)
-			printf "\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
+			printf "\t\tDIFF "$""?" = 1 (different .output <-> stdout)\n"
 		fi
 
 
