@@ -1,6 +1,7 @@
 #!/bin/bash
  
 generate=0
+tests=0
 tmpdir="/tmp/ifj16/package"
 xsubaa00=25
 xpalie00=25
@@ -10,10 +11,13 @@ xtotha01=25
 declare -A contributors
 declare -A tmpCon
 
-while getopts ":g" opt; do
+while getopts ":gt" opt; do
   case $opt in
     g)
         generate=1
+      ;;
+    t)
+        tests=1
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -72,6 +76,11 @@ if [ $generate -eq 1 ]; then
 fi
 printf "xsubaa00:%.2d\nxtotha01:%.2d\nxsuhaj02:%.2d\nxpalie00:%.2d\n" $xsubaa00 $xtotha01 $xsuhaj02 $xpalie00 > $tmpdir/rozdeleni
 printf "BOOLOP\n" > $tmpdir/rozsireni
+
+if [ $tests -eq 1 ]; then
+  contents=`ls | grep -e "test" | grep -v -e "[.]c" -e "[.]h"`
+  cp -r ${contents} $tmpdir
+fi
 
 currentdir=`pwd`
 cd $tmpdir
