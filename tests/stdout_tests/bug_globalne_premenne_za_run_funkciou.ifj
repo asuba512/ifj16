@@ -1,0 +1,6 @@
+class Main {
+	static void run() {
+		ifj16.print("=PRINT="+"\n");
+	}
+	static int y = 2;
+}
