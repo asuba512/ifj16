@@ -2,12 +2,14 @@
 #include "sym_table.h"
 #include "ilist.h"
 #include "ifj16_class.h"
-#include "parser.h" // errno
+#include "parser.h" // error_number
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "gc.h"
 #include <math.h>
+#include <errno.h>
+#include <limits.h>
 
 // src1_value and src2_value ARE INTEGERS, DOUBLES ARE NOT SUPPORTED!
 
@@ -701,42 +703,46 @@ int inter(instr_t I){
 
             case r_str:
                 (inter_stack.top)->vars[0].val.s_val=ifj16_readString();
-                if(errno==99){
+                if(error_number==99){
                     fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
             case r_int:
                 (inter_stack.top)->vars[0].val.i_val=ifj16_readInt();
-                if(errno==7) {
+                if(error_number==7) {
                     fprintf(stderr, "ERR: Given input is not valid integer.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
-                if(errno==99){
+                if(error_number==99){
                     fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
+                }
+                if(error_number == 42){
+                	fprintf(stderr, "Input error - Invalid value for an int.\n");
+                	clear_frames();
+                	return 7;
                 }
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
             case r_dbl:
                 (inter_stack.top)->vars[0].val.d_val=ifj16_readDouble();
-                if(errno==7) {
+                if(error_number==7) {
                     fprintf(stderr, "ERR: Given input is not valid floating point number.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
-                if(errno==99){
+                if(error_number==99){
                     fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
-
                 (inter_stack.top)->vars[0].initialized = true;
                 break;
             
@@ -747,15 +753,15 @@ int inter(instr_t I){
             
             case subs:
                 (inter_stack.top)->vars[3].val.s_val=ifj16_substr((inter_stack.top)->vars[0].val.s_val,(inter_stack.top)->vars[1].val.i_val,(inter_stack.top)->vars[2].val.i_val);
-                if(errno==99){
+                if(error_number==99){
                     fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
-                if(errno==10){
+                if(error_number==10){
                     fprintf(stderr,"ERR: Index out of bounds.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
                 (inter_stack.top)->vars[3].initialized = true;
                 break;
@@ -772,10 +778,10 @@ int inter(instr_t I){
             
             case sortstr:
                 (inter_stack.top)->vars[1].val.s_val=ifj16_sort((inter_stack.top)->vars[0].val.s_val);
-                if(errno==99){
+                if(error_number==99){
                     fprintf(stderr, "ERR: Internal error.\n");
                     clear_frames();
-                    return errno;
+                    return error_number;
                 }
                 (inter_stack.top)->vars[1].initialized = true;
                 break;

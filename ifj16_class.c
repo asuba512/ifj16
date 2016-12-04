@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
+#include <limits.h>
 
 extern int error_number;
 
@@ -147,12 +149,7 @@ int populate_sym_table() {
 }
 
 void ifj16_print(string_t s) {
-	if((strcmp(s->data,"inf\n")==0)){
-		printf("Infinity\n");
-	}
-	else{
     printf("%s", s->data);
-	}
 }
 
 int ifj16_readInt() {
@@ -177,6 +174,9 @@ int ifj16_readInt() {
          counter++;
     	}
     num=strtol(s->data,&pEnd,10);
+    if(errno == ERANGE || num > INT_MAX || num < INT_MIN){
+        error_number=42;
+    }
     if (*pEnd != '\0') {
     	error_number=7;
     }
