@@ -4,11 +4,14 @@
 #include "token.h"
 #include <stdio.h>
 
+/** Tries to create a new class with given id in ST. On success, returns 0,
+    otherwise corresponding error is returned and error message is printed
+    on stderr */
 int sem_new_class(string_t id) {
     class_t c;
     int err = insert_class(id, &c);
     if (err == 0) {
-        active_class = c;
+        active_class = c; // update active class indicator
         return 0;
     } else if(err == 3) {
         fprintf(stderr, "ERR: Can't redefine class \"%s\".\n", id->data);
@@ -17,14 +20,18 @@ int sem_new_class(string_t id) {
     }
     active_class = NULL; // causes segfault (intentionally) if program continues  ilegally
     return err;
-} // OK
+}
 
+/** Tries to create a new class member in 'active_class' (see header file)
+    with given id in ST. On success, returns 0, otherwise corresponding error
+    is returned and error message is printed on stderr. Needed info is retrieved
+    from parameter 'member_type' and global structure 'sem_tmp_data' (see header file). */
 int sem_add_member_active_class(var_func member_type) {
     class_memb_t new_memb;
     int err = st_insert_class_memb(active_class, &new_memb, sem_tmp_data.id, member_type, sem_tmp_data.dt);
     if (err == 0) {
         if(member_type == func) {
-            active_function = new_memb;
+            active_function = new_memb; // update active function indicator
         }
         return 0;
     } else if(err == 3) {
@@ -34,8 +41,11 @@ int sem_add_member_active_class(var_func member_type) {
     }
     active_function = NULL; // causes segfault (intentionally) if program continues ilegally
     return err;
-} // OK
+}
 
+/** Tries to add argument to 'active_function' (see header file). On success, returns 0,
+    otherwise corresponding error is returned and error message is printed on stderr.
+    Needed info is retrieved from global structure 'sem_tmp_data' (see header file). */
 int sem_add_arg_active_fn() {
     int err = st_add_fn_arg(active_function, sem_tmp_data.dt, sem_tmp_data.id);
     if (err == 0) {
@@ -46,41 +56,53 @@ int sem_add_arg_active_fn() {
         fprintf(stderr, "ERR: Internal error.\n");
     }
     return err;
-} // OK
+}
 
+/** Marks static var with given 'id' as "reached" by second pass */
 void sem_mark_sec_pass(string_t id) {
     class_memb_t var = st_getmemb(active_class, id);
     var->second_pass = true;
 }
 
+/** Sets class with given 'id' as active (the one, between whose
+    brackets {} the current token is). */
 void sem_set_active_class(string_t id) {
-    active_class = st_getclass(id); // cant cause err (I think)
-} // OK
+    active_class = st_getclass(id); 
+}
 
+/** Sets function with given 'id' as active (the one, between whose
+    brackets {} the current token is). */
 void sem_set_active_fn(string_t id) {
-    active_function = st_getmemb(active_class, id); // cant cause err (I think)
-} // OK
+    active_function = st_getmemb(active_class, id); 
+}
 
+/** Tries to search for symbol (suitable for current context, 
+    considering active_function and active_class), with given
+    intifier(s) in ST. On success, a global variable 'sem_id_decoded.ptr'
+    is set to corresponding element (function or variable).
+    Otherwise NULL is returned. */
 void sem_search(string_t class_id, string_t memb_id) {
     void *symbol = NULL;
-    if (class_id == NULL) {
-        if(!outside_func) { // local scope has more priority inside function
+    if (class_id == NULL) { // when there's no class selected, we assume active one
+        if(!outside_func) { // local scope has higher priority than global one
             symbol = st_get_loc_var(active_function, memb_id);
-            if(!symbol)
+            if(!symbol) // if we had no luck, we try to search global identifier
                 symbol = st_getmemb(active_class, memb_id);
         } else { // outside function, we search only for global identifiers
             symbol = st_getmemb(active_class, memb_id);
         }
-    } else {
+    } else { // with given class id, we don't do any assumptions
         class_t class = st_getclass(class_id);
-        if (class) {
+        if (class) { // if class is found, the search for its member
             symbol = st_getmemb(class, memb_id);
         }
     }
     sem_id_decoded.ptr = symbol;
     setIsFunFlag(symbol);
-} // OK -> never causes error by itself
+}
 
+/** Sets global flag to indicate whether the identifier we searched for
+    was function or variable */
 void setIsFunFlag(void *symbol) {
     if(symbol != NULL) {
         class_memb_t memb = (class_memb_t)symbol;
@@ -93,8 +115,11 @@ void setIsFunFlag(void *symbol) {
             sem_id_decoded.isFun = false;
     } else
         sem_id_decoded.isFun = false;
-} // OK
+}
 
+/** Tries to add a new local variable with given identifier and datatype
+    into local ST of 'active_function'. On success, 0 is returned, otherwise
+    corresponding error is returned and error is printed to stderr. */
 int sem_new_loc_var(datatype dt, string_t id) {
     class_memb_t m = st_getmemb(active_class, id);
     if((m && !(m->type == func)) || !(m)) {
@@ -110,10 +135,13 @@ int sem_new_loc_var(datatype dt, string_t id) {
     } else {
         fprintf(stderr, "ERR: Cannot define local variable '%s'. A function already exists with same identifier in current context.\n", id->data);
         return 3;
-    }
-    
-} // OK
+    }   
+}
 
+/** Tries to add a new helper variable with given datatype
+    into list in local ST of 'active_function'. On success, pointer
+    to newly created variable is returned, otherwise NULL signalizing
+    internal err. */
 local_var_t sem_new_tmp_var(datatype dt) {
     local_var_t tmpvar = st_fn_add_tmpvar(active_function, dt);
     if (tmpvar == NULL) {
@@ -121,8 +149,12 @@ local_var_t sem_new_tmp_var(datatype dt) {
         return NULL;
     }
     return tmpvar;
-} // OK -> only causes internal err
+}
 
+/** Called with reduction steps in precedence analysis. Checks, whether
+    operands are type compatible (and generates corresponding conversion
+    instructions if needed). Function identifiers always cause semantic error.
+    Returns 0 on success, otherwise corresponding number is returned. */
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     op_t new_var = NULL, new_dst = NULL; // new_var = result of conversion, new_dst destination of effective instruction
     token_t t;  // for generating conversion tmp var

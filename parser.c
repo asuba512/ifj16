@@ -582,13 +582,13 @@ int as_ca(){
 						if (!tmp.attr.p) return 99;
 						tok_enqueue(expr_queue, tmp);
 					}
-
+					if(error_number) return 3; // identifier was undefined
 					next_token();
 					counter++;
 				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
 
 				if(!(counter == 2 && is(token_rbracket)) && !is_string){
-				 	printf("ERR: Incompatible types used as arguments of ifj16.print().\n");
+				 	fprintf(stderr, "ERR: Incompatible types used as arguments of ifj16.print().\n");
 				 	return error_number = 4;
 				}
 

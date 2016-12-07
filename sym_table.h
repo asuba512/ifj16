@@ -13,6 +13,8 @@
 #include "token.h"
 #include "ilist.h"
 
+#define ARG_CHUNK 5 // chunk for adding space to array of pointers to function arguments
+
 typedef enum {
 	dt_double,
 	dt_int,
