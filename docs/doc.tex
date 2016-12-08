@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[a4paper, 11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[czech]{babel}
 \usepackage{amsmath}
@@ -86,8 +86,9 @@
     Sémantická analýza je soubor funkcí a kontrol volaných během syntaktické analýzy v obou průchodech. V 1. průchodu do tabulky symbolů vkládá informace o třídách, statických funkcích, statických proměnných, argumentech funkcí a kontroluje, zda nedošlo k redefinici.  Těla funkcí nejsou v 1. průchodu sémanticky zpracována. V druhé fázi jsou pak generovány instrukce inicializačních výrazů statických proměnných a do tabulky symbolů jsou vkládány lokální proměnné. Rovněž jsou v této fázi zpracována těla funkcí, což zahrnuje kontrolu typů, kontrolu, zda byl identifikátor při jeho použití (u volání funkce, přiřazení) již definován a následné generování instrukcí, pokud nenastaly chyby zmíněné dříve.\par
     V případě sémantické správnosti kódu je během precedenční analýzy vždy při redukci části výrazu na neterminál generovaná aritmetická instrukce, případně i dodateční konverzní instrukce, pokud je daná implicitní konverze podporovaná. Výstupem sémantické akce generující aritmetickou instrukci je pomocná proměnná, která je během precedenční analýzy přiřazena jako atribut cílovému neterminálu a může být dále použita při jiné redukci.\par
     \subsection{Tabulka symbolů}\label{ts}    
-    Tabulka symbolů (dále jen TS) je podle zadání implementovaná pomocí binárního vyhledávacího stromu. Vzhledem k tomu, že v jazyce IFJ16 existují různé rozsahy platnosti identifikátorů a třídy umožňují vytvářet oddělené jmenné prostory, navrhli jsme TS jako tříúrovňovou kaskádu vyhledávacích struktur. První úroveň je jediná tabulka tříd. Každá třída má potom vlastní tabulku členů (společnou pro statické proměnné a funkce). Funkce mají dále vlastní tabulky lokálních proměnných.\par
-    Hodnoty statických proměnných jsou uložené přímo v odpovídajících položkách TS. Hodnoty lokálních proměnných nejsou, kvůli možnému rekurzivnímu volání funkcí, uložené přímo v TS, ale jejich hodnoty si ukládá interpret na svém zásobníku během vykonávání instrukcí\par
+    Tabulka symbolů (dále jen TS) je podle zadání implementovaná pomocí binárního vyhledávacího stromu. Vzhledem k tomu, že v jazyce IFJ16 existují různé rozsahy platnosti identifikátorů a třídy umožňují vytvářet oddělené jmenné prostory, navrhli jsme TS jako tříúrovňovou kaskádu vyhledávacích struktur. První úroveň je jediná tabulka tříd. Každá třída má potom vlastní tabulku členů (společnou pro statické proměnné a funkce). Funkce mají dále vlastní tabulky lokálních proměnných. \par
+    Hodnoty statických proměnných jsou uložené přímo v odpovídajících položkách TS. Hodnoty lokálních proměnných nejsou, kvůli možnému rekurzivnímu volání funkcí, uložené přímo v TS, ale jejich hodnoty si ukládá interpret na svém zásobníku během vykonávání instrukcí.\par
+    Různé typy proměnných (statická, lokální, pomocná) a literály jsou v naší implementaci reprezentovány různými strukturami, ale při sémantických akcích často není potřeba mezi nimi rozlišovat. Kvůli tomuto sme zavedli jednu extra strukturu, která je umístěna jako první člen ostatních struktur. Obsahuje informaci o tom, na kterou strukturu lze ukazatel na tuto univerzální strukturu dále přetypovat v případě potřeby.\footnote{A pointer to a structure object, suitably converted, points to its initial member and vice versa. C Standard, http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf, s. 103} Krom toho ještě obsahuje informaci o datovém typu, který může sémantická skontrolovat bez nutnosti přetypování.\par
     \subsection{Interpret}
     Interpret jazyka IFJ16 obsahuje jednu velkou funkci, jejímž vstupem je instrukční páska. Funkce se pomocí cyklu posouvá po instrukční pásce až do dosažení konce, tj. na instrukční pásce je \texttt{NULL}.\par
     Podle operačního kódu instrukce se zvolí příslušná větev interpretu a pomocná dekódovací funkce získá z instrukce operandy (jejich hodnotu, informaci o tom, jestli jsou inicializované apod.). Pro rámce funkcí má interpret svůj vlastní zásobník. Při volání funkce se vytvoří nový rámec, vyplní se potřebnými hodnotami (argumenty funkce a místo pro návratovou hodnotu) a vloží se na zásobník. Při návratu z funkce je návratová hodnota uložena na místa v rámci pro ni vymezeného.
@@ -197,7 +198,7 @@
 \textbf{\$} & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ &  & $<$ & $<$ & $<$ & $<$ &  \\ \hline
     \end{tabular}
 	
-	\subsection{Diagram konečného automatu lexikální analýzi}\bigskip
+	\subsection{Diagram konečného automatu lexikální analýzy}\bigskip
 	\begin{center}
 		\includegraphics[scale=0.4]{docs/FSM_part1}\\
 		\includegraphics[scale=0.4]{docs/FSM_part2}
