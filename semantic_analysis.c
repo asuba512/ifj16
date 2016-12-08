@@ -157,15 +157,14 @@ local_var_t sem_new_tmp_var(datatype dt) {
     Returns 0 on success, otherwise corresponding number is returned. */
 int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
     op_t new_var = NULL, new_dst = NULL; // new_var = result of conversion, new_dst destination of effective instruction
-    token_t t;  // for generating conversion tmp var
+    token_t t;  // for generating conversion tmp var (the function takes token as parameter)
     struct instr i, conv; // i - main instruction, conv - helper conversion instruction
     int err = 0; // catches error codes
     // just default values
     i.type = type;
     i.src1 = src1;
     i.src2 = src2;
-    *dst = NULL;
-    // dst will be set at the end because we don't know its datatype yet
+    *dst = NULL;  // dst will be set at the end because we don't know its datatype yet
     if(src1->sc == global && (((class_memb_t)(src1))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
         return 3;
@@ -173,18 +172,18 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         fprintf(stderr, "ERR: Function identifier used as variable.\n");
         return 3;
     }
-    if(src1->dtype == dt_String || (src2 && src2->dtype == dt_String)) {
+    if(src1->dtype == dt_String || (src2 && src2->dtype == dt_String)) { // one operand is string, we're doing concatenation
         if(type == add) {
             i.type = conc; // concatenation of strings and addicion are different instructions
             NEW_STRING(new_dst) // result of concatenation
             if(!new_dst) INTERNAL_ERR
             // conversion and further modifications in instruction are needed, when one of operands is not a string  
-            if(src1->dtype != dt_String || src2->dtype != dt_String) {   
+            if(src1->dtype != dt_String || src2->dtype != dt_String) { // one operand is not a string yet, we need to generate conversion
                 NEW_STRING(new_var) // converted operand   
                 if(!new_var) INTERNAL_ERR
                 conv.src2 = NULL; 
                 if(src1->dtype != dt_String) {
-                    switch(src1->dtype) {
+                    switch(src1->dtype) { // choose appropriate conversion
                         case dt_double: conv.type = dbl_to_str; break;
                         case dt_int: conv.type = int_to_str; break;
                         case dt_boolean: conv.type = bool_to_str; break;
@@ -193,7 +192,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                     conv.src1 = src1;
                     i.src1 = new_var;
                 } else {
-                    switch(src2->dtype) {
+                    switch(src2->dtype) { // choose appropriate conversion
                         case dt_double: conv.type = dbl_to_str; break;
                         case dt_int: conv.type = int_to_str; break;
                         case dt_boolean: conv.type = bool_to_str; break;
@@ -213,12 +212,13 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         }
     } else {
         if(type == add || type == sub || type == imul || type == idiv) {
-            if(isNum(src1) && isNum(src2)) {
+            if(isNum(src1) && isNum(src2)) { // both operands are int/double
                 if(src1->dtype == dt_int && src2->dtype == dt_int)
-                    NEW_INT(new_dst)
+                    NEW_INT(new_dst) // both were int, no conversion
                 else {
                     NEW_DOUBLE(new_dst)
                     if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
+                        // one operand is double and other is int
                         NEW_DOUBLE(new_var) // converted operand
                         conv.type = int_to_dbl;
                         conv.src2 = NULL;
@@ -230,7 +230,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                             conv.src1 = src1;
                             i.src1 = new_var;
                         }
-                        INSTR(conv)
+                        INSTR(conv) // generate conversion instruction
                         if(err) INTERNAL_ERR
                     }
                 }
@@ -244,6 +244,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             if(!new_dst) INTERNAL_ERR
             if(isNum(src1) && isNum(src2)) {
                 if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
+                    // if one of operands was double and other was int, generate conversion
                     NEW_DOUBLE(new_var) // converted operand
                     conv.type = int_to_dbl;
                     conv.src2 = NULL;
@@ -265,7 +266,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
                 return 4;
             }
         } else if(type == leq || type == geq || type == gre || type == less) { 
-            NEW_BOOLEAN(new_dst)
+            NEW_BOOLEAN(new_dst) // inequality comparisons only take numbers and generate boolean
             if(!new_dst) INTERNAL_ERR
             if(isNum(src1) && isNum(src2)) {
                 if((src1->dtype == dt_double && src2->dtype == dt_int) || (src1->dtype == dt_int && src2->dtype == dt_double)){
@@ -293,7 +294,7 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
             if(!new_dst) INTERNAL_ERR
             if(src1->dtype == dt_boolean && src2->dtype == dt_boolean) { // both operands must be boolean
                 // OK
-            } else { // everything else if prohibited
+            } else { // everything else is prohibited
                 fprintf(stderr, "ERR: Incompatible types of operands.\n");
                 return 4;
             }
@@ -310,14 +311,17 @@ int sem_generate_arithm(instr_type_t type, op_t src1, op_t src2, op_t *dst) {
         }
     }
     *dst = i.dst = new_dst;
-    INSTR(i)
+    INSTR(i) // finally generate effective arithmetic instruction
     if(err) INTERNAL_ERR
     return 0;
-} // OK, trivial, evident
+}
 
+/** Checks type compatibility, creates conversion if applicable, and generates
+    mov instuction, a.k.a. assignment. Return 0 on success, otherwise corresponding
+    error code is returned. */
 int sem_generate_mov(op_t src, op_t dst) {
     struct instr i;
-    token_t t; // for generating conversion tmp var
+    token_t t; // for generating conversion tmp var (macro takes token)
     int err = 0; // catches error codes
     i.type = mov;
     if(src->sc == global && (((class_memb_t)(src))->type) == func) {
@@ -330,7 +334,7 @@ int sem_generate_mov(op_t src, op_t dst) {
         fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
         return 3;
     } 
-    if(src->dtype == dst->dtype) {
+    if(src->dtype == dst->dtype) { // compatible operands
         i.src1 = src;
     } else if(src->dtype == dt_int && dst->dtype == dt_double) {
         struct instr conv;
@@ -348,12 +352,15 @@ int sem_generate_mov(op_t src, op_t dst) {
     }
     i.dst = dst;
     i.src2 = NULL;
-    INSTR(i)
+    INSTR(i) // finally generate assignment instruction
     if(err) INTERNAL_ERR
     return 0;
-} // OK
+}
 
-// generates 'sframe' instruction
+/** Generates instruction sframe (tells interpreter which function is going
+    to be called, so that it is able to allocate enough memory). Also performs
+    check if symbol is with given identifier is function, otherwise error
+    is returned. */
 int sem_generate_prepare(class_memb_t fn) {
     if(fn->op.sc == local) {
         fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
@@ -367,28 +374,33 @@ int sem_generate_prepare(class_memb_t fn) {
     i.src1 = (op_t)fn;
     i.src2 = i.dst = NULL;
     if(st_add_fn_instr(active_function, i)) INTERNAL_ERR
-    calling_function = fn;
+    calling_function = fn; // remember function we are calling in global variable
     return 0;
-} // OK
+}
 
+/** Generates 'push' instruction (used to copy argument's value onto stack). 
+    Performs type check and returns corresponding error code. */
 int sem_generate_push(class_memb_t called_fn, op_t arg) {
+    // fistly, check if we do not push more parameters than called function takes
     if(arg_counter == called_fn->arg_count) {
         fprintf(stderr, "ERR: Too many arguments\n");
         return 4;
     }
-    token_t t; // macro
+    token_t t; // for macro 'NEW_DOUBLE'
     struct instr i;
     struct instr conv;
     i.type = push;
     i.src2 = i.dst = NULL;
     i.src1 = arg;
+    // only variable element can be pushed
     if(arg->sc == global && (((class_memb_t)(arg))->type) == func) {
-        fprintf(stderr, "ERR: Function identifier used as variable.\n");
+        fprintf(stderr, "ERR: Function identifier used as function argument.\n");
         return 4;
     }
     if(arg->dtype == ((called_fn->arg_list)[arg_counter])->op.dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double)) { 
         // OK
 		if(arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double){
+            // if we're pushing int and function expects double, generate conversion first
 			NEW_DOUBLE(conv.dst)
             if(!conv.dst) INTERNAL_ERR
             conv.src1 = arg;
@@ -406,16 +418,20 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
     return 0;
 }
 
+/** Resets count of pushed arguments of function call that is processed at the moment */
 void sem_rst_argcount() {
     arg_counter = 0;
 }
 
+/** Called at the end of (.., .., ..) sequence when calling function,
+    to check whether sufficient arguments count was given. */
 bool sem_args_ok(class_memb_t called_fn) {
     if((called_fn->arg_count != arg_counter))
         fprintf(stderr,"ERR: Too few arguments.\n");
     return called_fn->arg_count == arg_counter;
 }
 
+/** Generates 'call' instruction after processing of arguments is done. */
 int sem_generate_call(class_memb_t called_fn) {
     struct instr i;
     i.type = call;
@@ -425,6 +441,9 @@ int sem_generate_call(class_memb_t called_fn) {
     return 0;
 }
 
+/** Generates instruction to assign return value of called function to 'dst'.
+    Performs type check and generates appropriate conversion, if applicable.
+    Return 0 on success, otherwise error code is returned. */
 int sem_generate_movr(class_memb_t called_fn, op_t dst) {
     struct instr i;
     i.type = movr;
@@ -438,10 +457,11 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
     if(called_fn->op.dtype == dst->dtype) {
         // OK
     } else if(called_fn->op.dtype == dt_int && dst->dtype == dt_double) {
+        // generate additional conversion (special one, just for return value "register")
         struct instr conv;
         conv.type = i_d_r;
-        conv.dst = conv.src2 = conv.src1 = NULL;
-        // no operands, just convert value in register
+        conv.dst = conv.src2 = conv.src1 = NULL; // implicit operand 'eax'
+        // no operands, just convert value in "register"
         if(st_add_fn_instr(active_function, conv)) INTERNAL_ERR
     } else {
         fprintf(stderr, "ERR: Incompatible types of operands.\n");
@@ -453,6 +473,8 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
     return 0;
 }
 
+/** Generates conditional jump instruction based on 'src'. Performs type check.
+    Additional operand 'dst' must be supplied later */
 int sem_generate_jmpifn(op_t src) {
     struct instr i;
     i.type = jmpifn;
@@ -466,6 +488,7 @@ int sem_generate_jmpifn(op_t src) {
     return 0;
 }
 
+/** Generates dummy label instruction as a destination of jumps */
 int sem_generate_label() {
     struct instr i;
     i.type = label;
@@ -474,6 +497,7 @@ int sem_generate_label() {
     return 0;
 }
 
+/** Generates non-conditional jump instruction. */
 int sem_generate_jmp(op_t dst) {
     struct instr i;
     i.type = jmp;
@@ -483,24 +507,32 @@ int sem_generate_jmp(op_t dst) {
     return 0;
 }
 
+/** Provides 'dst' operand (destination of a jump) to given instruction. */
 int sem_set_jmp_dst(instr_t i, op_t dst) {
     i->dst = dst;
     return 0;
 }
 
+/** Generates return instruction, setting return value to 'src'. 
+    'src' can be NULL -> function assumes empty return expression.
+    Type check of return value is also performed. Return expression 
+    of a void-function must be empty. */
 int sem_generate_ret(op_t src) {
     struct instr i;
     i.type = ret;
     i.src2 = i.dst = NULL;
     if(active_function->op.dtype != t_void && !src) {
+        // trying to return; (without expression) in non-void function
         fprintf(stderr,"ERR: Non-void-function must return a value.\n");
         return 4;
     } else if(active_function->op.dtype == t_void && src) {
+        // opposite case - trying to return a value in void-function
         fprintf(stderr,"ERR: Void-function can't return a value.\n");
         return 4;
     } else if((active_function->op.dtype == t_void && !src) || active_function->op.dtype == src->dtype) {
-        i.src1 = src;
+        i.src1 = src; // compatible return types
     } else if(active_function->op.dtype == dt_double && src->dtype == dt_int) {
+        // generating additional conversion
         struct instr conv;
         conv.type = int_to_dbl;
         conv.src1 = src;
@@ -516,6 +548,9 @@ int sem_generate_ret(op_t src) {
     return 0;
 }
 
+/** Function to append a 'halt' instruction. When interpreter reaches this,
+    it signalizes that the called function is missing return statement
+    although it is non-void. */
 int sem_generate_halt() {
     struct instr i;
     i.type = halt;
@@ -524,7 +559,10 @@ int sem_generate_halt() {
     return 0;
 }
 
-// returns op_t because we want to use the result of conversion immediately
+/** Function to generate conversion instruction of non-string operand
+    to string. Returns string operand, so we can use it immediately.
+    Is only used when evaluating concatenation in print statement,
+    so there's no support for global operand result. */
 op_t sem_generate_conv_to_str(op_t op) {
     struct instr i;
     int err; // catching errors

@@ -1,18 +1,24 @@
 #include "sym_table.h"
 #include "infinite_string.h"
 
-
+/** Global variable to store pointer to class in whose body we are in. */
 class_t active_class;
+/** Global variable to store pointer to function in whose body we are in. */
 class_memb_t active_function;
+/** Global var to store pointer to function we're calling (for processing arguments purposes). */
 class_memb_t calling_function;
+/** Counter of processed arguments when calling function */
 int arg_counter;
+/** Stores result of precedence analysis */
 op_t precedence_result;
+/** Flag indicating whether we are currently inside or outside function */
 bool outside_func;
+/** Stores data before submitting new symbol to ST. */
 struct temp_data {
     string_t id;
     datatype dt;
 } sem_tmp_data;
-
+/** Stores result of searching for symbols in sem_search() */
 struct fq {
     bool isFun;
     void* ptr;
@@ -44,10 +50,17 @@ int sem_generate_halt();
 op_t sem_generate_conv_to_str(op_t op);
 void sem_mark_sec_pass(string_t id);
 
+/** Helper condition to determine whether operand is a number (double/int) */
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)
+
+/** Shorthand for throwing an internal error */
 #define INTERNAL_ERR {fprintf(stderr, "ERR: Internal error.\n"); return 99;}
+
+/** These create a new helper variable (local/global - based on outside_func global flag) */
 #define NEW_STRING(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_String); else {t.type = token_string; d = (op_t)add_global_helper_var(t, false);}
 #define NEW_DOUBLE(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_double); else {t.type = token_double; d = (op_t)add_global_helper_var(t, false);}
 #define NEW_BOOLEAN(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_boolean); else {t.type = token_boolean; d = (op_t)add_global_helper_var(t, false);}
 #define NEW_INT(d) if (!outside_func) d = (op_t)sem_new_tmp_var(dt_int); else {t.type = token_int; d = (op_t)add_global_helper_var(t, false);}
+
+/* This generates new instruction (local/global - based on outside_func global flag) */
 #define INSTR(i) if(outside_func) { err = st_add_glob_instr( i ); } else { err = st_add_fn_instr(active_function, i ); }

@@ -1,7 +1,6 @@
 /**
- * @file 	   sym_table.h
- * @brief      Header file of table of symbols module.
- * @authors    Paliesek Jakub
+ * Header file of table of symbols module.
+ * Author:    Paliesek Jakub (xpalie00)
  */
 
 #ifndef SYM_TABLE_INC
@@ -15,6 +14,7 @@
 
 #define ARG_CHUNK 5 // chunk for adding space to array of pointers to function arguments
 
+/** Represents datatype in ST */
 typedef enum {
 	dt_double,
 	dt_int,
@@ -23,17 +23,23 @@ typedef enum {
 	t_void
 } datatype;
 
+/** Represents information whether symbol is function or var (needed in static symbols) */
 typedef enum {
 	var,
 	func
 } var_func;
 
+/** Indicates scope of a symbol. In most places local variables, class members
+	and helper variables are used interchangeably, but sometimes we need to
+	distinct them. Before casting op_t (see below) to any of these, we need to look at this
+	enum first. */
 typedef enum {
 	local,
 	global,
 	helper
 } scope;
 
+/** Stores actual value of variable. */
 typedef union {
 	double d_val;
 	int i_val;
@@ -43,120 +49,107 @@ typedef union {
 
 // generic struct for global var, local var, literal, helper var - will be always casted in interpret (except jmp, jmpif)
 // its purpose is to simplify the 3AC to work with 
+// before casting to another struct, we need to look at 'sc'
+// is always the first element of symbol structure
+// "A pointer to a structure object, suitably converted, points to its initial member.", ISO C Standard
 typedef struct operand {
 	scope sc;
 	datatype dtype;
 } *op_t;
 
+/** Represents instruction in global/local instruction tape */
 typedef struct instr {
 	instr_type_t type;
-	op_t src1, src2, dst;
+	// operands are op_t by default, but are always casted to one of these: class_memb_t, local_var_t, glob_helper_var_t, instr_t
+	op_t src1, src2, dst; 
 	struct instr *next;
 } *instr_t;
 
-/** 
- * @brief Global class table
- */
+/** Global class table (Level1 ST) */
 typedef struct class_table {
 	bst_node_t root; ///< Root node
 } *class_table_t;
 
+/** Helper variable, that is created as a product storing literal or in precedence analysis for global var initialization */
 typedef struct global_helper_var {
-	struct operand op;
+	struct operand op; // common part with other symbols
 	bool initialized;
-	var_value val; ///< value
+	var_value val;
 	struct global_helper_var *next; // stored in linked list
-} *glob_helper_var_t; // literals and global tmp variables are stored in this struct (created during generation of global var initialization code)
+} *glob_helper_var_t;
 
-struct global_helper_var_arr {
+/** List of global helpers variables */
+struct global_helper_varz {
 	glob_helper_var_t head;
 	glob_helper_var_t tail;
 } glob_helper_vars;
 
-/** 
- * @brief Pointer to class entry in global class table
- */
+/** Pointer to class entry in global class table. */
 typedef struct class {
-	//string_t id;
-	bst_node_t root; ///< Root node
+	bst_node_t root; // Root node of Level2 ST (class member table)
 } *class_t;
 
-/**
- * @brief      Represents a local variable or argument in the table of local variables of function.
- * 
- * A new set of local variable instances is pushed to the stack whenever a function is called.
- */
+/** Represents a local variable or argument in the table of local variables (Level3 ST) of a function.
+	Is also used to store helper variables (in linked list) created during precedence analysis. */
 typedef struct local_var {
-	struct operand op;
-	int index; ///< index in array of variable instances in function context, unique within one function
-	struct local_var *next; // for helper vars stored in linkedlist
+	struct operand op; // common part with other symbols
+	int index; // index in array of variable instances in function context, unique within one function
+	struct local_var *next; // for helper vars stored in linkedlist, not used by regular vars or arguments
 } *local_var_t;
 
-/**
- * @brief Entry in table of members of class
- * 
- * Either static function or static variable.
- */
+/** Entry in table of members of class (Level2 ST), either static function or static variable.
+	These elements share one structure representation, because we need to to store them in
+	a single BST. */
 typedef struct class_memb {
-	struct operand op;
-	bool initialized; ///< indicates whether static variable was initialized or not, not used by function
-	var_value val; ///< value of global variable, not used by functions
-	var_func type; ///< indicates whether entry represents function or variable
-	bool second_pass; ///< indicates whether variable was already processed in second pass (applies on vars only)
-	int arg_count; ///< argument count, not used by static variable
-	int _max_arg_count;
-	int var_count; ///< local variable count, including arguments, not used by static variable
-	local_var_t *arg_list; ///< array of pointers to argument entries in local variable table
-	                       ///< ordered by index in function header
-	                       ///< not used by static variable
+	struct operand op; // common part with other symbols
+	bool initialized; // indicates whether static variable was initialized or not, not used by functions
+	var_value val; // value of global variable, not used by functions
+	var_func type; // indicates whether entry represents function or variable
+	bool second_pass; // indicates whether variable was already processed in second pass (applies on vars only)
+	int arg_count; // argument count, not used by variables
+	int _max_arg_count; // indicates currently allocated space for arg_list array
+	int var_count; // local variable count, including arguments, not used by static variable
+	local_var_t *arg_list; // array of pointers to argument entries in local variable table
+	                       // ordered by index in function prototype
+	                       // not used by static variable
 	local_var_t helper_vars; // stack-like linked list of helper variables created during precedence analysis inside function
-	bst_node_t local_sym_table_root; ///< root node of local table of symbols, not used by static variable
-	instr_t instr_list;
-	instr_t instr_list_end;
+	bst_node_t local_sym_table_root; // root node of local table of symbols (Level3 ST), not used by static variables
+	instr_t instr_list; // instruction tape head
+	instr_t instr_list_end; // instruction tape tail
 } *class_memb_t;
 
 
-/**
- * @brief      Represents an instance of local variable or function argument.
- * 
- * A new instance is created and pushed to the stack whenever a function is called and is popped when functions returns from control.
- */
+/** Represents an instance of local variable, function argument or helper variable. 
+	New instances are created when function is called during interpretaion. 
+	This is where interpret stores values of local vars. */
 typedef struct local_var_inst {
-	bool initialized; ///< indicates whether local variable was initialized or not
-	var_value val; ///< value of local variable instance
+	bool initialized; // indicates whether local variable was initialized or not
+	var_value val; // value of local variable instance
 } local_var_inst_t;
 
-/**
- * @brief      Represents one "context" of funcion. Contains an array of local variable values.
- * 
- * A new context is created and pushed to the context stack whenever a function is called. Once completed, context is popped from the stack.
- */
+/** Represents one stackframe-like structure where interpreter stores values of local variables,
+	return addresses for returning and return values. */
 typedef struct stackframe {
-	struct stackframe *next; ///< pointer to next function context on the stack
-	local_var_inst_t *vars; ///< array of variable instances in current context
-	instr_t ret_addr; ///< store next instruction here before calling function
+	struct stackframe *next; // pointer to next function 'stackframe' on the stack
+	local_var_inst_t *vars; // array of variable instances in current context
+	instr_t ret_addr; // store next instruction here before calling function
 	var_value eax; // "register", where return value is stored after returning from function
 } *stackframe_t;
 
+/** Instruction list structure */
 typedef struct instr_list {
 	instr_t head;
 	instr_t tail;
 } instr_list_t;
 
+/** Global instruction list */
 instr_list_t glob_instr_list;
 
 // just to avoid one malloc
 struct class_table ctable;
 
-/**
- * Global variable - table of classes. Will point to variable above.
- */
+/** Global variable - table of classes. Will point to variable above. */
 class_table_t classes;
-
-/**
- * Global variable - top of function call stack.
- */
-stackframe_t call_stack_top;
 
 
 void init_class_table();
