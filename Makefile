@@ -28,5 +28,14 @@ prec_test: prec_test.o infinite_string.o token.o precedence.o
 clean: clean-obj
 	$(RM) $(BIN) sc_test sem_test prec_test .fuse*
 
+doc:
+	latex docs/doc.tex
+	latex docs/doc.tex
+	dvips doc.dvi 
+	ps2pdf -sPAPERSIZE=a4 doc.ps
+	mv doc.pdf dokumentace.pdf
+	rm `ls | grep "doc[.]"`
+
+
 clean-obj:
 	$(RM) *.o

@@ -7,10 +7,9 @@ xsubaa00=25
 xpalie00=25
 xsuhaj02=25
 xtotha01=25
-
 declare -A contributors
+declare -A contributorsName
 declare -A tmpCon
-
 while getopts ":gt" opt; do
   case $opt in
     g)
@@ -24,6 +23,11 @@ while getopts ":gt" opt; do
       ;;
   esac
 done
+
+contributorsName[xsubaa00]="Adam Šuba"
+contributorsName[xpalie00]="Jakub Paliesek"
+contributorsName[xsuhaj02]="Peter Šuhaj"
+contributorsName[xtotha01]="Adrián Tóth"
 
 rm -rf *.o ifj sc_test sem_test prec_test .fuse*
 contents=`ls | grep -v -e "test" -e "docs" -e "pack" -e "README"`
@@ -60,19 +64,28 @@ do
   currentdir=`pwd`
   cd $tmpdir
 
-  authors=`echo ${!contributors[@]} | tr " " "\n" | sort | tr "\n" " "`
-  authors=${authors:0:-1}
-  message="/***\n * IFJ16 programming language interpret\n * Contributors: ${authors// /, }\n***/\n\n"
+	for login in "${!contributors[@]}"
+	do
+		authors=$authors`echo "${contributorsName[$login]} ($login)\0"`
+	done
+
+  authors=${authors:0:-2}
+  message="/********************************************************************/\n/*\n/* Projekt: Implementace interpretu imperativniho jazyka IFJ16\n/* Řešitelé: ${authors//"\0"/, }\n/*\n/********************************************************************/\n\n"
 
   sed -i '1s@^@'"$message"'@' $file
 
   cd $currentdir
   contributors=()
   tmpCon=()
+  authors=""
 done
 
 if [ $generate -eq 1 ]; then
     touch $tmpdir/dokumentace.pdf
+else
+	make doc
+	cp dokumentace.pdf $tmpdir
+	rm dokumentace.pdf
 fi
 printf "xsubaa00:%.2d\nxtotha01:%.2d\nxsuhaj02:%.2d\nxpalie00:%.2d\n" $xsubaa00 $xtotha01 $xsuhaj02 $xpalie00 > $tmpdir/rozdeleni
 printf "BOOLOP\n" > $tmpdir/rozsireni
