@@ -265,7 +265,7 @@ void destroy_class(bst_node_t c) {
 void destroy_class_memb(bst_node_t m) {
 	// no need to check before freeing, because arg_list is always NULL (free does nothing) or holds some allocated space
 	free(((class_memb_t)(m->data))->arg_list); 
-	// crawls entire Level2 ST and calls destroy_loc_var() on every node (local vars and arguments)
+	// crawls entire Level3 ST and calls destroy_loc_var() on every node (local vars and arguments)
 	bst_postorder(((class_memb_t)(m->data))->local_sym_table_root, destroy_loc_var);
 	// if function has nonempty instruction list, we need to dispose the linked list
 	if (((class_memb_t)(m->data))->instr_list != NULL) {
