@@ -8,8 +8,6 @@
 #include "ifj16_class.h"
 #include <string.h>
 
-// OPTIMALIZATION FLAG = marks places that can be optimized
-
 extern struct temp_data sem_tmp_data;
 extern struct fq sem_id_decoded;
 extern class_memb_t calling_function;
@@ -21,6 +19,7 @@ extern bool outside_func;
 #define is(x) (t.type == x)
 
 int c_list(){
+	// initialize global variables used later
 	outside_func = true;
 	sem_id_decoded.ptr = NULL;
 	calling_function = NULL;
@@ -28,13 +27,13 @@ int c_list(){
 	if(is(token_k_class)){
 		next_token();
 		if(is(token_id)){
-			sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS) {
-				error_number = sem_new_class(t.attr.s); // first pass adds this class into symbols table
+				error_number = sem_new_class(t.attr.s); // first pass adds this class into ST
 				if (error_number) return error_number;
 			}
-			else if(SECOND_PASS) // OPTIMALIZATION FLAG = redundant search
+			else if(SECOND_PASS) {
 				sem_set_active_class(t.attr.s); // second pass marks this class as active scope for searching members
+			}
 			next_token();
 			if(is(token_lbrace)){
 				if(!memb_list() && is(token_rbrace)){
@@ -49,7 +48,7 @@ int c_list(){
 }
 
 int memb_list(){
-	active_function = NULL;
+	active_function = NULL; // we're not in a function yet
 	next_token();
 	if(is(token_k_static)){
 		return c_memb() ||  memb_list() ? 2 : 0;
@@ -70,11 +69,12 @@ int c_memb(){
 int c_memb1(){
 	next_token();
 	if(is(token_k_void)){
+		// reached some definition
 		if(FIRST_PASS)
-			sem_tmp_data.dt = t_void;
+			sem_tmp_data.dt = t_void; // remember datatype
 		next_token();
 		if(is(token_id)){
-			sem_tmp_data.id = t.attr.s;
+			sem_tmp_data.id = t.attr.s; // remember identifier
 			next_token();
 			return c_memb_func();
 		}
@@ -82,7 +82,7 @@ int c_memb1(){
 	else if(!type()){
 		next_token();
 		if(is(token_id)){
-			sem_tmp_data.id = t.attr.s;
+			sem_tmp_data.id = t.attr.s; // remember identifier
 			return c_memb2();
 		}
 	}
@@ -90,17 +90,18 @@ int c_memb1(){
 }
 
 int type(){
+	// if there's a datatype token, remember it, so it can be used later to insert symbol into ST
 	if(is(token_k_int)){
-		sem_tmp_data.dt = dt_int;
+		if(FIRST_PASS) sem_tmp_data.dt = dt_int;
 		return 0;
 	} else if (is(token_k_double)) {
-		sem_tmp_data.dt = dt_double;
+		if(FIRST_PASS) sem_tmp_data.dt = dt_double;
 		return 0;
 	} else if(is(token_k_string)) {
-		sem_tmp_data.dt = dt_String;
+		if(FIRST_PASS) sem_tmp_data.dt = dt_String;
 		return 0;
 	} else if(is(token_k_boolean)){
-		sem_tmp_data.dt = dt_boolean;
+		if(FIRST_PASS) sem_tmp_data.dt = dt_boolean;
 		return 0;
 	}
 	return 2;
@@ -113,13 +114,13 @@ int c_memb_func(){
 			if (error_number) return error_number;
 		}
 		else if (SECOND_PASS)
-			sem_set_active_fn(t.attr.s); // second pass marks this function as active local scope
+			sem_set_active_fn(t.attr.s); // second pass marks this function as active local scope (for searching purposes)
 		if(!fn_def_plist() && is(token_rbracket)){
 			next_token();
 			if(is(token_lbrace)){
-				outside_func = false;
+				outside_func = false; // we're entering body of a function
 				if(!fn_body() && is(token_rbrace)){
-					return 0;
+					return 0; // ('active_function' and 'outside_fun'c have been already reset)
 				}
 			}
 		}
@@ -131,19 +132,22 @@ int c_memb2(){
 	next_token();
 	if(is(token_assign)){
 		if (FIRST_PASS) {
+			// last token was assignment, add new symbol as variable
 			if((error_number = sem_add_member_active_class(var))) return error_number;
+			// and skip the expression for now
 			do{
 				next_token();
 				if(is(token_eof)) return 2;
 			} while(!is(token_semicolon));
 		} else {
-			sem_mark_sec_pass(sem_tmp_data.id);
+			sem_mark_sec_pass(sem_tmp_data.id); // this variable can now be used in static initializers
 			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
 			tok_que_t expr_queue = tok_que_init();
+			// prepare precedence analysis
 			next_token();
 			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 				return 2;
-			error_number = precedence(expr_queue, &precedence_result);
+			error_number = precedence(expr_queue, &precedence_result); // evaluate expression
 			if(error_number == 2) {
 				error_number = 0;
 				return 2;
@@ -158,10 +162,11 @@ int c_memb2(){
 	}
 	else if(is(token_semicolon)){
 		if (FIRST_PASS) {
+			// symbol was definitely a variable, insert into ST
 			if ((error_number = sem_add_member_active_class(var))) return error_number;
 		}
 		else {
-			sem_mark_sec_pass(sem_tmp_data.id);
+			sem_mark_sec_pass(sem_tmp_data.id); // this variable can now be used in static initializers
 		}			
 		return 0;
 	}
@@ -203,6 +208,7 @@ int par_def(){
 		if(is(token_id)){
 			sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS) {
+				// we've just collected type and id of argument, let's submit that into ST
 				error_number = sem_add_arg_active_fn();
 				if(error_number) return error_number;
 			}
@@ -223,10 +229,11 @@ int fn_body(){
 		next_token();
 		if(is(token_id)){
 			if(SECOND_PASS) {
+				// submitting new local variable into ST using collected information
 				error_number = sem_new_loc_var(sem_tmp_data.dt, t.attr.s);
 				if(error_number) return error_number;
-				// OPTIMALIZATION FLAG - redundant search
-				sem_search(NULL, t.attr.s); // never causes error
+				// remembers pointer to just submitted var in sem_id_decoded.ptr so we can use it as destination of initializer assignment later
+				sem_search(NULL, t.attr.s); 
 			}
 			if(!opt_assign() && is(token_semicolon)){
 				return fn_body();
@@ -234,14 +241,16 @@ int fn_body(){
 		}
 	}
 	else if(is(token_rbrace)) {
+		// leaving function body
 		if(SECOND_PASS) {
 			if(active_function->op.dtype == t_void) {
-				if ((error_number = sem_generate_ret(NULL))) return error_number; // append ret instruction at the end of void function
+				// append ret instruction at the end of void function automatically
+				if ((error_number = sem_generate_ret(NULL))) return error_number; 
 			}
 			else {
-				if ((error_number = sem_generate_halt())) return error_number; // append halt instruction at the end of non-void function. proper funcion should not reach this instruction
-			}
-				
+				// append halt instruction at the end of non-void function. proper funcion should not reach this instruction
+				if ((error_number = sem_generate_halt())) return error_number; 
+			}			
 		}
 		outside_func = true;
 		active_function = NULL;
@@ -255,17 +264,20 @@ int opt_assign(){
 	if(is(token_assign)){
 		op_t tmp_dst = NULL;
 		if(SECOND_PASS) {
-			tmp_dst = (op_t)(sem_id_decoded.ptr);
+			tmp_dst = (op_t)(sem_id_decoded.ptr); // remembers pointer to just defined variable in fn_body()
 		}
-		int err = assign();
+		// produces result of expression evaluation in 'precedence_result' variable (assignment by evaluating expression)
+		// or sets pointer to called function (assignment by function call)
+		int err = assign(); 
 		if(err == 0 && SECOND_PASS) {
-			if(!calling_function) {
+			// generate either regular assignment instruction or assignment from return value of function
+			if(!calling_function) { // if 'calling_function' isn't NULL, we're assigning return value
 				if((error_number = sem_generate_mov(precedence_result, tmp_dst)))
 					return error_number;
 			} else {
 				if((error_number = sem_generate_movr(calling_function, tmp_dst)))
 					return error_number;
-				calling_function = NULL;
+				calling_function = NULL; // make sure that the value is not reused in future
 			}
 		}
 		return err;
@@ -276,52 +288,59 @@ int opt_assign(){
 	return 2;
 }
 
-/* NOT SO HUGE MESS */
+/** Determines what is going to be assigned and sets necessary values. */
 int assign(){
-	if(FIRST_PASS){ // for test purposes, change to FIRST_PASS
+	if(FIRST_PASS){ 
+		// we pretty much know nothing in first pass, skipping everything
 		do{
 			next_token();
-		} while(t.type <= token_string || is(token_comma));
+		} while(t.type <= token_string || is(token_comma)); // skip commas, too, there could be a func call
 		return 0;
 	}
-	if(SECOND_PASS){ // for test purposes, change to SECOND_PASS
+	if(SECOND_PASS){ 
 		next_token();
-		if(!id() && sem_id_decoded.isFun){ // function
+		// in this place, we use id() to check: IF token IS id/fqid THEN it MUST BE defined
+		// (the program is ok if and only if this implication is true)
+		if(!id() && sem_id_decoded.isFun){
+			// identifier token after '=' belongs to func, we try to call that function
 			if(((class_memb_t)sem_id_decoded.ptr)->op.dtype == t_void) {
 				fprintf(stderr, "ERR: Cannot assign return value of void-function.\n");
 				return error_number = 8;
 			}
-			if((error_number = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return error_number;
+			if((error_number = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return error_number; // sframe instruction
 			next_token();
 			if(is(token_lbracket)){
-				if(!fn_plist())
+				if(!fn_plist()) 
 					if(is(token_semicolon)){					
 						if(!sem_args_ok(calling_function)) {
-							return error_number = 4;
+							return error_number = 4; // checks whether the number of given args is ok
 						}
-						if((error_number = sem_generate_call(calling_function))) return error_number;
+						if((error_number = sem_generate_call(calling_function))) return error_number; // finally generate call instruction
+						// 'movr' is generated outside assign() nonterminal
 						return 0;
 					}
 			}
 		}
 		else if(error_number) {
+			// token in id() WAS is/fqid and WAS NOT defined -> error
 			return error_number;
 		}
-		else{ // expression
+		else{ // expression [(token WAS NOT an id -> NOT AN ERROR) OR (token WAS defined id/fqid and was belongs to variable)]
 			token_t tmp;
 			tok_que_t expr_queue = tok_que_init();
 			if(sem_id_decoded.ptr){ // if there was id as first token
 				tmp.type = token_id;
 				tmp.attr.p = sem_id_decoded.ptr;
 				tok_enqueue(expr_queue, tmp);
-				next_token(); // if there was an id(), you should take another token
+				next_token(); // _cond_fill_que expects first token to be already retrieved
 			}
 			else if(t.type > token_string){ // unsupported tokens
 				return 2;				
 			}
 			if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 				return 2;
-			return error_number = precedence(expr_queue, &precedence_result);
+			return error_number = precedence(expr_queue, &precedence_result); // finally evaluate the expession
+			// 'mov' is generated outside assign() nonterminal
 		}
 	}
 	return 2;
@@ -330,7 +349,7 @@ int assign(){
 int fn_plist(){
 	next_token();
 	if(SECOND_PASS)
-		sem_rst_argcount();
+		sem_rst_argcount(); // reset counter of processed args
 	if(is(token_rbracket)){
 		next_token();
 		return 0;
@@ -355,9 +374,11 @@ int fn_plist1(){
 }
 
 int val_id(){
+	// processing function arguments
 	if(!id()){
 		if(SECOND_PASS) {
 			if(calling_function) {
+				// if token was identifier (definition check was already performed), then generate 'push' instruction
 				if ((error_number = sem_generate_push(calling_function, (op_t)sem_id_decoded.ptr))) return error_number;
 			}
 		}
@@ -366,8 +387,8 @@ int val_id(){
 	if(is(token_int) || is(token_double) || is(token_string) || is(token_boolean)){
 		if(SECOND_PASS) {
 			if(calling_function) {
+				// if token was literal, then we need to add it into list of helper variables, then generate 'push'
 				op_t literal = (op_t)add_global_helper_var(t, true);
-				//printf("Literal: %d (%p)\n", ((literal_t)literal)->i_val, (void*)literal);
 				if ((error_number = sem_generate_push(calling_function, literal))) return error_number;
 			}
 		}
@@ -377,13 +398,17 @@ int val_id(){
 }
 
 int id(){
+	/** In second pass, this nonterminal tries to search for the indentifier in symbols table.
+	 	In case of success, sem_id_decoded.ptr points to found symbol in ST (and can be used
+	 	in semantic analysis later) */
 	if(is(token_id)){
-		if(SECOND_PASS) {
-			sem_search(NULL, t.attr.s);
+		if(SECOND_PASS) {			
+			sem_search(NULL, t.attr.s); // search for symbol in implicit (active) class
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s\n", t.attr.s->data);
 				return error_number = 3;
 			} else if(outside_func && ((class_memb_t)(sem_id_decoded.ptr))->type == var && !(((class_memb_t)(sem_id_decoded.ptr))->second_pass)) {
+				// the case when identifier IS in ST, but cannot be used yet, because it is defined lexically later
 				fprintf(stderr, "ERR: Static var must be defined before its usage.\n");
 				return error_number = 6;
 			}
@@ -393,6 +418,7 @@ int id(){
 	else if(is(token_fqid)){
 		string_t class_id = NULL, memb_id = NULL;
 		if(SECOND_PASS) {
+			// split fully qualified identifier into 'class part' and 'member part' (fqid)
 			char *ptr = strchr(t.attr.s->data, '.');
 			*ptr = 0;
 			if(!(class_id = str_init(t.attr.s->data))) {
@@ -403,11 +429,13 @@ int id(){
 				fprintf(stderr, "ERR: Internal error.\n");
 				return error_number = 99;
 			}
-			sem_search(class_id, memb_id);
+
+			sem_search(class_id, memb_id); // search for symbol in explicit class
 			if(!sem_id_decoded.ptr) {
 				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", t.attr.s->data, ptr + 1);
 				return error_number = 3;
 			} else if(outside_func && ((class_memb_t)(sem_id_decoded.ptr))->type == var && !(((class_memb_t)(sem_id_decoded.ptr))->second_pass)) {
+				// the case when identifier IS in ST, but cannot be used yet, because it is defined lexically later
 				fprintf(stderr, "ERR: Static var must be defined before its usage.\n");
 				return error_number = 6;
 			}
@@ -420,7 +448,7 @@ int id(){
 }
 
 int stat(){
-	int lb = 0, rb = 0;
+	int lb = 0, rb = 0; // helper variables for counting brackets
 	if(is(token_id) || is(token_fqid)){
 		if(!id()){
 			next_token();
@@ -443,7 +471,7 @@ int stat(){
 				if((error_number = precedence(expr_queue, &precedence_result)))
 					return 2;
 				if((error_number = sem_generate_jmpifn(precedence_result))) return error_number;
-				if_jmp_instr = active_function->instr_list_end; // we'll add jump target later
+				if_jmp_instr = active_function->instr_list_end; // retrieve newly created conditional jump instr. (we'll add a target later)
 			}
 			else{
 				do{ // in first pass skip the whole expression
@@ -456,18 +484,18 @@ int stat(){
 				next_token();
 				if(is(token_k_else)) {
 					if(SECOND_PASS) {
-						if ((error_number = sem_generate_jmp(NULL))) return error_number;
-						pre_else_jmp = active_function->instr_list_end; // another jump we will correct later
+						if ((error_number = sem_generate_jmp(NULL))) return error_number; // jump to skip the 'else' part
+						pre_else_jmp = active_function->instr_list_end; // target will be added later
 						if ((error_number = sem_generate_label())) return error_number;
-						sem_set_jmp_dst(if_jmp_instr, (op_t)(active_function->instr_list_end)); //set label we just created as a jump target
+						//set label we just created as target to this 'else' part
+						sem_set_jmp_dst(if_jmp_instr, (op_t)(active_function->instr_list_end)); 
 					}					
 					next_token();
 					if(!stat_com()){
 						if(SECOND_PASS) {
 							if ((error_number = sem_generate_label())) return error_number;
-							sem_set_jmp_dst(pre_else_jmp, (op_t)(active_function->instr_list_end));
-						}
-						
+							sem_set_jmp_dst(pre_else_jmp, (op_t)(active_function->instr_list_end)); // target of jmp that skips 'else' part
+						}						
 						return 0;
 					}
 				}		
@@ -479,6 +507,7 @@ int stat(){
 		if(SECOND_PASS) {
 			if ((error_number = sem_generate_label())) return error_number;
 			while_label = active_function->instr_list_end;
+			// remember label as target of looping jump that will be created at the end of while statement
 		}
 		next_token();
 		if(is(token_lbracket)){
@@ -488,6 +517,7 @@ int stat(){
 					return 2;
 				if((error_number = precedence(expr_queue, &precedence_result)))
 					return error_number;
+				// generate conditional jump (that ends looping)
 				if ((error_number = sem_generate_jmpifn(precedence_result))) return error_number;
 				while_jmp = active_function->instr_list_end;
 			}
@@ -500,7 +530,9 @@ int stat(){
 			}
 			if(!stat_com()){
 				if(SECOND_PASS) {
+					// jump instruction to the part that re-evaluates while loop condition 
 					if ((error_number = sem_generate_jmp((op_t)while_label))) return error_number;
+					// target label of conditional jump that sits after evaluating loop condition sequence
 					if ((error_number = sem_generate_label())) return error_number;
 					sem_set_jmp_dst(while_jmp, (op_t)(active_function->instr_list_end));
 				}
@@ -509,9 +541,10 @@ int stat(){
 		}
 	}
 	else if(is(token_k_return)){
-		if(!ret_val() && is(token_semicolon)){
+		if(!ret_val() && is(token_semicolon)){ // ret_val() generates instructions from return statement expression (if provided)
 			if(SECOND_PASS) {
-				if((error_number = sem_generate_ret(precedence_result))) {
+				// generate return instruction returning result of precedence analysis ('precedence_result' is NULL if no expr. was provided)
+				if((error_number = sem_generate_ret(precedence_result))) { 
 					return error_number;
 				}
 			}
@@ -543,13 +576,15 @@ int stat_list(){
 	return 2;
 }
 
-int as_ca(){
+int as_ca() {
 	if(is(token_lbracket)){
+		// function call
 		int err = 0;
 		if(SECOND_PASS) {
-			if ((error_number = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return error_number;
-			
+			if ((error_number = sem_generate_prepare((class_memb_t)sem_id_decoded.ptr))) return error_number; // sframe
 			if(sem_id_decoded.ptr == print_fn){ // in case of ifj16.print()
+				// we're going to evaluate simple concatenation and push the result as function argument like any other
+				// this part pretty much simulates the behaviour of fn_plist nonterminal, but allows concatenation
 				int counter = 1;
 				bool is_string = false;
 				tok_que_t expr_queue = tok_que_init();
@@ -597,10 +632,11 @@ int as_ca(){
 				err = precedence(expr_queue, &precedence_result);
 				if(err)
 					return error_number = err;
-				sem_rst_argcount();	
+				sem_rst_argcount();	// reset counter of pushed arguments, we're processing function call like any other
 				op_t arg = precedence_result;
 				if(precedence_result->dtype != dt_String) {
-					arg = sem_generate_conv_to_str(precedence_result); // possible internal err
+					// handles cases like ifj16.print(42), ifj16.print(42.0), ifj16.print(false) etc.
+					arg = sem_generate_conv_to_str(precedence_result);
 					if(!arg) return 99;
 				}
 				if ((error_number = sem_generate_push(calling_function, arg))) return error_number; // push result of concatenation
@@ -610,9 +646,10 @@ int as_ca(){
 				else
 					return 2;
 			}
-			else
-				err = fn_plist();
+			else // calling something else (not ifj16.print)
+				err = fn_plist(); // process arguments regularly
 
+			// performing standard check after processing arguments, this part applies to EVERY call (even ifj16.print)
 			if(is(token_semicolon)){					
 				if(!sem_args_ok(calling_function)) {
 					return error_number = 4;
@@ -624,6 +661,7 @@ int as_ca(){
 			return err;			
 		}
 		else{ // FIRST_PASS
+			// skip contents the contents of parentheses part  - foo( ... ), will be processed in second pass
 			do{
 				next_token();
 			} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
@@ -637,19 +675,21 @@ int as_ca(){
 		}
 	}
 	else if(is(token_assign)) {
-		op_t tmp_dst = NULL; // initialization totally pointless, just to avoid optimizer warning
+		// assigment
+		op_t tmp_dst = NULL; // initialization is totally pointless, just to avoid optimizer warning
 		if(SECOND_PASS) {
-			tmp_dst = (op_t)(sem_id_decoded.ptr);
+			tmp_dst = (op_t)(sem_id_decoded.ptr); // remember destination of assignment
 		}
-		int err = assign();
+		int err = assign(); // evaluates expression or assignment by function call
 		if(err == 0 && SECOND_PASS) {
-			if(!calling_function) {
+			// generate assignment instruction
+			if(!calling_function) { // if calling_function == NULL, generate assigment from result of expression analysis
 				if((err = sem_generate_mov(precedence_result, tmp_dst)))
 					return error_number = err;
-			} else {
+			} else { // if calling_function != NULL, generate assignment from return value of function 
 				if((err = sem_generate_movr(calling_function, tmp_dst)))
 					return error_number = err;
-				calling_function = NULL;
+				calling_function = NULL; // prevent accidental global variable reusage
 			}
 		}
 		return err;
@@ -663,12 +703,12 @@ int ret_val(){
 	if(is(token_semicolon))
 		return 0;
 	tok_que_t expr_queue = tok_que_init(); // init new queue
-	if(SECOND_PASS){
+	if(SECOND_PASS){ // second pass processes the expression
 		if(_cond_fill_que(expr_queue, false)) // fill queue, counting brackets is off
 			return 2;
 		if((error_number = precedence(expr_queue, &precedence_result)))
 			return error_number;
-		//semantic actions
+		// return instruction is generated outside ret_val nonterminal
 	}
 	else{
 		do{ // in first pass skip the whole expression
