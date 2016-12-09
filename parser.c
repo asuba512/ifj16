@@ -27,6 +27,7 @@ int c_list(){
 	if(is(token_k_class)){
 		next_token();
 		if(is(token_id)){
+			//sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS) {
 				error_number = sem_new_class(t.attr.s); // first pass adds this class into ST
 				if (error_number) return error_number;
@@ -92,16 +93,16 @@ int c_memb1(){
 int type(){
 	// if there's a datatype token, remember it, so it can be used later to insert symbol into ST
 	if(is(token_k_int)){
-		if(FIRST_PASS) sem_tmp_data.dt = dt_int;
+		sem_tmp_data.dt = dt_int;
 		return 0;
 	} else if (is(token_k_double)) {
-		if(FIRST_PASS) sem_tmp_data.dt = dt_double;
+		sem_tmp_data.dt = dt_double;
 		return 0;
 	} else if(is(token_k_string)) {
-		if(FIRST_PASS) sem_tmp_data.dt = dt_String;
+		sem_tmp_data.dt = dt_String;
 		return 0;
 	} else if(is(token_k_boolean)){
-		if(FIRST_PASS) sem_tmp_data.dt = dt_boolean;
+		sem_tmp_data.dt = dt_boolean;
 		return 0;
 	}
 	return 2;
@@ -139,7 +140,7 @@ int c_memb2(){
 				next_token();
 				if(is(token_eof)) return 2;
 			} while(!is(token_semicolon));
-		} else {
+		} else { // second pass
 			sem_mark_sec_pass(sem_tmp_data.id); // this variable can now be used in static initializers
 			class_memb_t tmp_dst = st_getmemb(active_class, sem_tmp_data.id);
 			tok_que_t expr_queue = tok_que_init();
