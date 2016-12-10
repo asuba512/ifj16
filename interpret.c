@@ -767,7 +767,7 @@ int inter(instr_t I){
 					clear_frames();
 					return error_number;
 				}
-				if(error_number == 42){
+				if(error_number == 42){ // special error code to distinguish error messages
 					fprintf(stderr, "ERR: Cannot create substring with negative length\n");
 					clear_frames();
 					return 10;
