@@ -9,7 +9,7 @@
 
 typedef struct bst_node {
 	string_t key;
-	void *data;
+	void *data; // effective data of BST node is a void pointer, because we store multiple types of structures in it
 	struct bst_node *right_p, *left_p;
 } *bst_node_t;
 
@@ -20,11 +20,9 @@ int BMA_index(string_t str,string_t substr);
 
 void shell_sort(string_t s);
 
-bool bst_search(bst_node_t root, string_t key);
+
 bst_node_t bst_search_get(bst_node_t root, string_t key);
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data);
-void bst_delete(bst_node_t *root, string_t key);
-void _bst_del(bst_node_t *node);
 int bst_insert(bst_node_t *root_ptr, string_t key, void *data);
 void bst_postorder(bst_node_t root, void (*do_work)(bst_node_t));
 

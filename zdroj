@@ -1,0 +1,14 @@
+class Main
+{
+    static String Main = "42";
+	static void run()
+	{
+		//int a = ifj16.readInt();
+        int a = 0-1;
+        ifj16.substr(Main, 0,a);
+	}
+
+    static int _Main() {
+        return 2;
+    }
+}

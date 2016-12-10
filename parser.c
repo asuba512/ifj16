@@ -27,7 +27,6 @@ int c_list(){
 	if(is(token_k_class)){
 		next_token();
 		if(is(token_id)){
-			//sem_tmp_data.id = t.attr.s;
 			if (FIRST_PASS) {
 				error_number = sem_new_class(t.attr.s); // first pass adds this class into ST
 				if (error_number) return error_number;

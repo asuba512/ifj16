@@ -329,7 +329,7 @@ int sem_generate_mov(op_t src, op_t dst) {
         return 3;
     } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
-        return 4;
+        return 3;
     } else if (!dst) { // undefined dst
         fprintf(stderr, "ERR: Undefined variable used as destination of assignment.\n");
         return 3;
@@ -364,10 +364,10 @@ int sem_generate_mov(op_t src, op_t dst) {
 int sem_generate_prepare(class_memb_t fn) {
     if(fn->op.sc == local) {
         fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
-        return 4;
+        return 3;
     } else if(fn->op.sc == global && fn->type == var) {
         fprintf(stderr, "ERR: Trying to call function, which is variable.\n");
-        return 4;
+        return 3;
     }
     struct instr i;
     i.type = sframe;
@@ -395,7 +395,7 @@ int sem_generate_push(class_memb_t called_fn, op_t arg) {
     // only variable element can be pushed
     if(arg->sc == global && (((class_memb_t)(arg))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as function argument.\n");
-        return 4;
+        return 3;
     }
     if(arg->dtype == ((called_fn->arg_list)[arg_counter])->op.dtype || (arg->dtype == dt_int && ((called_fn->arg_list)[arg_counter])->op.dtype == dt_double)) { 
         // OK
@@ -452,7 +452,7 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
         return 3;
     } else if(dst->sc == global && (((class_memb_t)(dst))->type) == func) {
         fprintf(stderr, "ERR: Function identifier used as destination of assignment.\n");
-        return 4;
+        return 3;
     }
     if(called_fn->op.dtype == dst->dtype) {
         // OK
@@ -478,6 +478,10 @@ int sem_generate_movr(class_memb_t called_fn, op_t dst) {
 int sem_generate_jmpifn(op_t src) {
     struct instr i;
     i.type = jmpifn;
+    if(src->sc == global && ((class_memb_t)src)->type == func) {
+        fprintf(stderr, "ERR: Trying to use function identifier as a condition.\n");
+        return 3;
+    }
     if(src->dtype != dt_boolean) {
         fprintf(stderr, "ERR: Non-boolean value used as condition.\n");
         return 4;

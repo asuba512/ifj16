@@ -74,6 +74,7 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
             k = k-1;
         }//from here
         else {
+            // determine which heuristic gives higher jump and then stick with it            
 			if(char_jump[(int)str->data[j-1]] > match_jump[k]) {
 				j = j+char_jump[(int)str->data[j-1]];
 			}
@@ -127,30 +128,15 @@ void shell_sort(string_t s) {
     return;
 }
 
-// function finds node through the use of key
-bool bst_search(bst_node_t root, string_t key) {
-    if(root != NULL) {
-        if(str_compare(root->key, key) == 0) { // key found
-            return true;
-        } else {
-            if(str_compare(root->key, key) > 0) { // go left
-                return bst_search(root->left_p, key);
-            } else {
-                return bst_search(root->right_p, key); // go right
-            }
-        }
-    } else { // key not found
-        return false;
-    }
-}
 
-// function finds node through the use of key and returns the node 
+// find node with corresponding key, returns node if found, otherwise returns NULL
 bst_node_t bst_search_get(bst_node_t root, string_t key) {
     if(root == NULL) {
         return NULL;
     } else {
-        if(str_compare(root->key, key) != 0) {
-            if(str_compare(root->key, key) > 0) {
+        int cmp = str_compare(root->key, key); // store comparison result so we don't call it multiple times
+        if(cmp != 0) {
+            if(cmp > 0) {
                 return bst_search_get(root->left_p, key); // go left
             } else {
                 return bst_search_get(root->right_p, key); // go right
@@ -161,11 +147,13 @@ bst_node_t bst_search_get(bst_node_t root, string_t key) {
     }
 }
 
-// function inserts to tree root_ptr with content and with key
+// inserts new node into BST with provided key and data
+// if node with same key exists, an error is returned
 int bst_insert(bst_node_t *root_ptr, string_t key, void *data) {
     if(*root_ptr == NULL) {
         return _bst_create_node(root_ptr, key, data);
     } else {
+        // search for place to store the node
         int cmp = str_compare((*root_ptr)->key, key);
         if(cmp > 0) {
             return bst_insert(&((*root_ptr)->left_p), key, data); // go left
@@ -177,7 +165,7 @@ int bst_insert(bst_node_t *root_ptr, string_t key, void *data) {
     }
 }
 
-// function provide tree initialization
+// allocates slice of memory for a new node and fills with data
 int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
     *node_ptr = malloc(sizeof(struct bst_node));
     if(*node_ptr == NULL) return BST_MEM_ERR;
@@ -188,6 +176,7 @@ int _bst_create_node(bst_node_t *node_ptr, string_t key, void *data) {
 }
 
 // passage throught tree with recursive postorder method
+// processes every node with provided function
 void bst_postorder(bst_node_t root, void (*do_work)(bst_node_t)) {
     if(root != NULL) {
         bst_postorder(root->left_p, do_work);        
