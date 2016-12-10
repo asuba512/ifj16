@@ -6,10 +6,12 @@
 #include "ial.h"
 #include "gc.h"
 
+//BMA has pascal like implementation so we are indexing from 1, the 0 element of every array is unused and array sizes are increased by 1
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 // heuristic function for BMA number 1
+// calculates the jump for each character
 void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
-    for(int i=0; i<256; i++){ //the interval is from algorithm
+    for(int i=0; i<256; i++){ //the interval is from algorithm(size of alphabet)
         char_jump[i] =substr->length;
     } 
     for(int k=1; k<=substr->length; k++){
@@ -19,7 +21,7 @@ void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
 }
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-// heuristic function for BMA number 2
+// heuristic function for BMA number 2, calculates jumps
 void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
     int k,q,qq;
     int m=substr->length;
@@ -63,7 +65,8 @@ void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
 
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-// BMA
+// compares substring with string, "moves" the substring, the move depends of the max values of charjump and matchjump values
+// returns the index if substr is found, if not found returns -1
 int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump) {
     int index;
     int j = substr->length;
@@ -92,6 +95,7 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
     return index;
 }
 
+//function for calculating index, parameters are only str and substr, BMA is called
 int BMA_index(string_t str,string_t substr) {
 	int index;
 	unsigned compute_jumps_array[257];//in compute jumps for from 0 to 255(256 items)

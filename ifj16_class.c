@@ -153,7 +153,7 @@ void ifj16_print(string_t s) {
 }
 
 int ifj16_readInt() {
-    string_t s=str_init("");
+    string_t s=str_init("");//create empty str for adding chars
     if(s==NULL){
         error_number=99;
     }
@@ -163,28 +163,28 @@ int ifj16_readInt() {
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
     	if(counter == 0){
-    		if(isspace(c) || c=='\n'){
+    		if(isspace(c) || c=='\n'){//checks that at the begining there was space or newline
     			error_number=7;
     		}
     	}
-    	if(c=='\n') break;
+    	if(c=='\n') break;//checking end of line
             if((str_addchar(s, c)) == 99){
                 error_number=99;
             }
-         counter++;
+        counter++;
     	}
-    num=strtol(s->data,&pEnd,10);
-    if(errno == ERANGE || num > INT_MAX || num < INT_MIN){
+    num=strtol(s->data,&pEnd,10);//converting to int
+    if(errno == ERANGE || num > INT_MAX || num < INT_MIN){//checking overflow
         error_number=42;
     }
-    if (*pEnd != '\0') {
+    if (*pEnd != '\0') {//checking if it was a valid int
     	error_number=7;
     }
-    return (int)num;
+    return (int)num;//retype beacuse strtol return long int and we need int 
 }
 
 double ifj16_readDouble() {
-	string_t s=str_init("");
+	string_t s=str_init("");//create empty str for adding chars
     if(s==NULL){
         error_number=99;
     }
@@ -194,18 +194,18 @@ double ifj16_readDouble() {
     char * pEnd=NULL;
     while((c=getchar()) != EOF){
     	if(counter == 0){
-    		if(isspace(c) || c=='\n'){
+    		if(isspace(c) || c=='\n'){//checks that at the begining there was space or newline
     			error_number=7;
     		}
     	}
-    	if(c=='\n') break;
+    	if(c=='\n') break;//checking end of line
     	    if((str_addchar(s, c)) == 99){
                 error_number=99;
             }
          counter++;
     	}
-    num=strtod(s->data,&pEnd);
-    if (*pEnd != '\0') {
+    num=strtod(s->data,&pEnd);//converting to double
+    if (*pEnd != '\0') {//checking if it was a valid double
     	error_number=7;
     }
     return num;
@@ -213,13 +213,13 @@ double ifj16_readDouble() {
 }
 
 string_t ifj16_readString() {
-    string_t s=str_init("");
+    string_t s=str_init("");//create empty str for adding chars
     if(s==NULL){
         error_number=99;
     }
     int c;
     while((c=getchar()) != EOF){
-    	if(c=='\n') break;
+    	if(c=='\n') break;//checking end of line
             if((str_addchar(s, c)) == 99){
                 error_number=99;
             }
@@ -232,16 +232,18 @@ int ifj16_length(string_t s) {
 }
 
 string_t ifj16_substr(string_t s, int i, int n) {
-    if(i<0 || i > s->length || (i+n)>s->length){
+    if(i<0 || i > s->length || (i+n)>s->length ){//checking if indexes are out of bounds of string
     	error_number=10;
     }
+    if(n<0){//checking length(substring can't have negative length)
+        error_number=42;
+    }
 
-
-    string_t s2=str_init("");
+    string_t s2=str_init("");//create empty str for adding chars
     if(s2==NULL){
         error_number=99;
     }
-    for(int j=0;j<n;j++){
+    for(int j=0;j<n;j++){//adding chars from str to substr 
         if((str_addchar(s2, s->data[i+j])) == 99){
                 error_number=99;
             }
@@ -249,6 +251,7 @@ string_t ifj16_substr(string_t s, int i, int n) {
  	return s2;
 }
 
+//comparing two strings. if strings are equal returns 0, if s1<s2 returns -1, if s1>s2 returns 1
 int ifj16_compare(string_t s1, string_t s2) {
     int cmp=str_compare(s1,s2);
     if(cmp==0){
