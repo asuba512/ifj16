@@ -14,7 +14,6 @@ int precedence(tok_que_t queue, op_t *result){
 	int err;
 	/* initialization of prec_table (static) and stacks */
 	prec_stack_init();
-	prec_auxstack_init(); // auxiliary stack stores pointers to "stop" terminals when reducing terminals to nonterminal
 	static char prec_table[17][17] = {
 		{'>','>','<','<','>','>','>','>','>','>','<','>','>','>','<','<','>'},
 		{'>','>','<','<','>','>','>','>','>','>','<','>','>','>','<','<','>'},
@@ -37,6 +36,7 @@ int precedence(tok_que_t queue, op_t *result){
 
 	static token_t eof = {.type = token_eof}; // auxiliary token representing EOF
 	static token_t nonterminal = {.type = token_nonterminal}; // auxiliary token representing non-terminal E
+	static token_t stop = {.type = token_stop}; // auxiliary token representing stop
 	token_t qtoken, stoken;
 	prec_st_element tmp;
 	
@@ -51,18 +51,25 @@ int precedence(tok_que_t queue, op_t *result){
 				qtoken = tok_remove_head(queue);
 				break;
 			case '<': // insert <
-				if(prec_auxstack_push(prec_stack_top())) return 99;
+				prec_stack_insert(prec_stack_top(), stop);
 				if(prec_stack_push(qtoken)) return 99;
 				qtoken = tok_remove_head(queue);
 				break;
 			case '>': // reduce
-				if(!prec_auxstack_is_empty()){ // if there is something to reduce
-					tmp = stack.top;
-					if(tmp && tmp->data.type == token_id && prec_auxstack_top() == tmp){ // E -> id
-						nonterminal.attr.p = tmp->data.attr.p; // kinda semantic action, it's probably what you wanna do
-						prec_stack_pop();
-						if(prec_stack_push(nonterminal)) return 99;
-						prec_auxstack_pop(); 
+				/* many parts of this case are similar to each other, only in different order, it isn't necessary to comment everything' */
+				if(count_of_stops){ // if there is something to reduce
+					tmp = stack.top; // get the actual top of stack (top() returns top terminal !!!)
+					if(tmp && tmp->data.type == token_id){ // E -> id
+						nonterminal.attr.p = tmp->data.attr.p;
+						prec_stack_pop(); // remove already processed token
+						tmp = stack.top;
+						if(tmp && tmp->data.type == token_stop){
+							prec_stack_pop(); // finish the reduction
+							count_of_stops--; // stop was removed
+							if(prec_stack_push(nonterminal)) return 99;
+						}
+						else
+							return 2;
 					}
 					/* E -> (E) */
 					else if(tmp && tmp->data.type == token_rbracket){ // (
@@ -73,8 +80,13 @@ int precedence(tok_que_t queue, op_t *result){
 							tmp = stack.top;
 							if(tmp && tmp->data.type == token_lbracket){ // (E)
 								prec_stack_pop();
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop();
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99;
+								}
+								else return 2;
 							}
 						}
 					}
@@ -88,13 +100,19 @@ int precedence(tok_que_t queue, op_t *result){
 						if(tmp && tmp->data.type == token_addition){ // E + 
 							prec_stack_pop(); // move to next token on stack
 							tmp = stack.top; // get the actual top of stack (prec_stack_top() returns top terminal)
-							/* at this point, on the top of stack should be nonterminal, that corresponds with top of auxiliary stack*/
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E + E
+							/* at this point, on the top of stack should be nonterminal */
+							if(tmp && tmp->data.type == token_nonterminal){ // E + E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop(); // remove operand from stack
 								try(sem_generate_arithm(add, op1, op2, (op_t *)&(nonterminal.attr.p))); // generate instruction
-								if(prec_stack_push(nonterminal)) return 99; // push the result
-								prec_auxstack_pop();  // remove "stop" from aux. stack
+								tmp = stack.top; // next token on stack should be token_stop
+								if(tmp && tmp->data.type == token_stop){ 
+									prec_stack_pop(); // finish the reduction
+									count_of_stops--; // stop was removed
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -102,12 +120,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_substraction){ // E -
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E - E
+							if(tmp && tmp->data.type == token_nonterminal){ // E - E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(sub, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -115,12 +139,17 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_multiplication){ // E *
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E * E
+							if(tmp && tmp->data.type == token_nonterminal){ // E * E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(imul, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99;
+								}
+								else return 2;
 							}
 							else
 								return 2;
@@ -128,12 +157,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_division){ // E /
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E / E
+							if(tmp && tmp->data.type == token_nonterminal){ // E / E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(idiv, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -141,12 +176,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_less){ // E <
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E < E
+							if(tmp && tmp->data.type == token_nonterminal){ // E < E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(less, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -154,12 +195,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_more){ // E >
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E > E
+							if(tmp && tmp->data.type == token_nonterminal){ // E > E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(gre, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -167,12 +214,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_lesseq){ // E <=
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E <= E
+							if(tmp && tmp->data.type == token_nonterminal){ // E <= E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(leq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -180,12 +233,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_moreeq){ // E >=
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E >= E
+							if(tmp && tmp->data.type == token_nonterminal){ // E >= E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(geq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -193,12 +252,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_equal){ // E ==
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E == E
+							if(tmp && tmp->data.type == token_nonterminal){ // E == E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(eql, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -206,12 +271,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_nequal){ // E !=
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E != E
+							if(tmp && tmp->data.type == token_nonterminal){ // E != E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(neq, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -219,12 +290,18 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_and){ // E &&
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E && E
+							if(tmp && tmp->data.type == token_nonterminal){ // E && E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(and, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
@@ -232,21 +309,33 @@ int precedence(tok_que_t queue, op_t *result){
 						else if(tmp && tmp->data.type == token_or){ // E ||
 							prec_stack_pop();
 							tmp = stack.top;
-							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E || E
+							if(tmp && tmp->data.type == token_nonterminal){ // E || E
 								op1 = (op_t)(tmp->data.attr.p);
 								prec_stack_pop();
 								try(sem_generate_arithm(or, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 							}
 							else
 								return 2;
 						}
-						else if(tmp && tmp->data.type == token_not && prec_auxstack_top() == tmp){ // E -> !E
+						else if(tmp && tmp->data.type == token_not){ // E -> !E
 							prec_stack_pop();
 							try(sem_generate_arithm(not, op2, NULL, (op_t *)&(nonterminal.attr.p)));
-							if(prec_stack_push(nonterminal)) return 99;
-							prec_auxstack_pop(); 
+								tmp = stack.top;
+								if(tmp && tmp->data.type == token_stop){
+									prec_stack_pop();
+									count_of_stops--;
+									if(prec_stack_push(nonterminal)) return 99; // push the result
+								}
+								else
+									return 2;
 						}
 						else
 							return 2;
@@ -271,9 +360,7 @@ int precedence(tok_que_t queue, op_t *result){
 */
 void prec_stack_init(){
 	stack.top = NULL;
-}
-void prec_auxstack_init(){
-	auxstack.top = NULL;
+	count_of_stops = 0;
 }
 
 /*
@@ -294,17 +381,26 @@ int prec_stack_push(token_t t){
 	return 1;
 }
 
-int prec_auxstack_push(prec_st_element *e){
-	prec_auxst_element tmp;
-	if((tmp = gc_malloc(sizeof(struct prec_auxstack_element)))){
-		tmp->ptr = e;
-		tmp->next = auxstack.top;
-		auxstack.top = tmp;
-		return 0;
+
+/*
+	Inserts token into stack in front of passed element
+*/
+int prec_stack_insert(prec_st_element *e,token_t t){
+	prec_st_element tmp;
+	if((tmp = gc_malloc(sizeof(struct prec_stack_element)))){
+		tmp->data = t;
+		tmp->next = *e;
+		tmp->prev = (*e)->prev;
+		if((*e)->prev)
+			(*e)->prev->next = tmp;
+		else
+			stack.top = tmp;
+		(*e)->prev = tmp;
+		count_of_stops++;
+		return 0;	
 	}
 	return 1;
 }
-
 /*
 	Pops an element from stack.
 */
@@ -314,14 +410,6 @@ void prec_stack_pop(){
 		//free(stack.top);
 		stack.top = tmp;
 		stack.top->prev = NULL;
-	}
-}
-
-void prec_auxstack_pop(){
-	if(auxstack.top){
-		prec_auxst_element tmp = auxstack.top->next;
-		//free(auxstack.top);
-		auxstack.top = tmp;
 	}
 }
 
@@ -335,21 +423,11 @@ prec_st_element *prec_stack_top(){
 	return tmp;
 }
 
-prec_st_element prec_auxstack_top(){
-	return (*auxstack.top->ptr);
-}
-
 /*
 	Returns 1 if stack is empty, otherwise 0
 */
 int prec_stack_is_empty(){
 	if(stack.top)
-		return 0;
-	return 1;
-}
-
-int prec_auxstack_is_empty(){
-	if(auxstack.top)
 		return 0;
 	return 1;
 }

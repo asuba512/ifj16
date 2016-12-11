@@ -12,28 +12,12 @@ typedef struct prec_stack_element{
 	struct prec_stack_element *prev;
 } *prec_st_element;
 
-
 /*
 * Pseudo-stack of tokens for precedence analysis
 */
 typedef struct prec_stack{
 	prec_st_element top;
 } prec_stack_t;
-
-/*
-* Elements of auxiliary stack
-*/
-typedef struct prec_auxstack_element{
-	prec_st_element *ptr;
-	struct prec_auxstack_element *next;
-} *prec_auxst_element;
-
-/*
-* Auxiliary stack
-*/
-typedef struct prec_s{
-	prec_auxst_element top;
-} prec_auxstack_t;
 
 /*
 * Precedence analysis
@@ -50,6 +34,9 @@ void prec_stack_init();
 */
 int prec_stack_push(token_t);
 
+
+int prec_stack_insert(prec_st_element *, token_t);
+
 /*
 * Removes top element of precedence stack
 */
@@ -65,32 +52,7 @@ prec_st_element *prec_stack_top();
 */
 int prec_stack_is_empty();
 
-/*
-* Initialization of auxiliary stack
-*/
-void prec_auxstack_init();
-
-/*
-* Pushes element to auxiliary stack
-*/
-int prec_auxstack_push(prec_st_element *);
-
-/*
-* Removes top element from auxiliary stack
-*/
-void prec_auxstack_pop();
-
-/*
-* Returns top element of auxiliary stack
-*/
-prec_st_element prec_auxstack_top();
-
-/*
-* 1 == auxiliary stack is empty
-*/
-int prec_auxstack_is_empty();
-
-prec_auxstack_t auxstack; // global precedence stack
-prec_stack_t stack; // global auxiliary stack
+prec_stack_t stack; // global precedence stack
+int count_of_stops; // counter of stops in stack
 
 #endif

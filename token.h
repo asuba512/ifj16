@@ -47,7 +47,8 @@ typedef enum token_type {
 	token_k_static, // keyword static 40
 	token_k_void, // keyword void 41
 	token_k_while, // keyword while 42
-	token_nonterminal // for precedence analysis 43
+	token_nonterminal, // for precedence analysis 43
+	token_stop
 } token_type;
 
 typedef union attr {
