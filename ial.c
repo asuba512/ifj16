@@ -6,91 +6,48 @@
 #include "ial.h"
 #include "gc.h"
 
-//BMA has pascal like implementation so we are indexing from 1, the 0 element of every array is unused and array sizes are increased by 1
+#define ALPHABET_LEN 256 //2^CHAR_BIT(a char can have value from 0 to 255)
+
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 // heuristic function for BMA number 1
 // calculates the jump for each character
 void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
-    for(int i=0; i<256; i++){ //the interval is from algorithm(size of alphabet)
+    for(int i=0; i<ALPHABET_LEN; i++){ //the interval is from algorithm(size of alphabet), adding maximal jump to every index(substring length)
         char_jump[i] =substr->length;
     } 
-    for(int k=1; k<=substr->length; k++){
-        char_jump[(int)substr->data[k-1]] = substr->length-k;
+    for(int k=0; k<substr->length; k++){//changing jumps for characters in substring
+        char_jump[(int)substr->data[k]] = substr->length-k-1;
     }
     return;
 }
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-// heuristic function for BMA number 2, calculates jumps
-void BMA_compute_match_jumps(string_t substr,unsigned *match_jump){
-    int k,q,qq;
-    int m=substr->length;
-    unsigned backup[m+1];
-
-    for (int k=1;k<=m;k++){
-        match_jump[k]=2*m-k;
-    }
-    k=m;
-    q=m+1;
-
-    while(k>0) {
-        backup[k]=q;
-        while((q<=m) && (substr->data[k-1] != substr->data[q-1])) {
-            if ((int)match_jump[q] > m-k) {
-                match_jump[q] = m-k;
-            }
-            q=backup[q];
-        }
-        k=k-1;
-        q=q-1;
-    }
-
-    for(int k=1;k<=q;k++) {
-        if ((int)match_jump[k] > m+q-k) {
-            match_jump[k]=m+q-k;
-        }
-    }
-	qq=backup[q];
-    while(q<m) {
-        while(q<=qq) {
-            if((int)match_jump[q]>qq-q+m) {
-                match_jump[q]=qq-q+m;
-            }
-        q=q+1;
-        }
-    qq=backup[qq];
-    }
-}
-
-
-
-// Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
 // compares substring with string, "moves" the substring, the move depends of the max values of charjump and matchjump values
 // returns the index if substr is found, if not found returns -1
-int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump) {
+//pascal like implementation, so at getting data from arrays we need to decrease by one the value of indexes
+int BMA(string_t str, string_t substr, unsigned *char_jump/*, unsigned *match_jump*/) {
     int index;
+    int j_prev=0;//for saving previous index and comparising with the new
     int j = substr->length;
     int k = substr->length;
     while( j<=str->length && k>0 ){
-        if (str->data[j-1] == substr->data[k-1]) {
+        if (str->data[j-1] == substr->data[k-1]) {//if the two characters are the same then index is lowered 
             j = j-1;
             k = k-1;
-        }//from here
+        }//if the characters are different
         else {
-            // determine which heuristic gives higher jump and then stick with it            
-			if(char_jump[(int)str->data[j-1]] > match_jump[k]) {
 				j = j+char_jump[(int)str->data[j-1]];
-			}
-			else {
-				j = j+match_jump[k];
-			}
+				if(j_prev > j){//check move to the left, if it occurs then break->can't move to left,only to right
+					break;
+				}
+				j_prev=j;
 		    k = substr->length;
         }
     }
-    if (k == 0) {
+    if (k == 0) {//if found
         index = j;
     }
-    else {
+    else {//if not found
         index = -1; 
     }       
     return index;
@@ -99,14 +56,12 @@ int BMA(string_t str, string_t substr, unsigned *char_jump, unsigned *match_jump
 //function for calculating index, parameters are only str and substr, BMA is called
 int BMA_index(string_t str,string_t substr) {
 	int index;
-	unsigned compute_jumps_array[257];//in compute jumps for from 0 to 255(256 items)
-    unsigned match_jumps_array[substr->length+2];//in compute match jumps indexed with q(q=substr->length+1)
-    if(substr->length==0) {
+	unsigned compute_jumps_array[ALPHABET_LEN];//in compute jumps for from 0 to 255(256 items in alphabet)
+    if(substr->length==0) {//empty string is found on index 0
     	return 0;
     }
     BMA_compute_jumps(substr,compute_jumps_array);
-    BMA_compute_match_jumps(substr,match_jumps_array);
-    index=BMA(str,substr,compute_jumps_array,match_jumps_array);
+    index=BMA(str,substr,compute_jumps_array);
     return index;
 }
 
