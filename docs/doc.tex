@@ -106,7 +106,7 @@
     Všechny popsané algoritmy jsou implementovány v souboru \texttt{ial.c}
     \subsection{Vyhledávání podřetězce použitím Boyer-Mooreova algoritmu (b)}
 	Boyer-Moorův algoritmus je nejefektivnější algoritmus na vyhledávání podřetězce v řetězci. Vychází z klasického porovnávání hledaného vzorku patřičně přiloženému k prohledávanému řětěci, ale s tím rozdílem, že změna zarovnání vzorku s řetězcem se neděje po jednom, ale po více znacích. Porovnávání znaků přiloženého vzorku se děje od konce k počátku.\par
-	K určení, o kolik znaků lze vzorek posunout (kolik zarovnání lze přeskočit), se používají dvě heuristiky. První z nich je heuristika \uv{bad character}, která se při neshodě snaží vzorek zarovnat tak, aby ke shodě došlo. Pokud to není možné (vzorek již daný znak neobsahuje), vzorek se zarovná až za daný znak v řetězci. Druhou heuristikou je \uv{good suffix}, která se v případě neshody po několika shodných znacích snaží vzorek zarovnat tak, aby nedošlo k porušení již nalezené shody. V naší implementaci jsme se rozhodli využít obou heuristik a při zarovnávání využít ten skok, který je větší a tedy výhodnější.
+	K určení, o kolik znaků lze vzorek posunout (kolik zarovnání lze přeskočit), se používají dvě heuristiky. První z nich je heuristika \uv{bad character}, která se při neshodě snaží vzorek zarovnat tak, aby ke shodě došlo. Pokud to není možné (vzorek již daný znak neobsahuje), vzorek se zarovná až za daný znak v řetězci. Druhou heuristikou je \uv{good suffix}, která se v případě neshody po několika shodných znacích snaží vzorek zarovnat tak, aby nedošlo k porušení již nalezené shody. V naší implementaci jsme se rozhodli využít pouze první heuristiku.
     \subsection{Řazení použítím algoritmu Shell sort (3)}
     Shell sort je řadící algoritmus, který pracuje na principu bublinového vkládání. Neřadí prvky nacházející se výhradně vedle sebe, ale i posloupnosti oddělené určitým počtem prvků (krokem). V naší implementaci je na počátku tento krok stanoven na polovinu počtu prvků. Při každé další iteraci je hodnota kroku snížena na polovinu. V různých implementacích existují jiné způsoby určení těchto kroků, od čeho se odvijí jejich časová složitost. Algoritmus skončí jakmile krok dosáhne hodnoty 0. Shell sort pracuje \uv{in situ} a je nestabilní, což nám nevadí. Ve srovnání s jinými algoritmy je pomalejší než Quicksort a rychlejší než Heapsort. Složitost naší implementace je $O$(n$^2$).
     \subsection{Implementace tabulky symbolů použitím binárního vyhledávacího stromu (I)}
@@ -208,10 +208,16 @@
 \textbf{id} & $>$ & $>$ & $>$ & $>$ & $>$ & $>$ & $>$ & $>$ & $>$ & $>$ &  & $>$ & $>$ & $>$ & $>$ &  & $>$ \\ \hline
 \textbf{\$} & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ & $<$ &  & $<$ & $<$ & $<$ & $<$ &  \\ \hline
     \end{tabular}
-	
+	\newpage
 	\subsection{Diagram konečného automatu lexikální analýzy}\bigskip
 	\begin{center}
-		\includegraphics[scale=0.4]{docs/FSM_part1}\\
-		\includegraphics[scale=0.4]{docs/FSM_part2}
+        \begin{figure}[h]
+		    \includegraphics[scale=0.4]{docs/FSM_part1}
+            \caption{Diagram konenečného automatu, část 1.}
+        \end{figure}
+        \begin{figure}[t]
+		    \includegraphics[scale=0.4]{docs/FSM_part2}
+            \caption{Diagram konenečného automatu, část 2.}
+        \end{figure}
 	\end{center}
 \end{document}

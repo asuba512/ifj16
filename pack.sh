@@ -29,7 +29,8 @@ contributorsName[xpalie00]="Jakub Paliesek"
 contributorsName[xsuhaj02]="Peter Šuhaj"
 contributorsName[xtotha01]="Adrián Tóth"
 
-rm -rf *.o ifj sc_test sem_test prec_test .fuse*
+make clean
+
 contents=`ls | grep -v -e "test" -e "docs" -e "pack" -e "README"`
 mkdir -p $tmpdir
 cp -r ${contents} $tmpdir
@@ -70,7 +71,7 @@ do
 	done
 
   authors=${authors:0:-2}
-  message="/********************************************************************/\n/*\n/* Projekt: Implementace interpretu imperativniho jazyka IFJ16\n/* Řešitelé: ${authors//"\0"/, }\n/*\n/********************************************************************/\n\n"
+  message="/********************************************************************\n *\n * Projekt: Implementace interpretu imperativniho jazyka IFJ16\n * Řešitelé: ${authors//"\0"/, }\n *\n ********************************************************************/\n\n"
 
   sed -i '1s@^@'"$message"'@' $file
 

@@ -1,8 +1,3 @@
-/**
- * \file sc_test.c
- * \brief Test module for scanner.
- *
- */
 
 #include "scanner.h"
 //#include "parser.h"

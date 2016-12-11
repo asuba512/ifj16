@@ -1,9 +1,3 @@
-/**
- * \file main.c
- * \brief Main module of IFJ16 programming language interpreter.
- *
- */
-
 #include "scanner.h"
 #include "parser.h"
 #include "token.h"

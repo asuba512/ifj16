@@ -1,10 +1,5 @@
 #ifndef TOKEN_INC
 #define TOKEN_INC 1
-/**
- * \file token.h
- * \brief Header file of module implementing tokens.
- *
- */
 
 #include "infinite_string.h"
 

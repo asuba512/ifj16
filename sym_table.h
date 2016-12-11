@@ -1,8 +1,3 @@
-/**
- * Header file of table of symbols module.
- * Author:    Paliesek Jakub (xpalie00)
- */
-
 #ifndef SYM_TABLE_INC
 #define SYM_TABLE_INC 1
 
