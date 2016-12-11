@@ -7,10 +7,13 @@
 
 token_t t;
 FILE *fd;
-int error_number;
+int error_number; // var for storing errors != 2
 int pass_number; // either first or second
-tok_que_t tok_q;
+tok_que_t tok_q; // queue, where tokens are stored during first pass for needs of second pass
 
+/*
+	List of functions implementing rules of LL-grammer
+*/
 int c_list();
 int c_memb(); 
 int c_memb1();
@@ -34,4 +37,8 @@ int ret_val();
 int fn_plist();
 int fn_plist1();
 int val_id();
+
+/*
+	Auxiliary function for filling up queue for precedence analysis
+*/
 int _cond_fill_que(tok_que_t, bool);

@@ -14,7 +14,7 @@ int precedence(tok_que_t queue, op_t *result){
 	int err;
 	/* initialization of prec_table (static) and stacks */
 	prec_stack_init();
-	prec_auxstack_init();
+	prec_auxstack_init(); // auxiliary stack stores pointers to "stop" terminals when reducing terminals to nonterminal
 	static char prec_table[17][17] = {
 		{'>','>','<','<','>','>','>','>','>','>','<','>','>','>','<','<','>'},
 		{'>','>','<','<','>','>','>','>','>','>','<','>','>','>','<','<','>'},
@@ -84,15 +84,17 @@ int precedence(tok_que_t queue, op_t *result){
 						op2 = (op_t)(tmp->data.attr.p);
 						prec_stack_pop(); // move to next token on stack
 						tmp = stack.top;
+						/* list of possible binary operators follow, the body of if/elseif is always the same */ 
 						if(tmp && tmp->data.type == token_addition){ // E + 
 							prec_stack_pop(); // move to next token on stack
-							tmp = stack.top;
+							tmp = stack.top; // get the actual top of stack (prec_stack_top() returns top terminal)
+							/* at this point, on the top of stack should be nonterminal, that corresponds with top of auxiliary stack*/
 							if(tmp && tmp->data.type == token_nonterminal && prec_auxstack_top()->prev == tmp){ // E + E
 								op1 = (op_t)(tmp->data.attr.p);
-								prec_stack_pop();
-								try(sem_generate_arithm(add, op1, op2, (op_t *)&(nonterminal.attr.p)));
-								if(prec_stack_push(nonterminal)) return 99;
-								prec_auxstack_pop(); 
+								prec_stack_pop(); // remove operand from stack
+								try(sem_generate_arithm(add, op1, op2, (op_t *)&(nonterminal.attr.p))); // generate instruction
+								if(prec_stack_push(nonterminal)) return 99; // push the result
+								prec_auxstack_pop();  // remove "stop" from aux. stack
 							}
 							else
 								return 2;
@@ -324,7 +326,7 @@ void prec_auxstack_pop(){
 }
 
 /*
-	Returns value on top of stack
+	Returns top terminal on stack
 */
 prec_st_element *prec_stack_top(){
 	prec_st_element *tmp = &stack.top;

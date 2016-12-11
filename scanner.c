@@ -1,9 +1,3 @@
-/**
- * \file scanner.c
- * \brief Lexical analyzer module of IFJ16 programming language interpreter.
- *
- */
-
 #include "scanner.h"
 #include "infinite_string.h"
 #include <string.h>

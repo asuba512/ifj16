@@ -18,6 +18,10 @@ extern bool outside_func;
 #define next_token() do{ if(FIRST_PASS){ if((error_number = get_token(fd, &t)) ) return 2; tok_enqueue(tok_q, t); } else { t = tok_q->head->tok; tok_remove_head(tok_q); }} while(0)
 #define is(x) (t.type == x)
 
+/*
+	- Macro next_token() is used for getting new token from scanner in the first pass and from queue in the second pass
+*/
+
 int c_list(){
 	// initialize global variables used later
 	outside_func = true;
@@ -42,7 +46,7 @@ int c_list(){
 			}
 		}
 	}
-	else if(is(token_eof))
+	else if(is(token_eof)) // end of program
 		return 0;
 	return 2;
 }
@@ -322,16 +326,16 @@ int assign(){
 			}
 		}
 		else if(error_number) {
-			// token in id() WAS is/fqid and WAS NOT defined -> error
+			// token in id() WAS id/fqid and WAS NOT defined -> error
 			return error_number;
 		}
-		else{ // expression [(token WAS NOT an id -> NOT AN ERROR) OR (token WAS defined id/fqid and was belongs to variable)]
+		else{ // expression [(token WAS NOT an id -> NOT AN ERROR) OR (token WAS defined id/fqid and belongs to variable)]
 			token_t tmp;
-			tok_que_t expr_queue = tok_que_init();
-			if(sem_id_decoded.ptr){ // if there was id as first token
+			tok_que_t expr_queue = tok_que_init(); // queue for precedence analysis
+			if(sem_id_decoded.ptr){ // first token WAS an id/fqid
 				tmp.type = token_id;
 				tmp.attr.p = sem_id_decoded.ptr;
-				tok_enqueue(expr_queue, tmp);
+				tok_enqueue(expr_queue, tmp); // push simplified ID token (attr is pointer into TS) to precedence queue
 				next_token(); // _cond_fill_que expects first token to be already retrieved
 			}
 			else if(t.type > token_string){ // unsupported tokens
@@ -435,7 +439,7 @@ int id(){
 				fprintf(stderr, "ERR: Unknown identifier %s.%s\n", t.attr.s->data, ptr + 1);
 				return error_number = 3;
 			} else if(outside_func && ((class_memb_t)(sem_id_decoded.ptr))->type == var && !(((class_memb_t)(sem_id_decoded.ptr))->second_pass)) {
-				// the case when identifier IS in ST, but cannot be used yet, because it is defined lexically later
+				// the case when identifier IS in TS, but cannot be used yet, because it is defined lexically later
 				fprintf(stderr, "ERR: Static var must be defined before its usage.\n");
 				return error_number = 6;
 			}
@@ -448,7 +452,7 @@ int id(){
 }
 
 int stat(){
-	int lb = 0, rb = 0; // helper variables for counting brackets
+	int lb = 0, rb = 0; // auxiliary variables for counting brackets
 	if(is(token_id) || is(token_fqid)){
 		if(!id()){
 			next_token();
@@ -464,7 +468,7 @@ int stat(){
 		instr_t pre_else_jmp = NULL;
 		next_token();
 		if(is(token_lbracket)){
-			tok_que_t expr_queue = tok_que_init(); // init new queue
+			tok_que_t expr_queue = tok_que_init(); // init new queue for precedence analysis
 			if(SECOND_PASS){
 				if(_cond_fill_que(expr_queue, true)) // fill queue, counting brackets is on
 					return 2;
@@ -478,7 +482,7 @@ int stat(){
 					if(is(token_lbracket)) lb++;
 					if(is(token_rbracket)) rb++;
 					next_token();
-				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
+				} while((lb != rb || is(token_rbracket)) && t.type <= token_string); // brackets must be in pairs and only expression supported tokens are allowed
 			}
 			if(!stat_com()){
 				next_token();
@@ -511,7 +515,7 @@ int stat(){
 		}
 		next_token();
 		if(is(token_lbracket)){
-			tok_que_t expr_queue = tok_que_init(); // init new queue
+			tok_que_t expr_queue = tok_que_init(); // init new queue for precedence analysis
 			if(SECOND_PASS){
 				if(_cond_fill_que(expr_queue, true)) // fill queue, counting brackets is on
 					return 2;
@@ -526,7 +530,7 @@ int stat(){
 					if(is(token_lbracket)) lb++;
 					if(is(token_rbracket)) rb++;
 					next_token();
-				} while((lb != rb || is(token_rbracket)) && t.type <= token_string);
+				} while((lb != rb || is(token_rbracket)) && t.type <= token_string); // brackets must be in pairs and only expr supported tokens are allowed
 			}
 			if(!stat_com()){
 				if(SECOND_PASS) {
@@ -585,35 +589,40 @@ int as_ca() {
 			if(sem_id_decoded.ptr == print_fn){ // in case of ifj16.print()
 				// we're going to evaluate simple concatenation and push the result as function argument like any other
 				// this part pretty much simulates the behaviour of fn_plist nonterminal, but allows concatenation
-				int counter = 1;
+				int counter = 1; // counts number of tokens in concatenation, helps to determine few things later on
 				bool is_string = false;
-				tok_que_t expr_queue = tok_que_init();
+				tok_que_t expr_queue = tok_que_init(); // new queue for precedence analysis
 				token_t tmp;
 				next_token();
+				/* this part is the same as _cond_fill_que(), however we need special behavior */
 				do{
 					if(is(token_comma)){
+						/*
+							ifj16.print() takes only 1 argument, so token_comma is unsupported, however we need to check for comma here (because of ifj16.print(,),
+							so it is among allowed tokends in the while condition few lines below
+						*/
 						fprintf(stderr, "ERR: Function ifj16.print() takes only simple concatenation expression.\n");
 						return 2;
 					}
-					if((counter%2 == 0 && !is(token_addition)) || (counter%2 == 1 && is(token_addition))){
+					if((counter%2 == 0 && !is(token_addition)) || (counter%2 == 1 && is(token_addition))){ // makes sure that operators between vars or literals is +
 						fprintf(stderr, "ERR: Function ifj16.print() supports only simple concatenation expressions.\n");
 						return 2;
 					}
-					if(is(token_addition))
+					if(is(token_addition)) // + can go into queue as it is
 						tok_enqueue(expr_queue, t);
 					
-					if((is(token_id) || is(token_fqid)) && !id()){
+					if((is(token_id) || is(token_fqid)) && !id()){ // if identifier is okay, it is enqueued as simplified identifier
 						if(((class_memb_t)sem_id_decoded.ptr)->op.dtype == dt_String)
 							is_string = true;
 						tmp.type = token_id;
 						tmp.attr.p = sem_id_decoded.ptr;
 						tok_enqueue(expr_queue, tmp);
 					}
-					else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){
+					else if(is(token_int) || is(token_double) || is(token_boolean) || is(token_string)){ // literals are added into list of helper variables and enqueued
 						if(is(token_string))
 							is_string = true;
 						tmp.type = token_id;
-						tmp.attr.p = add_global_helper_var(t, true); // insert as variable into TS
+						tmp.attr.p = add_global_helper_var(t, true);
 						if (!tmp.attr.p) return 99;
 						tok_enqueue(expr_queue, tmp);
 					}
@@ -622,14 +631,15 @@ int as_ca() {
 					counter++;
 				} while(is(token_id) || is(token_fqid) || is(token_int) || is(token_double) || is(token_string) || is(token_boolean) || is(token_addition) || is(token_comma));
 
-				if(!(counter == 2 && is(token_rbracket)) && !is_string){
+				if(!(counter == 2 && is(token_rbracket)) && !is_string){ // if there were more then ONE token and no String literal/variable
 				 	fprintf(stderr, "ERR: Incompatible types used as arguments of ifj16.print().\n");
 				 	return error_number = 4;
 				}
 
+				/* enqueue EOF to the queue */
 				tmp.type = token_eof;
 				tok_enqueue(expr_queue, tmp);
-				err = precedence(expr_queue, &precedence_result);
+				err = precedence(expr_queue, &precedence_result); // let precedence eval the concatenation
 				if(err)
 					return error_number = err;
 				sem_rst_argcount();	// reset counter of pushed arguments, we're processing function call like any other
@@ -751,7 +761,7 @@ int _cond_fill_que(tok_que_t expr_queue, bool count_brackets){
 			tok_enqueue(expr_queue, tmp);
 			next_token();	
 		}
-	} while((count_brackets ? (lb != rb || is(token_rbracket)) : 1) && t.type <= token_string);
+	} while((count_brackets ? (lb != rb || is(token_rbracket)) : 1) && t.type <= token_string); // if counting brackets, they must be in pairs, only expr supported tokens are allowed
 	tmp.type = token_eof; // add eof to the end of queue
 	tok_enqueue(expr_queue, tmp);
 	return 0;
