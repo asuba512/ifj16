@@ -80,7 +80,7 @@ while getopts "tcCoOhHgGsSpPaAeE" opt; do
 				switch_WORKING_CODES=0
 				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
-				switch_SCANNER_DIR_2=1
+				switch_SCANNER_DIR_2=0
 				switch_SYMBOLIC_TABLE=1
 			;;
 		c)  printf "== WORKING SOURCE CODES ==\n"
@@ -114,13 +114,13 @@ while getopts "tcCoOhHgGsSpPaAeE" opt; do
 		s)  printf "== SCANNER ==\n"
 				switch_SCANNER_DIR_3=0
 				switch_SCANNER_DIR=1
-				switch_SCANNER_DIR_2=0
+				switch_SCANNER_DIR_2=1
 			;;
 		S)  printf "== SCANNER with VALGRIND ==\n"
 				switch_VALGRIND=0
 				switch_SCANNER_DIR_3=0
 				switch_SCANNER_DIR=1
-				switch_SCANNER_DIR_2=0
+				switch_SCANNER_DIR_2=1
 			;;
 		p)  printf "== PARSER ==\n"
 				switch_BAD_dir_2=0
@@ -139,7 +139,7 @@ while getopts "tcCoOhHgGsSpPaAeE" opt; do
 				switch_WORKING_CODES=0
 				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
-				switch_SCANNER_DIR_2=0
+				switch_SCANNER_DIR_2=1
 				switch_SYMBOLIC_TABLE=1
 			;;
 		A)  printf "== ALL with VALGRIND ==\n"
@@ -153,7 +153,7 @@ while getopts "tcCoOhHgGsSpPaAeE" opt; do
 				switch_WORKING_CODES=0
 				switch_STDOUT_DIR=0
 				switch_SCANNER_DIR=1
-				switch_SCANNER_DIR_2=0
+				switch_SCANNER_DIR_2=1
 				switch_SYMBOLIC_TABLE=1
 			;;
 		h)  printf "== HELP ==\n"
