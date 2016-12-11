@@ -812,6 +812,7 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
 	class_memb_t glob;
 	local_var_t loc;
 	glob_helper_var_t hlpr;
+	// global and helper are not uset interchangeably because structures are not of same size
 	if(op->sc == global) {
 		glob = (class_memb_t)op;
 		*dtype = glob->op.dtype;
@@ -823,10 +824,11 @@ bool decode_address(op_t op, var_value **target, datatype *dtype, bool **initial
 		*dtype = hlpr->op.dtype;
 		*target = &(hlpr->val);
 		*initialized = &(hlpr->initialized);
-		return hlpr->initialized; // this ain't just literal anymore ...
+		return hlpr->initialized; 
 	} else if(op->sc == local) {
 		loc = (local_var_t)op;
 		*dtype = loc->op.dtype;
+		// take values from the stack, because those are context-aware
 		*target = &(((inter_stack.top->vars)[loc->index]).val);
 		*initialized = &(((inter_stack.top->vars)[loc->index]).initialized);
 		return ((inter_stack.top->vars)[loc->index]).initialized;
