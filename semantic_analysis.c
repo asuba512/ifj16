@@ -2,6 +2,7 @@
 #include "semantic_analysis.h"
 #include "infinite_string.h"
 #include "token.h"
+#include "ifj16_class.h" // STR() macro
 #include <stdio.h>
 
 /** Tries to create a new class with given id in ST. On success, returns 0,
@@ -587,4 +588,51 @@ op_t sem_generate_conv_to_str(op_t op) {
     INSTR(i)
     if(err) return NULL;
     return i.dst;
+}
+
+/** Finds Main.run() function and appends call instruction to the very
+    end of global instruction tape. If problem occurs, prints error message
+    and returns corresponding error code. */
+int add_head() {
+	struct instr i;
+	string_t str;
+	i.type = sframe;
+	STR("Main")
+	class_t c = st_getclass(str);
+	if(!c) {
+		fprintf(stderr,"ERR: Missing 'Main' class.\n");
+		return 3;
+	}
+	STR("run")
+	i.src1 = (op_t)st_getmemb(c, str);
+	if(!i.src1) {
+		fprintf(stderr,"ERR: Missing 'Main.run()' function.\n");
+		return 3;
+	}
+	if(((class_memb_t)(i.src1))->op.dtype != t_void) {
+		fprintf(stderr,"ERR: 'Main.run()' must be a void-funcion.\n");
+		return 3;
+	} else if(((class_memb_t)(i.src1))->arg_count) {
+		fprintf(stderr,"ERR: 'Main.run()' must not have any arguments.\n");
+		return 3;
+	}
+	i.dst = i.src2 = NULL;
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}
+	i.dst = i.src1;
+	i.src1 = NULL;
+	i.type = call;
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}	
+	i.type = label;
+	i.dst = i.src1 = i.src2 = NULL;
+	if(st_add_glob_instr(i)) {
+		fprintf(stderr, "ERR: Internal error.\n");
+		return 99;
+	}
+	return 0;
 }

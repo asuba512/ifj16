@@ -1,10 +1,5 @@
 #ifndef SCANNER_INC
 #define SCANNER_INC 1
-/**
- * \file scanner.h
- * \brief Header file of lexical analyzer module.
- *
- */
 
 #include <stdio.h>
 #include "token.h"
