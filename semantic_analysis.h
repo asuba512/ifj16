@@ -49,6 +49,7 @@ int sem_generate_ret(op_t src);
 int sem_generate_halt();
 op_t sem_generate_conv_to_str(op_t op);
 void sem_mark_sec_pass(string_t id);
+int add_head();
 
 /** Helper condition to determine whether operand is a number (double/int) */
 #define isNum(x) (x->dtype == dt_double || x->dtype == dt_int)

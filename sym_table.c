@@ -41,11 +41,11 @@ int st_insert_class_memb(class_t c, class_memb_t *target, string_t id, var_func 
 		return 99;
 	// initialization
 	m->type = type; // variable or func?
-	m->op.dtype = dt; // datatype
+	m->op.dtype = dt; 
 	m->arg_count = m->var_count = m->_max_arg_count = 0;
 	m->arg_list = NULL; // will be allocated when needed
 	m->local_sym_table_root = NULL;
-	m->initialized = false; // variable is not initialized by default
+	m->initialized = false;
 	m->second_pass = false; // is marked "true" when second pass reaches this symbol
 	m->helper_vars = NULL;	// has no helper variables by default
 	m->op.sc = global; // all symbols in Level 2 are global
@@ -152,7 +152,7 @@ glob_helper_var_t add_global_helper_var(struct token t, bool initialized) {
 	glob_helper_var_t new_node = malloc(sizeof(struct global_helper_var));
     if(new_node == NULL)
         return NULL;
-	// working with queue (the way these are stored is NOT IMPORTANT during analysis or interpretation)
+	// working with queue (we store these only for freeing purposes)
     new_node->next = NULL;
     if(glob_helper_vars.head == NULL)
         glob_helper_vars.head = new_node;
