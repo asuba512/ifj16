@@ -22,9 +22,8 @@ void BMA_compute_jumps(string_t substr, unsigned *char_jump) {
 }
 
 // Algorithm from "Opora-IAL-2014-verze-15-A.pdf" (page 174)
-// compares substring with string, "moves" the substring, the move depends of the max values of charjump and matchjump values
 // returns the index if substr is found, if not found returns -1
-//pascal like implementation, so at getting data from arrays we need to decrease by one the value of indexes
+// pascal like implementation, so at getting data from arrays we need to decrease by one the value of indexes
 int BMA(string_t str, string_t substr, unsigned *char_jump/*, unsigned *match_jump*/) {
     int index;
     int j_prev=0;//for saving previous index and comparising with the new
@@ -37,11 +36,11 @@ int BMA(string_t str, string_t substr, unsigned *char_jump/*, unsigned *match_ju
         }//if the characters are different
         else {
 				j = j+char_jump[(int)str->data[j-1]];
-				if(j_prev > j){//check move to the left, if it occurs then break->can't move to left,only to right
-					break;
+				if(j_prev > j){//check move to the left, if it occurs then move by one to right->can't move to left,only to right
+						j=j_prev+1;
 				}
-				j_prev=j;
-		    k = substr->length;
+				j_prev=j;//save index for comparision
+		    	k = substr->length;
         }
     }
     if (k == 0) {//if found
