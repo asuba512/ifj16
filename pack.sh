@@ -30,6 +30,7 @@ contributorsName[xsuhaj02]="Peter Šuhaj"
 contributorsName[xtotha01]="Adrián Tóth"
 
 make clean
+rm -rf dokumentace.pdf xsubaa00.tgz
 
 contents=`ls | grep -v -e "test" -e "docs" -e "pack" -e "README"`
 mkdir -p $tmpdir

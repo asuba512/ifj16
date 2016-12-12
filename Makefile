@@ -9,7 +9,7 @@ all: scanner.o main.o infinite_string.o ial.o parser.o semantic_analysis.o sym_t
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
 clean: clean-obj
-	$(RM) $(BIN) sc_test sem_test prec_test .fuse* dokumentace.pdf
+	$(RM) $(BIN) sc_test sem_test prec_test .fuse*
 
 clean-obj:
 	$(RM) *.o
